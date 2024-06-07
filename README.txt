@@ -23,3 +23,6 @@ Dependencies:
 - Spring Boot Actuator
 - Validation
 - Lombok
+
+## Dev
+1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory

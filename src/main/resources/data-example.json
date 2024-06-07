@@ -1,0 +1,45 @@
+{
+	"users": {
+		"iuasniujsi": {
+			"username": "crow123",
+			"email": "nnnn@example.com",
+			"role": "admin"
+		}
+	},
+	"problems": {
+		"SKF-1": {
+			"id": "SKF-1",
+			"problemImage": "problems/skf1.png",
+			"answerImage": "answers/skf1.png",
+			"categoryId": "1",
+			"createdOn": "2014-01-01T00:00:00Z"
+		},
+		"SKF-2": {
+			"problemText": "hi",
+			"problemImage": "https://i.imgur.com/Emp8WZN.png",
+			"answerText": "x = 3",
+			"answerImage": "https://i.imgur.com/Emp8WZN.png",
+			"categoryId": "1",
+			"createdOn": "2014-01-01T00:00:00Z"
+		},
+		"SKF-3": {
+			"problemText": "hoho",
+			"answerText": "x = 2",
+			"categoryId": "1",
+			"createdOn": "2014-01-01T00:00:00Z"
+		}
+	},
+	"categories": {
+		"1": {
+			"name": "Math. Algebra",
+			"description": "Math problems related to algebra",
+			"createdBy": "crow123",
+			"createdOn": "2014-01-01T00:00:00Z"
+		}
+	},
+	"meta": {
+		"problemMeta": {
+			"lastUsedCode": "SKF-3"
+		}
+	}
+}
