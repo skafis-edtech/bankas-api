@@ -26,3 +26,5 @@ Dependencies:
 
 ## Dev
 1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
+2. Run the application
+3. Open http://localhost:8080/swagger-ui/index.html in browser
