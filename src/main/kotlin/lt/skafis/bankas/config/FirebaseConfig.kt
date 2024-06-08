@@ -1,4 +1,4 @@
-package lt.skafis.bankas.configuration
+package lt.skafis.bankas.config
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.firestore.Firestore

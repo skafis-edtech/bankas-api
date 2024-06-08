@@ -1,4 +1,4 @@
-package lt.skafis.bankas.configuration
+package lt.skafis.bankas.config
 
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean

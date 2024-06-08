@@ -1,40 +1,40 @@
 package lt.skafis.bankas.category
 
 import org.springframework.web.bind.annotation.*
-import com.google.cloud.firestore.Firestore
-import com.google.cloud.firestore.DocumentReference
-import com.google.api.core.ApiFuture
-import com.google.cloud.firestore.WriteResult
+import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.dto.CategoryViewDto
+import lt.skafis.bankas.repository.FirestoreCategoryRepository
 
 @RestController
 @RequestMapping("/api/categories")
-class CategoryController (
-    private val firestore: Firestore
+class CategoryController(
+    private val categoryRepository: FirestoreCategoryRepository
 ) {
 
     @GetMapping("/{id}")
-    fun getCategory(@PathVariable id: String): Category? {
-        val docRef: DocumentReference = firestore.collection("categories").document(id)
-        val future: ApiFuture<com.google.cloud.firestore.DocumentSnapshot> = docRef.get()
-        val document = future.get()
-        return if (document.exists()) document.toObject(Category::class.java) else null
+    fun getCategory(@PathVariable id: String): CategoryViewDto? {
+        return categoryRepository.getCategoryById(id)
     }
 
     @PostMapping
-    fun createCategory(@RequestBody category: Category): String {
-        val future: ApiFuture<WriteResult> = firestore.collection("categories").document().set(category)
-        return future.get().updateTime.toString()
+    fun createCategory(@RequestBody category: CategoryViewDto): String {
+        return categoryRepository.createCategory(category)
     }
 
-    @PutMapping("/{id}")
-    fun updateCategory(@PathVariable id: String, @RequestBody category: Category): String {
-        val future: ApiFuture<WriteResult> = firestore.collection("categories").document(id).set(category)
-        return future.get().updateTime.toString()
+    @PutMapping
+    fun updateCategory(@RequestBody category: CategoryViewDto): String {
+        val updated = categoryRepository.updateCategory(category)
+        return if (updated) "Update successful" else "Update failed"
     }
 
     @DeleteMapping("/{id}")
     fun deleteCategory(@PathVariable id: String): String {
-        val future: ApiFuture<WriteResult> = firestore.collection("categories").document(id).delete()
-        return future.get().updateTime.toString()
+        val deleted = categoryRepository.deleteCategory(id)
+        return if (deleted) "Delete successful" else "Delete failed"
+    }
+
+    @GetMapping
+    fun getAllCategories(): List<CategoryViewDto> {
+        return categoryRepository.getAllCategories()
     }
 }

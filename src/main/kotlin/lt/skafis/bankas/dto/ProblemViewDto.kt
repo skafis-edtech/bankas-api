@@ -1,6 +1,6 @@
-package lt.skafis.bankas.problem
+package lt.skafis.bankas.dto
 
-data class Problem(
+data class ProblemViewDto(
     val id: String = "",
     val problemImage: String? = null,
     val answerImage: String? = null,

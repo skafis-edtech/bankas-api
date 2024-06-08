@@ -8,9 +8,10 @@ import java.security.Principal
 
 @RestController
 @RequestMapping("/api")
-@SecurityRequirement(name = "bearerAuth")
 class AuthController {
+
     @GetMapping(path = ["/test"])
+    @SecurityRequirement(name = "bearerAuth")
     fun test(principal: Principal): String {
         return principal.name
     }

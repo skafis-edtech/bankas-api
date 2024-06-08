@@ -26,11 +26,16 @@ Dependencies:
 
 ## Dev
 1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
-2. Run the application
+2. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
 3. Open http://localhost:8080/swagger-ui/index.html in browser
 
 ## Auth stuff
+1. Firebase to check JWT and retrieve user data
 https://medium.com/comsystoreply/authentication-with-firebase-auth-and-spring-security-fcb2c1dc96d
-...
+2. Other stuff
 https://github.com/naglissul/korys-backend/blob/main/src/main/kotlin/lt/koriodienynas/service/AuthService.kt
 https://github.com/Esc-Key-5/back/blob/master/src/main/kotlin/com/example/demo/configuration/WebSecurityConfiguration.kt
+
+## Dir layout
+https://malshani-wijekoon.medium.com/spring-boot-folder-structure-best-practices-18ef78a81819
+
