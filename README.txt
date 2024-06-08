@@ -28,3 +28,9 @@ Dependencies:
 1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
 2. Run the application
 3. Open http://localhost:8080/swagger-ui/index.html in browser
+
+## Auth stuff
+https://medium.com/comsystoreply/authentication-with-firebase-auth-and-spring-security-fcb2c1dc96d
+...
+https://github.com/naglissul/korys-backend/blob/main/src/main/kotlin/lt/koriodienynas/service/AuthService.kt
+https://github.com/Esc-Key-5/back/blob/master/src/main/kotlin/com/example/demo/configuration/WebSecurityConfiguration.kt

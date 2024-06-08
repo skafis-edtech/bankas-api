@@ -1,5 +1,6 @@
 package lt.skafis.bankas.configuration
 
+import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.Customizer
@@ -11,6 +12,8 @@ import org.springframework.security.web.SecurityFilterChain
 @EnableWebSecurity
 class SecurityConfig() {
 
+    private val logger = LoggerFactory.getLogger(javaClass)
+
     @Bean
     fun genericFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http.authorizeHttpRequests {
@@ -21,10 +24,15 @@ class SecurityConfig() {
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().denyAll()
         }
+            .oauth2ResourceServer { oauth2 ->
+                oauth2.jwt(Customizer.withDefaults())
+            }
             .formLogin(Customizer.withDefaults())
             .httpBasic(Customizer.withDefaults())
             .cors { it.disable() }
             .csrf { it.disable() }
+
             .build()
+
     }
 }
