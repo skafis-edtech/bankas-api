@@ -1,4 +1,4 @@
-package lt.skafis.bankas.auth
+package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import org.springframework.web.bind.annotation.GetMapping

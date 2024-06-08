@@ -1,7 +1,6 @@
-package lt.skafis.bankas.category
+package lt.skafis.bankas.controller
 
 import org.springframework.web.bind.annotation.*
-import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.dto.CategoryViewDto
 import lt.skafis.bankas.repository.FirestoreCategoryRepository
 
