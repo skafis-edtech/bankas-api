@@ -1,4 +1,4 @@
 package lt.skafis.bankas.repository
 
-class StorageAnswersRepository {
+class StorageAnswerRepository {
 }

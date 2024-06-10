@@ -2,6 +2,8 @@ package lt.skafis.bankas.config
 
 import com.google.auth.oauth2.GoogleCredentials
 import com.google.cloud.firestore.Firestore
+import com.google.cloud.storage.Storage
+import com.google.cloud.storage.StorageOptions
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
@@ -33,5 +35,13 @@ class FirebaseConfig {
     @Bean
     fun firestore(firebaseApp: FirebaseApp): Firestore {
         return FirestoreClient.getFirestore(firebaseApp)
+    }
+
+    @Bean
+    fun storage(): Storage {
+        return StorageOptions.newBuilder()
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount.inputStream))
+            .build()
+            .service
     }
 }

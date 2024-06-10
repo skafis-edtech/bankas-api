@@ -20,6 +20,7 @@ class SecurityConfig() {
             it
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/index.html").permitAll()
                 .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/api").permitAll()
                 .requestMatchers("/actuator/**").hasRole("ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().denyAll()
