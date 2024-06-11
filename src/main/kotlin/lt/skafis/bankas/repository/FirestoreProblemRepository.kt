@@ -1,6 +1,7 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.QuerySnapshot
 import lt.skafis.bankas.dto.ProblemViewDto
 import org.springframework.stereotype.Repository
 
@@ -53,5 +54,12 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
             val problemDto = it.toObject(ProblemViewDto::class.java)
             problemDto.let { dto -> ProblemViewDto(it.id, dto.problemImage, dto.answerImage, dto.problemText, dto.answerText, dto.categoryId, dto.createdOn) }
         }
+    }
+
+    fun countDocuments(): Long {
+        val collectionRef = firestore.collection(collectionPath)
+        val countQuery = collectionRef.count()
+        val countQuerySnapshot = countQuery.get().get()
+        return countQuerySnapshot.count
     }
 }

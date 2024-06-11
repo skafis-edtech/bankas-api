@@ -1,4 +1,4 @@
-package lt.skafis.bankas.controller
+package lt.skafis.bankas.draft
 
 import lt.skafis.bankas.repository.ProblemStorageRepository
 import org.springframework.http.ResponseEntity

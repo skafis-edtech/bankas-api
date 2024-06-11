@@ -54,4 +54,11 @@ class FirestoreCategoryRepository(private val firestore: Firestore) {
             categoryDto.let { dto -> CategoryViewDto( it.id, dto.name, dto.description, dto.createdOn, dto.createdBy) }
         }
     }
+
+    fun countDocuments(): Long {
+        val collectionRef = firestore.collection(collectionPath)
+        val countQuery = collectionRef.count()
+        val countQuerySnapshot = countQuery.get().get()
+        return countQuerySnapshot.count
+    }
 }

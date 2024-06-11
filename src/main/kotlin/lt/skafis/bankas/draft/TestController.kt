@@ -1,9 +1,8 @@
-package lt.skafis.bankas.controller
+package lt.skafis.bankas.draft
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.service.UserService
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 

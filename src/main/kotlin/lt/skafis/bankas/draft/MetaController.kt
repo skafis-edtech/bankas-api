@@ -1,4 +1,4 @@
-package lt.skafis.bankas.controller
+package lt.skafis.bankas.draft
 
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.model.ProblemMeta
