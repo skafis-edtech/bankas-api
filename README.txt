@@ -39,3 +39,6 @@ https://github.com/Esc-Key-5/back/blob/master/src/main/kotlin/com/example/demo/c
 ## Dir layout
 https://malshani-wijekoon.medium.com/spring-boot-folder-structure-best-practices-18ef78a81819
 
+## stuff
+Logging - services
+exceptions and HTTP codes - controllers (handleded by exception handler bean)
