@@ -1,39 +1,44 @@
 package lt.skafis.bankas.controller
 
+import lt.skafis.bankas.dto.CountDto
+import lt.skafis.bankas.dto.ProblemPostDto
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.dto.ProblemViewDto
-import lt.skafis.bankas.repository.FirestoreProblemRepository
+import lt.skafis.bankas.service.ProblemService
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/problems")
 class ProblemController(
-    private val problemRepository: FirestoreProblemRepository
+    private val problemService: ProblemService
 ) {
 
     @GetMapping("/{id}")
-    fun getProblem(@PathVariable id: String): ProblemViewDto? {
-        return problemRepository.getProblemById(id)
-    }
+    fun getProblem(@PathVariable id: String): ResponseEntity<ProblemViewDto?> =
+        ResponseEntity.ok(problemService.getProblemById(id))
+
+    @GetMapping("/{categoryId}")
+    fun getProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemViewDto>> =
+        ResponseEntity.ok(problemService.getProblemsByCategoryId(categoryId))
 
     @PostMapping
-    fun createProblem(@RequestBody problem: ProblemViewDto): String {
-        return problemRepository.createProblem(problem)
-    }
+    fun createProblem(@RequestBody problem: ProblemPostDto): ResponseEntity<ProblemViewDto> =
+        ResponseEntity(problemService.createProblem(problem), HttpStatus.CREATED)
 
-    @PutMapping
-    fun updateProblem(@RequestBody problem: ProblemViewDto): String {
-        val updated = problemRepository.updateProblem(problem)
-        return if (updated) "Update successful" else "Update failed"
-    }
+    @PutMapping("/{id}")
+    fun updateProblem(@PathVariable id: String, @RequestBody problem: ProblemPostDto): ResponseEntity<ProblemViewDto> =
+        ResponseEntity.ok(problemService.updateProblem(id, problem))
 
     @DeleteMapping("/{id}")
-    fun deleteProblem(@PathVariable id: String): String {
-        val deleted = problemRepository.deleteProblem(id)
-        return if (deleted) "Delete successful" else "Delete failed"
-    }
+    fun deleteProblem(@PathVariable id: String): ResponseEntity<Void> =
+        if (problemService.deleteProblem(id)) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
+        }
 
-    @GetMapping
-    fun getAllProblems(): List<ProblemViewDto> {
-        return problemRepository.getAllProblems()
-    }
+    @GetMapping("/count")
+    fun getProblemsCount(): ResponseEntity<CountDto> =
+        ResponseEntity.ok(problemService.getProblemCount())
 }
