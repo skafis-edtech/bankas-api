@@ -2,12 +2,14 @@ package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dto.CountDto
+import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.ProblemPostDto
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.dto.ProblemViewDto
 import lt.skafis.bankas.service.ProblemService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 @RestController
@@ -17,22 +19,29 @@ class ProblemController(
 ) {
 
     @GetMapping("/{id}")
-    fun getProblem(@PathVariable id: String): ResponseEntity<ProblemViewDto?> =
+    fun getProblem(@PathVariable id: String): ResponseEntity<ProblemDisplayViewDto> =
         ResponseEntity.ok(problemService.getProblemById(id))
 
-    @GetMapping("/{categoryId}")
-    fun getProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemViewDto>> =
+    @GetMapping("/byCategory/{categoryId}")
+    fun getProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getProblemsByCategoryId(categoryId))
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    fun createProblem(@RequestBody problem: ProblemPostDto, principal: Principal): ResponseEntity<ProblemViewDto> =
-        ResponseEntity(problemService.createProblem(problem, principal.name), HttpStatus.CREATED)
+    fun createProblem(@RequestBody problem: ProblemPostDto,
+                      @RequestParam("problemImageFile") problemImageFile: MultipartFile?,
+                      @RequestParam("answerImageFile") answerImageFile: MultipartFile?,
+                      principal: Principal): ResponseEntity<ProblemViewDto> =
+        ResponseEntity(problemService.createProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
 
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    fun updateProblem(@PathVariable id: String, @RequestBody problem: ProblemPostDto, principal: Principal): ResponseEntity<ProblemViewDto> =
-        ResponseEntity.ok(problemService.updateProblem(id, problem, principal.name))
+    fun updateProblem(@PathVariable id: String,
+                      @RequestBody problem: ProblemPostDto,
+                      @RequestParam("problemImageFile") problemImageFile: MultipartFile?,
+                      @RequestParam("answerImageFile") answerImageFile: MultipartFile?,
+                      principal: Principal): ResponseEntity<ProblemViewDto> =
+        ResponseEntity.ok(problemService.updateProblem(id, problem, principal.name, problemImageFile, answerImageFile))
 
     @DeleteMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")
