@@ -1,5 +1,6 @@
 package lt.skafis.bankas.controller
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dto.CategoryPostDto
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.dto.CategoryViewDto
@@ -7,6 +8,7 @@ import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.service.CategoryService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import java.security.Principal
 
 @RestController
 @RequestMapping("/api/categories")
@@ -23,16 +25,19 @@ class CategoryController(
         ResponseEntity.ok(categoryService.getAllCategories())
 
     @PostMapping
-    fun createCategory(@RequestBody category: CategoryPostDto): ResponseEntity<CategoryViewDto> =
-        ResponseEntity(categoryService.createCategory(category), HttpStatus.CREATED)
+    @SecurityRequirement(name = "bearerAuth")
+    fun createCategory(@RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<CategoryViewDto> =
+        ResponseEntity(categoryService.createCategory(category, principal.name), HttpStatus.CREATED)
 
     @PutMapping("/{id}")
-    fun updateCategory( @PathVariable id: String, @RequestBody category: CategoryPostDto): ResponseEntity<CategoryViewDto> =
-        ResponseEntity.ok(categoryService.updateCategory(id, category))
+    @SecurityRequirement(name = "bearerAuth")
+    fun updateCategory(@PathVariable id: String, @RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<CategoryViewDto> =
+        ResponseEntity.ok(categoryService.updateCategory(id, category, principal.name))
 
     @DeleteMapping("/{id}/cascade")
-    fun deleteCategory(@PathVariable id: String): ResponseEntity<Void> =
-    if (categoryService.deleteCategoryWithProblems(id)) {
+    @SecurityRequirement(name = "bearerAuth")
+    fun deleteCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
+    if (categoryService.deleteCategoryWithProblems(id, principal.name)) {
         ResponseEntity(HttpStatus.NO_CONTENT)
     } else {
         ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)

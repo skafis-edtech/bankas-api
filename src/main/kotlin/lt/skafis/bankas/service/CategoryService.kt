@@ -6,9 +6,9 @@ import lt.skafis.bankas.dto.CountDto
 
 interface CategoryService {
     fun getCategoryById(id: String): CategoryViewDto
-    fun createCategory(category: CategoryPostDto): CategoryViewDto
-    fun updateCategory(id: String, category: CategoryPostDto): CategoryViewDto
-    fun deleteCategoryWithProblems(id: String): Boolean
+    fun createCategory(category: CategoryPostDto, userId: String): CategoryViewDto
+    fun updateCategory(id: String, category: CategoryPostDto, userId: String): CategoryViewDto
+    fun deleteCategoryWithProblems(id: String, userId: String): Boolean
     fun getAllCategories(): List<CategoryViewDto>
     fun getCategoriesCount(): CountDto
 }

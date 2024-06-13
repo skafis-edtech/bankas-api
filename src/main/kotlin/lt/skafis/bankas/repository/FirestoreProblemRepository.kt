@@ -62,4 +62,16 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
         val countQuerySnapshot = countQuery.get().get()
         return countQuerySnapshot.count
     }
+
+    fun getProblemsByCategoryId(categoryId: String): List<ProblemViewDto> {
+        val querySnapshot = firestore.collection(collectionPath)
+            .whereEqualTo("categoryId", categoryId)
+            .get()
+            .get()
+
+        return querySnapshot.documents.mapNotNull {
+            val problemDto = it.toObject(ProblemViewDto::class.java)
+            problemDto.let { dto -> ProblemViewDto(it.id, dto.problemImage, dto.answerImage, dto.problemText, dto.answerText, dto.categoryId, dto.createdOn) }
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package lt.skafis.bankas.config
 
+import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,13 +16,15 @@ class GlobalExceptionHandler {
     @ExceptionHandler(NotFoundException::class)
     fun handleNotFoundException(ex: NotFoundException): ResponseEntity<String> {
         log.error("Resource not found: " + ex.message)
+        log.trace(ex.stackTraceToString())
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body<String>("Resource not found: " + ex.message)
     }
 
-    @ExceptionHandler(Exception::class)
-    fun handleException(ex: Exception): ResponseEntity<String> {
-        log.error("Exception occurred: " + ex.message)
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body<String>("Exception occurred: " + ex.message)
+    @ExceptionHandler(InternalException::class)
+    fun handleInternalException(ex: InternalException): ResponseEntity<String> {
+        log.error("Internal exception occurred: " + ex.message)
+        log.trace(ex.stackTraceToString())
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>("Internal exception occurred: " + ex.message)
     }
 
 }
