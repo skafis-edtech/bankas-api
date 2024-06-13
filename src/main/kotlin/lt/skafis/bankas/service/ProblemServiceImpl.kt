@@ -12,13 +12,14 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.webjars.NotFoundException
 import java.net.URI
-import java.net.URL
+import java.time.Instant
 
 @Service
 class ProblemServiceImpl (
     val firestoreProblemRepository: FirestoreProblemRepository,
     val problemStorageRepository: ProblemStorageRepository,
-    val answerStorageRepository: ProblemStorageRepository
+    val answerStorageRepository: ProblemStorageRepository,
+    val problemMetaService: ProblemMetaService
 ) : ProblemService {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -40,7 +41,41 @@ class ProblemServiceImpl (
     }
 
     override fun createProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
-        TODO("Not yet implemented")
+        val newProblemCode = problemMetaService.getIncrementedLastUsedSkfCode()
+        val problemExtension = problemImageFile?.originalFilename?.split(".")?.lastOrNull()
+        val answerExtension = answerImageFile?.originalFilename?.split(".")?.lastOrNull()
+
+        var problemImagePath: String? = null
+        var answerImagePath: String? = null
+
+        //TODO: form path and then send it to storage
+
+        log.info("Uploading images to storage (if provided) by user: $userId")
+        if (problemImageFile != null && problemImagePath != null) {
+            val mediaLink = problemStorageRepository.uploadImage(problemImageFile, problemImagePath)
+            log.info("Problem image uploaded: $mediaLink")
+        }
+        if (answerImageFile != null && answerImagePath != null) {
+            val mediaLink = answerStorageRepository.uploadImage(answerImageFile, answerImagePath)
+            log.info("Answer image uploaded: $mediaLink")
+
+        }
+        log.info("Problem images uploaded successfully")
+
+        log.info("Creating problem in firestore for user: $userId")
+        val problemToCreate = ProblemViewDto(
+            id = newProblemCode,
+            problemText = problem.problemText,
+            answerText = problem.answerText,
+            problemImage = problemImagePath,
+            answerImage = answerImagePath,
+            categoryId = problem.categoryId,
+            createdOn = Instant.now().toString()
+        )
+        val id = firestoreProblemRepository.createProblem(problemToCreate)
+        if (id.isBlank()) throw InternalException("Failed to create problem")
+        log.info("Problem created in firestore successfully")
+        return problemToCreate
     }
 
     override fun updateProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {

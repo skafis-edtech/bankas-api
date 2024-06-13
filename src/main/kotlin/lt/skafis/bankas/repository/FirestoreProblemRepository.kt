@@ -11,9 +11,8 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
     private val collectionPath = "problems"
 
     fun createProblem(problem: ProblemViewDto): String {
-        val docRef = firestore.collection(collectionPath).document()
-        val problemWithId = problem.copy(id = docRef.id)
-        docRef.set(problemWithId)
+        val docRef = firestore.collection(collectionPath).document(problem.id)
+        docRef.set(problem)
         return docRef.id
     }
 
