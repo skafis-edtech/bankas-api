@@ -41,6 +41,9 @@ class ProblemServiceImpl (
     }
 
     override fun createProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
+
+        log.info("Uploading images to storage (if provided) by user: $userId")
+
         val newProblemCode = problemMetaService.getIncrementedLastUsedSkfCode()
         val problemExtension = problemImageFile?.originalFilename?.split(".")?.lastOrNull()
         val answerExtension = answerImageFile?.originalFilename?.split(".")?.lastOrNull()
@@ -48,21 +51,46 @@ class ProblemServiceImpl (
         var problemImagePath: String? = null
         var answerImagePath: String? = null
 
-        //TODO: form path and then send it to storage
+        /*
+        Input (same for answerImage):
+        - CASE1: problem.problemImage is https://... string AND problemImageFile is null >>> Then just return problemImagePath = problem.problemImage
+        - CASE2: problem.problemImage is null AND problemImageFile is not null >>> Then upload the file to storage and return problemImagePath = "problems/$newSkfCode"
+         */
 
-        log.info("Uploading images to storage (if provided) by user: $userId")
-        if (problemImageFile != null && problemImagePath != null) {
-            val mediaLink = problemStorageRepository.uploadImage(problemImageFile, problemImagePath)
+        if (!problem.problemImage.isNullOrEmpty() && problemImageFile == null) {
+            //CASE1
+            if (isValidUrl(problem.problemImage)) {
+                problemImagePath = problem.problemImage
+            } else {
+                throw IllegalArgumentException("Invalid URL: ${problem.problemImage}")
+            }
+        } else if (problem.problemImage.isNullOrEmpty() && problemImageFile != null) {
+            //CASE2
+            problemImagePath = "problems/$newProblemCode.$problemExtension"
+            val mediaLink = problemStorageRepository.uploadImage(problemImageFile, "$newProblemCode.$problemExtension")
             log.info("Problem image uploaded: $mediaLink")
+        } else {
+            throw IllegalArgumentException("Invalid image input")
         }
-        if (answerImageFile != null && answerImagePath != null) {
-            val mediaLink = answerStorageRepository.uploadImage(answerImageFile, answerImagePath)
-            log.info("Answer image uploaded: $mediaLink")
 
+        if (!problem.answerImage.isNullOrEmpty() && answerImageFile == null) {
+            //CASE1
+            if (isValidUrl(problem.answerImage)) {
+                answerImagePath = problem.answerImage
+            } else {
+                throw IllegalArgumentException("Invalid URL: ${problem.answerImage}")
+            }
+        } else if (problem.answerImage.isNullOrEmpty() && answerImageFile != null) {
+            //CASE2
+            answerImagePath = "answers/$newProblemCode.$answerExtension"
+            val mediaLink = answerStorageRepository.uploadImage(answerImageFile, "$newProblemCode.$answerExtension")
+            log.info("Answer image uploaded: $mediaLink")
         }
+
         log.info("Problem images uploaded successfully")
 
         log.info("Creating problem in firestore for user: $userId")
+
         val problemToCreate = ProblemViewDto(
             id = newProblemCode,
             problemText = problem.problemText,
@@ -74,6 +102,8 @@ class ProblemServiceImpl (
         )
         val id = firestoreProblemRepository.createProblem(problemToCreate)
         if (id.isBlank()) throw InternalException("Failed to create problem")
+        problemMetaService.incrementLastUsedSkfCode()
+
         log.info("Problem created in firestore successfully")
         return problemToCreate
     }
@@ -135,7 +165,8 @@ class ProblemServiceImpl (
     }
 
     private fun isValidUrl(url: String): Boolean {
-        val regex = Regex("https?://[\\w-]+(\\.[\\w-]+)+(/[\\w- ./?%&=]*)?")
+        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
         return regex.matches(url)
     }
+
 }

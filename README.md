@@ -1,4 +1,12 @@
 # api.bankas.skafis.lt
+## Dev
+1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
+2. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
+3. Open http://localhost:8080/swagger-ui/index.html in browser
+
+## Testing
+There are postman tests in TESTS_AND_DOCUMENTATION directory
+
 ## Init
 start.spring.io
 
@@ -23,11 +31,6 @@ Dependencies:
 - Spring Boot Actuator
 - Validation
 - Lombok
-
-## Dev
-1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
-2. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
-3. Open http://localhost:8080/swagger-ui/index.html in browser
 
 ## Auth stuff
 1. Firebase to check JWT and retrieve user data
