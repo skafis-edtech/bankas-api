@@ -16,7 +16,7 @@ AWS - later... for deploy
 
 ## Prod
 1. Build the image `docker build -t naglissul/bankas-skafis-api:latest .`
-2. push image to dockerhub registry `docker push naglissul/bankas-skafis-api:latest` (you need to be logged in to dockerhub `docker login`
+2. push image to dockerhub registry `docker push naglissul/bankas-skafis-api:latest` (you need to be logged in to dockerhub `docker login`)
 3. `docker compose up -d`
 4. deploy to Render - upload firebase-admin.json file to render secrets /etc/secrets/firebase-admin.json, set env var FIREBASE_SERVICE_ACCOUNT_PATH to /etc/secrets/firebase-admin.json
 5. add custom domain to Render AND for you domain provider add CNAME record to Render domain

@@ -18,3 +18,5 @@ Dockerfile
 README.md
 docker-compose.yaml
 
+# Firebase admin
+src/main/resources/firebase-admin.json
