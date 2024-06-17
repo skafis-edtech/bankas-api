@@ -38,6 +38,3 @@ out/
 ### Kotlin ###
 .kotlin
 
-### Firebase ###
-src/main/resources/firebase-admin.json
-.env

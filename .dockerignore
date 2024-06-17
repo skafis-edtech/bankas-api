@@ -18,5 +18,3 @@ Dockerfile
 README.md
 docker-compose.yaml
 
-# Ignore secrets
-src/main/resources/firebase-admin.json

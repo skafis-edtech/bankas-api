@@ -8,21 +8,20 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.cloud.FirestoreClient
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.core.io.Resource
+import java.io.FileInputStream
 
 @Configuration
 class FirebaseConfig {
 
-    @Value("classpath:firebase-admin.json")
-    private lateinit var serviceAccount: Resource
+    private val serviceAccountPath = System.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
 
     @Bean
     fun firebaseApp(): FirebaseApp {
+        val serviceAccount = FileInputStream(serviceAccountPath)
         val options = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount.inputStream))
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
             .build()
         return FirebaseApp.initializeApp(options)
     }
@@ -39,8 +38,9 @@ class FirebaseConfig {
 
     @Bean
     fun storage(): Storage {
+        val serviceAccount = FileInputStream(serviceAccountPath)
         return StorageOptions.newBuilder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount.inputStream))
+            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
             .build()
             .service
     }
