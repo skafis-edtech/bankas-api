@@ -40,3 +40,4 @@ out/
 
 ### Firebase ###
 src/main/resources/firebase-admin.json
+.env

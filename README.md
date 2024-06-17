@@ -1,8 +1,23 @@
 # api.bankas.skafis.lt
+## Tech
+NoSQL - Firebase Firestore
+Spring Boot - Kotlin
+Gradle
+Docker
+Render - deploy
+Jenkins - later...
+AWS - later... for deploy
+
 ## Dev
 1. Add firebase-admin.json file with firebase admin SDK keys to src/main/resources directory
 2. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
 3. Open http://localhost:8080/swagger-ui/index.html in browser
+
+## Prod
+1. Build the image `docker build -t naglissul/bankas-skafis-api:latest .`
+2. push image to dockerhub registry `docker push naglissul/bankas-skafis-api:latest`
+3. deploy to render - upload firebase-admin.json file to render secrets /etc/secrets/firebase-admin.json
+4. add custom domain to Render AND for you domain provider add CNAME record to Render domain
 
 ## Testing
 There are postman tests in TESTS_AND_DOCUMENTATION directory
@@ -45,3 +60,7 @@ https://malshani-wijekoon.medium.com/spring-boot-folder-structure-best-practices
 ## stuff
 Logging - services
 exceptions and HTTP codes - controllers (handleded by exception handler bean)
+
+## deploy stuff - 2024-06-15
+Docker, DockerHub, Render (later - AWS)
+https://medium.com/spring-boot/free-hosting-bliss-deploying-your-spring-boot-app-on-render-d0ebd9713b9d

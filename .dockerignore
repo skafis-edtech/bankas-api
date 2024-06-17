@@ -1,0 +1,22 @@
+# Ignore Gradle build files
+.gradle
+build
+
+# Ignore IDE files
+.idea
+
+# Ignore log files and directories
+logs
+*.log
+
+# Ignore temporary files and directories
+tmp
+*.tmp
+
+# Ignore other unnecessary files
+Dockerfile
+README.md
+docker-compose.yaml
+
+# Ignore secrets
+src/main/resources/firebase-admin.json
