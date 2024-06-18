@@ -1,4 +1,6 @@
-# api.bankas.skafis.lt
+# bankas.skafis.lt API
+[https://api.bankas.skafis.lt](https://api.bankas.skafis.lt)
+
 ## Tech
 NoSQL - Firebase Firestore
 Spring Boot - Kotlin
@@ -20,6 +22,9 @@ AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed ser
 3. `docker compose up -d`
 4. deploy to Render - upload firebase-admin.json file to render secrets /etc/secrets/firebase-admin.json, set env var FIREBASE_SERVICE_ACCOUNT_PATH to /etc/secrets/firebase-admin.json
 5. add custom domain to Render AND for you domain provider add CNAME record to Render domain
+
+## Prod deploy - for me
+Just run `basic_deploy.ps1` script on your computer and check `basic_deploy_logs.txt` for errors
 
 ## Testing
 There are postman tests in TESTS_AND_DOCUMENTATION directory

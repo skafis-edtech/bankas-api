@@ -1,5 +1,6 @@
 package lt.skafis.bankas.controller
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
@@ -13,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 @RestController
-@RequestMapping("/api/problem")
+@RequestMapping("/problem")
 class ProblemController(
     private val problemService: ProblemService
 ) {
@@ -28,11 +29,14 @@ class ProblemController(
 
     @PostMapping
     @SecurityRequirement(name = "bearerAuth")
-    fun createProblem(@RequestBody problem: ProblemPostDto,
-                      @RequestParam("problemImageFile") problemImageFile: MultipartFile?,
-                      @RequestParam("answerImageFile") answerImageFile: MultipartFile?,
-                      principal: Principal): ResponseEntity<ProblemViewDto> =
-        ResponseEntity(problemService.createProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
+    fun createProblem(@RequestParam("problem") problemString: String,
+                      @RequestParam("problemImageFile", required = false) problemImageFile: MultipartFile?,
+                      @RequestParam("answerImageFile", required = false) answerImageFile: MultipartFile?,
+                      principal: Principal
+    ): ResponseEntity<ProblemViewDto> {
+        val problem = ObjectMapper().readValue(problemString, ProblemPostDto::class.java)
+        return ResponseEntity(problemService.createProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
+    }
 
     @PutMapping("/{id}")
     @SecurityRequirement(name = "bearerAuth")

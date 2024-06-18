@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity
 import java.security.Principal
 
 @RestController
-@RequestMapping("/api/category")
+@RequestMapping("/category")
 class CategoryController(
     private val categoryService: CategoryService,
 ) {

@@ -55,6 +55,7 @@ class ProblemServiceImpl (
         Input (same for answerImage):
         - CASE1: problem.problemImage is https://... string AND problemImageFile is null >>> Then just return problemImagePath = problem.problemImage
         - CASE2: problem.problemImage is null AND problemImageFile is not null >>> Then upload the file to storage and return problemImagePath = "problems/$newSkfCode"
+        - CASE3: problem.problemImage is null AND problemImageFile is null >>> Then return problemImagePath = null
          */
 
         if (!problem.problemImage.isNullOrEmpty() && problemImageFile == null) {
@@ -69,8 +70,11 @@ class ProblemServiceImpl (
             problemImagePath = "problems/$newProblemCode.$problemExtension"
             val mediaLink = problemStorageRepository.uploadImage(problemImageFile, "$newProblemCode.$problemExtension")
             log.info("Problem image uploaded: $mediaLink")
+        } else if (problem.problemImage.isNullOrEmpty() && problemImageFile == null) {
+            //CASE3
+            problemImagePath = null
         } else {
-            throw IllegalArgumentException("Invalid image input")
+            throw IllegalArgumentException("Invalid problem image input")
         }
 
         if (!problem.answerImage.isNullOrEmpty() && answerImageFile == null) {
@@ -85,6 +89,11 @@ class ProblemServiceImpl (
             answerImagePath = "answers/$newProblemCode.$answerExtension"
             val mediaLink = answerStorageRepository.uploadImage(answerImageFile, "$newProblemCode.$answerExtension")
             log.info("Answer image uploaded: $mediaLink")
+        } else if (problem.answerImage.isNullOrEmpty() && answerImageFile == null) {
+            //CASE3
+            answerImagePath = null
+        } else {
+            throw IllegalArgumentException("Invalid answer image input")
         }
 
         log.info("Problem images uploaded successfully")

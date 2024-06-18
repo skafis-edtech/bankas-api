@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*
 import java.security.Principal
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/test")
 class TestController (
     private val userService: UserService,
 ) {

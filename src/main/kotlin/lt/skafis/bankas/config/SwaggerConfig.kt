@@ -15,7 +15,7 @@ class SwaggerConfig {
         return OpenAPI()
             .info(Info().title("Skafis užduočių bankas API")
                 .version("1.0.0")
-                .description("This is bankas.skafis.lt API."))
+                .description("This is bankas.skafis.lt API. https://api.bankas.skafis.lt"))
             .components(
                 Components()
                     .addSecuritySchemes(
