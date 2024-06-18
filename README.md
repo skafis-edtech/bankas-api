@@ -95,3 +95,7 @@ Then, create an EC2 instance and setup jenkins (here tutorial):
 
 Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just made cron job on ubuntu and that's it. It sends GET problem count every 14 mins.
 `*/14 * * * * curl -X GET https://bankas-skafis-api-latest.onrender.com/api/problems/count >> curl_job.log`
+
+## Stuff -2024-06-18
+Not using postgresql - this for later - but do all the review stuff and namings immediately. Not later. Also writing postman tests, gonna add collections later. 
+
