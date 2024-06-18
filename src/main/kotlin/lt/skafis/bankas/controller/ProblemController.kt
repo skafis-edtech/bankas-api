@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 @RestController
-@RequestMapping("/api/problems")
+@RequestMapping("/api/problem")
 class ProblemController(
     private val problemService: ProblemService
 ) {

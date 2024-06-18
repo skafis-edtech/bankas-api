@@ -6,7 +6,7 @@ Gradle
 Docker
 Render - deploy
 Jenkins - later...
-AWS - later... for deploy
+AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed service every 14 minutes)
 
 ## Dev
 1. Somehow get firebase-admin.json file (from firebase console) - have it anywhere on your computer
@@ -73,3 +73,20 @@ So I deploy using Render. and for that i need to push to dockerhub PUBLIC image.
 Long story short - env variables and secrets IS PAIN IN THE A** when dealing with free deployment services.
 
 I needed dynamic file loading for firebase sdk file (FirebaseConfig). BUT IT DIDN'T WORK WHEN COPY PASTING FROM CHATGPT!!! So I started slow - first, read env variables, then read file content, the read file content from env var specified path, then config prod/dev env and then DEPLOY yey.
+
+AND FINALLY WORKS. Here's how: 
+- locally (intellij) go to top rght corner (configurations) and click three dots and then edit configuration. THen click "Modify options" and then add environmental variables - add varable FIREBASE_SERVICE_ACCOUNT_PATH=C:\pathpath\firebase.json. ANd then run.
+- For deploy - build image, push image to dockerhub, on Render pull that image from dockerhub registry, add env var FIREBASE_SERVICE_ACCOUNT_PATH=/etc/secrets/firebase-admin.json, add secret firebase-admin.json file to Render secrets. And then deploy. And then add custom domain to Render and add CNAME record to your domain provider.
+
+## Jenkins
+I need to trigger Render service that is deployed every 15 minutes (cuz if it's inactive, it shuts down).
+
+I use AWS for that. For that, FIRSTLY SETUP BILLING ALERT!!!:
+- https://us-east-1.console.aws.amazon.com/billing/home#/preferences >>> Free tier alert.
+- https://us-east-1.console.aws.amazon.com/billing/home#/budgets >>> Create budgets (recommendation - create 2 separate: for zero budget and for montly budget threshold (e.g. 10 USD)).
+
+Then, create an EC2 instance and setup jenkins (here tutorial):
+- https://www.jenkins.io/doc/tutorials/tutorial-for-installing-jenkins-on-AWS/#launching-an-amazon-ec2-instance
+
+Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just made cron job on ubuntu and that's it. It sends GET problem count every 14 mins.
+`*/14 * * * * curl -X GET https://bankas-skafis-api-latest.onrender.com/api/problems/count >> curl_job.log`
