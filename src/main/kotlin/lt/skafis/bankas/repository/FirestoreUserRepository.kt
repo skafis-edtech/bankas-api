@@ -19,4 +19,15 @@ class FirestoreUserRepository(private val firestore: Firestore) {
             null
         }
     }
+
+    fun updateUserBio(id: String, bio: String): Boolean {
+        val docRef = firestore.collection(collectionPath).document(id)
+        val docSnapshot = docRef.get().get()
+        return if (docSnapshot.exists()) {
+            docRef.update("bio", bio)
+            true
+        } else {
+            false
+        }
+    }
 }
