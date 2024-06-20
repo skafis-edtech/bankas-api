@@ -2,6 +2,7 @@ package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import lt.skafis.bankas.dto.CategoriesForAuthor
 import lt.skafis.bankas.dto.CategoryPostDto
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.dto.CountDto
@@ -55,12 +56,16 @@ class CategoryController(
     fun approveCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Category> =
         ResponseEntity.ok(categoryService.approveCategory(id, principal.name))
 
+    @GetMapping("/myAllSubmitted")
+    @Operation(
+        summary = "Works"
+    )
+    @SecurityRequirement(name = "bearerAuth")
+    fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<CategoriesForAuthor> =
+        ResponseEntity.ok(CategoriesForAuthor(categoryService.getAllMySubmittedCategories(principal.name), categoryService.getAllMyApprovedCategories(principal.name)))
+
     //NOT IMPLEMENTED STUFF -------------------------------------------------------------------------------------------
 
-    @GetMapping("/myAllSubmitted")
-    @SecurityRequirement(name = "bearerAuth")
-    fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<List<Category>> =
-        TODO("Both approved and under review")
 
 
 

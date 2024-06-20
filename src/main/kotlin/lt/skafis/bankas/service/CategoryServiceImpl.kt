@@ -99,6 +99,23 @@ class CategoryServiceImpl(
         log.info("Category approved successfully")
         return newCategory
     }
+
+    override fun getAllMySubmittedCategories(userId: String): List<UnderReviewCategory> {
+        val username = userService.getUsernameById(userId)
+        log.info("Fetching all under review categories submitted by user: $username")
+        val categories = firestoreUnderReviewCategoryRepository.getCategoriesByAuthor(username)
+        log.info("Fetched successfully")
+        return categories
+    }
+
+    override fun getAllMyApprovedCategories(userId: String): List<Category> {
+        val username = userService.getUsernameById(userId)
+        log.info("Fetching all approved categories by user: $username")
+        val categories = firestoreCategoryRepository.getCategoriesByAuthor(username)
+        log.info("Fetched successfully")
+        return categories
+    }
+
     //OLD STUFF ------------------------------------------------------------------------------------------------------
 
 

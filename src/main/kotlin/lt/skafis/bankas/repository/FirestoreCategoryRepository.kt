@@ -58,4 +58,14 @@ class FirestoreCategoryRepository(private val firestore: Firestore) {
         val countQuerySnapshot = countQuery.get().get()
         return countQuerySnapshot.count
     }
+
+    fun getCategoriesByAuthor(username: String): List<Category> {
+        val collection = firestore.collection(collectionPath)
+            .whereEqualTo("author", username)
+            .get()
+            .get()
+        return collection.documents.mapNotNull {
+            it.toObject(Category::class.java)
+        }
+    }
 }

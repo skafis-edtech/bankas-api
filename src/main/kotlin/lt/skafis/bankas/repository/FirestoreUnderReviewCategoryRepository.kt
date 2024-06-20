@@ -61,4 +61,15 @@ class FirestoreUnderReviewCategoryRepository(private val firestore: Firestore) {
         val countQuerySnapshot = countQuery.get().get()
         return countQuerySnapshot.count
     }
+
+    fun getCategoriesByAuthor(author: String): List<UnderReviewCategory> {
+        val querySnapshot = firestore.collection(collectionPath)
+            .whereEqualTo("author", author)
+            .get()
+            .get()
+
+        return querySnapshot.documents.mapNotNull {
+            it.toObject(UnderReviewCategory::class.java)
+        }
+    }
 }
