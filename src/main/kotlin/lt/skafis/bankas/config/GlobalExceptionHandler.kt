@@ -30,7 +30,7 @@ class GlobalExceptionHandler {
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<String> {
         log.error("Exception occurred: " + ex.message)
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>("Error occurred, try again. If the issue remains, contact the system admin naglis.suliokas@gmail.com. Error message: " + ex.message)
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>("Error occurred, try again. If the issue remains, contact the system admin. Error message: " + ex.message)
     }
 
 }

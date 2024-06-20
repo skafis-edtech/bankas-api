@@ -21,20 +21,29 @@ class CategoryController(
 ) {
 
     @GetMapping("/{id}")
+    @Operation(
+        summary = "Works. PUBLIC"
+    )
     fun getPublicCategory(@PathVariable id: String): ResponseEntity<Category?> =
         ResponseEntity.ok(categoryService.getPublicCategoryById(id))
 
     @GetMapping
+    @Operation(
+        summary = "Works. PUBLIC"
+    )
     fun getAllPublicCategories(): ResponseEntity<List<Category>> =
         ResponseEntity.ok(categoryService.getAllPublicCategories())
 
     @GetMapping("/count")
+    @Operation(
+        summary = "Works. PUBLIC"
+    )
     fun getPublicCategoriesCount(): ResponseEntity<CountDto> =
         ResponseEntity.ok(categoryService.getPublicCategoriesCount())
 
     @PostMapping("/submit")
     @Operation(
-        summary = "Works"
+        summary = "Works. USER"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun submitCategory(@RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<UnderReviewCategory> =
@@ -42,7 +51,7 @@ class CategoryController(
 
     @GetMapping("/underReview")
     @Operation(
-        summary = "Works"
+        summary = "Works. ADMIN"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun getSubmittedCategories(principal: Principal): ResponseEntity<List<UnderReviewCategory>> =
@@ -50,7 +59,7 @@ class CategoryController(
 
     @PostMapping("/{id}/approve")
     @Operation(
-        summary = "Works"
+        summary = "Works. ADMIN"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun approveCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Category> =
@@ -58,7 +67,7 @@ class CategoryController(
 
     @GetMapping("/myAllSubmitted")
     @Operation(
-        summary = "Works"
+        summary = "Works. USER"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<CategoriesForAuthor> =
@@ -69,7 +78,7 @@ class CategoryController(
 
     @PatchMapping("/{id}/reject")
     @Operation(
-        summary = "In progress"
+        summary = "Works. ADMIN"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun rejectCategory(@PathVariable id: String, @RequestBody rejectMsgDto: RejectMsgDto, principal: Principal): ResponseEntity<UnderReviewCategory> =
@@ -79,21 +88,21 @@ class CategoryController(
             userId = principal.name
         ))
 
-    //OLD STUFF ------------------------------------------------------------------------------------------------------
-    @PostMapping
+    @PutMapping("/{id}/fixMyUnderReview")
+    @Operation(
+        summary = "Works. USER"
+    )
     @SecurityRequirement(name = "bearerAuth")
-    fun createCategory(@RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<Category> =
-        ResponseEntity(categoryService.createCategory(category, principal.name), HttpStatus.CREATED)
+    fun updateCategory(@PathVariable id: String, @RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<UnderReviewCategory> =
+        ResponseEntity.ok(categoryService.updateMyUnderReviewCategory(id, category, principal.name))
 
-    @PutMapping("/{id}")
+    @DeleteMapping("/underReview/{id}/cascade")
+    @Operation(
+        summary = "Not fully done - doesn't delete/reject under review problems. USER"
+    )
     @SecurityRequirement(name = "bearerAuth")
-    fun updateCategory(@PathVariable id: String, @RequestBody category: CategoryPostDto, principal: Principal): ResponseEntity<Category> =
-        ResponseEntity.ok(categoryService.updateCategory(id, category, principal.name))
-
-    @DeleteMapping("/{id}/cascade")
-    @SecurityRequirement(name = "bearerAuth")
-    fun deleteCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
-    if (categoryService.deleteCategoryWithProblems(id, principal.name)) {
+    fun deleteUnderReviewCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
+    if (categoryService.deleteUnderReviewCategoryWithUnderReviewProblems(id, principal.name)) {
         ResponseEntity(HttpStatus.NO_CONTENT)
     } else {
         ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)

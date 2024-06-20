@@ -134,56 +134,38 @@ class CategoryServiceImpl(
         log.info("Category rejected successfully")
         return newCategory
     }
-    //OLD STUFF ------------------------------------------------------------------------------------------------------
 
+    override fun updateMyUnderReviewCategory(id: String, category: CategoryPostDto, userId: String): UnderReviewCategory {
+        val username = userService.getUsernameById(userId)
+        log.info("Updating under review category $id by user: $username")
+        val categoryToUpdate = firestoreUnderReviewCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
+        if (categoryToUpdate.author != username) throw IllegalStateException("User is not the author of the category")
 
-    override fun createCategory(category: CategoryPostDto, userId: String): Category {
-        TODO("Not yet implemented")
+        val newCategory = categoryToUpdate.copy(
+            name = category.name,
+            description = category.description,
+            lastModifiedOn = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        val success = firestoreUnderReviewCategoryRepository.updateCategory(newCategory)
+        if (!success) throw InternalException("Failed to update category")
+        log.info("Category updated successfully")
+        return newCategory
     }
 
-    override fun updateCategory(id: String, category: CategoryPostDto, userId: String): Category {
-        TODO("Not yet implemented")
+    override fun deleteUnderReviewCategoryWithUnderReviewProblems(id: String, userId: String): Boolean {
+        val username = userService.getUsernameById(userId)
+        log.info("Deleting under review category $id by user: $username")
+        val categoryToDelete = firestoreUnderReviewCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
+        if (categoryToDelete.author != username) throw IllegalStateException("User is not the author of the category")
+
+        val success = firestoreUnderReviewCategoryRepository.deleteCategory(id)
+        if (!success) throw InternalException("Failed to delete category")
+        log.info("Category deleted successfully")
+
+        //TODO: delete my under review problems for that category, reject others' problems for that category, delete others' problems for that category
+
+        log.info("Problems deleted and rejected successfully")
+        return true
     }
-
-    override fun deleteCategoryWithProblems(id: String, userId: String): Boolean {
-        TODO("Not yet implemented")
-    }
-//
-//    override fun createCategory(category: CategoryPostDto, userId: String): CategoryViewDto {
-//        val username = userService.getUsernameById(userId) ?: throw NotFoundException("User not found")
-//        log.info("Creating category by user: $username")
-//        val categoryToCreate = CategoryViewDto("", category.name, category.description, DateTimeFormatter.ISO_INSTANT.format(Instant.now()), username)
-//        val id = firestoreCategoryRepository.createCategory(categoryToCreate)
-//        log.info("Category created successfully")
-//        return categoryToCreate.copy(id = id)
-//    }
-//
-//    override fun updateCategory(id: String, category: CategoryPostDto, userId: String): CategoryViewDto {
-//        val username = userService.getUsernameById(userId) ?: throw NotFoundException("User not found")
-//        log.info("Updating category $id by user: $username")
-//        val categoryToUpdate = firestoreCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
-//        if (categoryToUpdate.createdBy != username) throw InternalException("User is not the creator of the category")
-//        val updatedCategory = categoryToUpdate.copy(id = id, name = category.name, description = category.description)
-//        val success = firestoreCategoryRepository.updateCategory(updatedCategory)
-//        if (!success) throw InternalException("Failed to update category")
-//        log.info("Category updated successfully")
-//        return updatedCategory
-//    }
-//
-//    override fun deleteCategoryWithProblems(id: String, userId: String): Boolean {
-//        val username = userService.getUsernameById(userId) ?: throw NotFoundException("User not found")
-//        log.info("Deleting category $id with all problems by user: $username")
-//        val categoryToDelete = firestoreCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
-//        if (categoryToDelete.createdBy != username) throw InternalException("User is not the creator of the category")
-//
-//        val problems = problemService.getProblemsByCategoryId(id)
-////        problems.forEach { problemService.deleteProblem(it.id, userId) }
-//
-//        val success = firestoreCategoryRepository.deleteCategory(id)
-//        if (!success) throw InternalException("Failed to delete category")
-//        log.info("Category with problems deleted successfully")
-//        return true
-//    }
-
-
 }
