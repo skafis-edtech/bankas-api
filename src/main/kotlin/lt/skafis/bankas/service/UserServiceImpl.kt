@@ -1,7 +1,7 @@
 package lt.skafis.bankas.service
 
-import lt.skafis.bankas.dto.UserViewDto
 import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.User
 import lt.skafis.bankas.repository.FirestoreUserRepository
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -13,21 +13,21 @@ class UserServiceImpl(private val userRepository: FirestoreUserRepository) : Use
 
     val log: Logger = LoggerFactory.getLogger(UserServiceImpl::class.java)
 
-    override fun getUserById(userId: String): UserViewDto? {
+    override fun getUserById(userId: String): User {
         log.info("Getting user by id: $userId")
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
         log.info("User found")
-        return UserViewDto(userId, user.email, user.username, user.role)
+        return user
     }
 
-    override fun getUsernameById(userId: String): String? {
+    override fun getUsernameById(userId: String): String {
         log.info("Getting username by id: $userId")
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
         log.info("Username found")
         return user.username
     }
 
-    override fun getRoleById(userId: String): Role? {
+    override fun getRoleById(userId: String): Role {
         log.info("Getting role by id: $userId")
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
         log.info("Role found")
@@ -42,5 +42,12 @@ class UserServiceImpl(private val userRepository: FirestoreUserRepository) : Use
         }
         log.info("Bio updated successfully")
         return true
+    }
+
+    override fun getBio(username: String): String {
+        log.info("Getting bio for user: $username")
+        val user = userRepository.getByUsername(username) ?: throw NotFoundException("User not found")
+        log.info("Bio found")
+        return user.bio
     }
 }

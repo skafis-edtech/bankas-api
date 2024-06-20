@@ -1,7 +1,7 @@
 package lt.skafis.bankas.service
 
-import lt.skafis.bankas.dto.UserViewDto
 import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.User
 import lt.skafis.bankas.repository.FirestoreUserRepository
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
@@ -11,7 +11,7 @@ import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import org.webjars.NotFoundException
 
-class UserServiceTest {
+class UserServiceTests {
 
     private lateinit var userRepository: FirestoreUserRepository
     private lateinit var userService: UserService
@@ -25,12 +25,12 @@ class UserServiceTest {
     @Test
     fun `getUserById returns user when user exists`() {
         val userId = "testUserId"
-        val user = UserViewDto(userId, "test@test.com", "testUsername", Role.USER)
+        val user = User(userId, "test@test.com", "testUsername", Role.USER)
         `when`(userRepository.getUserById(userId)).thenReturn(user)
 
         val result = userService.getUserById(userId)
 
-        assertEquals(UserViewDto(userId, user.email, user.username, user.role), result)
+        assertEquals(User(userId, user.email, user.username, user.role), result)
     }
 
     @Test
@@ -46,7 +46,7 @@ class UserServiceTest {
     @Test
     fun `getUsernameById returns username when user exists`() {
         val userId = "testUserId"
-        val user = UserViewDto(userId, "test@test.com", "testUsername", Role.USER)
+        val user = User(userId, "test@test.com", "testUsername", Role.USER)
         `when`(userRepository.getUserById(userId)).thenReturn(user)
 
         val result = userService.getUsernameById(userId)
@@ -67,7 +67,7 @@ class UserServiceTest {
     @Test
     fun `getRoleById returns role when user exists`() {
         val userId = "testUserId"
-        val user = UserViewDto(userId, "test@test.com", "testUsername", Role.USER)
+        val user = User(userId, "test@test.com", "testUsername", Role.USER)
         `when`(userRepository.getUserById(userId)).thenReturn(user)
 
         val result = userService.getRoleById(userId)
@@ -104,6 +104,27 @@ class UserServiceTest {
 
         assertThrows(NotFoundException::class.java) {
             userService.updateBio(bio, userId)
+        }
+    }
+
+    @Test
+    fun `getBio returns bio when user exists`() {
+        val username = "testUsername"
+        val user = User("testUserId", "test@test.com", username,  Role.USER,"testBio")
+        `when`(userRepository.getByUsername(username)).thenReturn(user)
+
+        val result = userService.getBio(username)
+
+        assertEquals(user.bio, result)
+    }
+
+    @Test
+    fun `getBio throws NotFoundException when user does not exist`() {
+        val username = "testUsername"
+        `when`(userRepository.getByUsername(username)).thenReturn(null)
+
+        assertThrows(NotFoundException::class.java) {
+            userService.getBio(username)
         }
     }
 }

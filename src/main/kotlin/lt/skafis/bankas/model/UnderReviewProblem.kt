@@ -1,16 +1,17 @@
 package lt.skafis.bankas.model
 
-data class Problem (
+data class UnderReviewProblem(
     val id: String = "",
-    val skfCode: String = "",
     val problemText: String = "",
-    val problemImagePath: String = "",
     val answerText: String = "",
+    val problemImagePath: String = "",
     val answerImagePath: String = "",
     val categoryId: String = "",
     val author: String = "",
-    val approvedBy: String = "",
-    val approvedOn: String = "",
     val createdOn: String = "",
     val lastModifiedOn: String = "",
+    val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
+    val rejectedBy: String = "",
+    val rejectedOn: String = "",
+    val rejectionMessage: String = "",
 )

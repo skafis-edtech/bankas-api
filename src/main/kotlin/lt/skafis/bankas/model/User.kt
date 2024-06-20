@@ -1,10 +1,7 @@
 package lt.skafis.bankas.model
 
-import jakarta.validation.constraints.Email
-
 data class User (
-
-    @Email
+    val id: String = "",
     val email: String = "",
     val username: String = "",
     val role: Role = Role.USER,

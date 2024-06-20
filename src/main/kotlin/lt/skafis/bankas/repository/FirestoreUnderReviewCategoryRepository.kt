@@ -1,32 +1,34 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
-import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.UnderReviewCategory
 import org.springframework.stereotype.Repository
 
 @Repository
-class FirestoreCategoryRepository(private val firestore: Firestore) {
+class FirestoreUnderReviewCategoryRepository(private val firestore: Firestore) {
 
-    private val collectionPath = "categories"
+    private val collectionPath = "underReviewCategories"
 
-    fun createCategory(category: Category): String {
+    //Input: UnderReviewCategory with unnecessary id field
+    //Output: id of the created category
+    fun createCategory(category: UnderReviewCategory): String {
         val docRef = firestore.collection(collectionPath).document()
         val categoryWithId = category.copy(id = docRef.id)
         docRef.set(categoryWithId)
         return docRef.id
     }
 
-    fun getCategoryById(id: String): Category? {
+    fun getCategoryById(id: String): UnderReviewCategory? {
         val docRef = firestore.collection(collectionPath).document(id)
         val docSnapshot = docRef.get().get()
         return if (docSnapshot.exists()) {
-            docSnapshot.toObject(Category::class.java)
+            docSnapshot.toObject(UnderReviewCategory::class.java)
         } else {
             null
         }
     }
 
-    fun updateCategory(category: Category): Boolean {
+    fun updateCategory(category: UnderReviewCategory): Boolean {
         val docRef = firestore.collection(collectionPath).document(category.id)
         return try {
             docRef.set(category).get()
@@ -46,10 +48,10 @@ class FirestoreCategoryRepository(private val firestore: Firestore) {
         }
     }
 
-    fun getAllCategories(): List<Category> {
+    fun getAllCategories(): List<UnderReviewCategory> {
         val collection = firestore.collection(collectionPath).get().get()
         return collection.documents.mapNotNull {
-            it.toObject(Category::class.java)
+            it.toObject(UnderReviewCategory::class.java)
         }
     }
 

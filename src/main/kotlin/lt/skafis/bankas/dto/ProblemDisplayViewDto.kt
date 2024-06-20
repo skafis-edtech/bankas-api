@@ -1,11 +1,15 @@
 package lt.skafis.bankas.dto
 
 data class ProblemDisplayViewDto(
-    val id: String = "",
-    val problemImageSrc: String? = null,
-    val answerImageSrc: String? = null,
-    val problemText: String? = null,
-    val answerText: String? = null,
+    val skfCode: String = "",
+    val problemText: String = "",
+    val problemImageSrc: String = "",
+    val answerText: String = "",
+    val answerImageSrc: String = "",
     val categoryId: String = "",
+    val author: String = "",
+    val approvedBy: String = "",
+    val approvedOn: String = "",
     val createdOn: String = "",
-    )
+    val lastModifiedOn: String = "",
+)

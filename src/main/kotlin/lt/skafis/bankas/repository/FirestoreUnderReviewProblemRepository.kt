@@ -4,7 +4,7 @@ package lt.skafis.bankas.repository
 //import org.springframework.stereotype.Repository
 //
 //@Repository
-//class FirestoreProblemRepository(private val firestore: Firestore) {
+//class FirestoreUnderReviewProblemRepository(private val firestore: Firestore) {
 //
 //    private val collectionPath = "problems"
 //
