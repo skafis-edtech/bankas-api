@@ -9,10 +9,9 @@ class FirestoreCategoryRepository(private val firestore: Firestore) {
 
     private val collectionPath = "categories"
 
-    fun createCategory(category: Category): String {
-        val docRef = firestore.collection(collectionPath).document()
-        val categoryWithId = category.copy(id = docRef.id)
-        docRef.set(categoryWithId)
+    fun createCategoryWithSpecifiedId(category: Category): String {
+        val docRef = firestore.collection(collectionPath).document(category.id)
+        docRef.set(category)
         return docRef.id
     }
 

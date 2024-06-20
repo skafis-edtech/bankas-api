@@ -74,6 +74,31 @@ class CategoryServiceImpl(
         return categories
     }
 
+    override fun approveCategory(id: String, userId: String): Category {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Approving category $id by user: $username")
+        val categoryToApprove = firestoreUnderReviewCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
+        val newCategory = Category(
+            id = id,
+            name = categoryToApprove.name,
+            description = categoryToApprove.description,
+            author = categoryToApprove.author,
+            approvedBy = username,
+            approvedOn = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+            createdOn = categoryToApprove.createdOn,
+            lastModifiedOn = categoryToApprove.lastModifiedOn
+        )
+        firestoreCategoryRepository.createCategoryWithSpecifiedId(newCategory)
+        log.info("Category created in main collection")
+        val success = firestoreUnderReviewCategoryRepository.deleteCategory(id)
+        if (!success) throw InternalException("Failed to delete category from under review collection")
+        log.info("Category deleted from under review collection")
+        log.info("Category approved successfully")
+        return newCategory
+    }
     //OLD STUFF ------------------------------------------------------------------------------------------------------
 
 

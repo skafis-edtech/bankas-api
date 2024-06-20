@@ -11,6 +11,7 @@ interface CategoryService {
     fun getPublicCategoriesCount(): CountDto
     fun submitCategory(category: CategoryPostDto, userId: String): UnderReviewCategory
     fun getAllUnderReviewCategories(userId: String): List<UnderReviewCategory>
+    fun approveCategory(id: String, userId: String): Category
     //OLD STUFF ------------------------------------------------------------------------------------------------------
     fun createCategory(category: CategoryPostDto, userId: String): Category
     fun updateCategory(id: String, category: CategoryPostDto, userId: String): Category

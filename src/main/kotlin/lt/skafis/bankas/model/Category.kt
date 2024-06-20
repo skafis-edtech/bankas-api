@@ -6,6 +6,7 @@ data class Category (
     val description: String = "",
     val author: String = "",
     val approvedBy: String = "",
+    val approvedOn: String = "",
     val createdOn: String = "",
     val lastModifiedOn: String = "",
 )

@@ -47,18 +47,22 @@ class CategoryController(
     fun getSubmittedCategories(principal: Principal): ResponseEntity<List<UnderReviewCategory>> =
         ResponseEntity.ok(categoryService.getAllUnderReviewCategories(principal.name))
 
+    @PostMapping("/{id}/approve")
+    @Operation(
+        summary = "Works"
+    )
+    @SecurityRequirement(name = "bearerAuth")
+    fun approveCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Category> =
+        ResponseEntity.ok(categoryService.approveCategory(id, principal.name))
+
     //NOT IMPLEMENTED STUFF -------------------------------------------------------------------------------------------
+
     @GetMapping("/myAllSubmitted")
     @SecurityRequirement(name = "bearerAuth")
     fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<List<Category>> =
         TODO("Both approved and under review")
 
 
-
-    @PostMapping("/{id}/approve")
-    @SecurityRequirement(name = "bearerAuth")
-    fun approveCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Category> =
-        TODO("Not yet implemented")
 
     @PatchMapping("/{id}/reject")
     @SecurityRequirement(name = "bearerAuth")
