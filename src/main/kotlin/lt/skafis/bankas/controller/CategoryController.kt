@@ -62,18 +62,22 @@ class CategoryController(
     )
     @SecurityRequirement(name = "bearerAuth")
     fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<CategoriesForAuthor> =
-        ResponseEntity.ok(CategoriesForAuthor(categoryService.getAllMySubmittedCategories(principal.name), categoryService.getAllMyApprovedCategories(principal.name)))
-
-    //NOT IMPLEMENTED STUFF -------------------------------------------------------------------------------------------
-
-
-
+        ResponseEntity.ok(CategoriesForAuthor(
+            categoryService.getAllMySubmittedCategories(principal.name),
+            categoryService.getAllMyApprovedCategories(principal.name)
+        ))
 
     @PatchMapping("/{id}/reject")
+    @Operation(
+        summary = "In progress"
+    )
     @SecurityRequirement(name = "bearerAuth")
-    fun rejectCategory(@PathVariable id: String, @RequestBody rejectMsgDto: RejectMsgDto, principal: Principal): ResponseEntity<Category> =
-        TODO("Not yet implemented")
-
+    fun rejectCategory(@PathVariable id: String, @RequestBody rejectMsgDto: RejectMsgDto, principal: Principal): ResponseEntity<UnderReviewCategory> =
+        ResponseEntity.ok(categoryService.rejectCategory(
+            id,
+            rejectMsg = rejectMsgDto.rejectionMessage,
+            userId = principal.name
+        ))
 
     //OLD STUFF ------------------------------------------------------------------------------------------------------
     @PostMapping

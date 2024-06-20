@@ -116,6 +116,24 @@ class CategoryServiceImpl(
         return categories
     }
 
+    override fun rejectCategory(id: String, rejectMsg: String, userId: String): UnderReviewCategory {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Rejecting category $id by user: $username")
+        val categoryToReject = firestoreUnderReviewCategoryRepository.getCategoryById(id) ?: throw NotFoundException("Category not found")
+        val newCategory = categoryToReject.copy(
+            reviewStatus = ReviewStatus.REJECTED,
+            rejectedOn = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
+            rejectedBy = username,
+            rejectionMessage = rejectMsg
+        )
+        val success = firestoreUnderReviewCategoryRepository.updateCategory(newCategory)
+        if (!success) throw InternalException("Failed to update category")
+        log.info("Category rejected successfully")
+        return newCategory
+    }
     //OLD STUFF ------------------------------------------------------------------------------------------------------
 
 

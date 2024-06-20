@@ -14,6 +14,7 @@ interface CategoryService {
     fun approveCategory(id: String, userId: String): Category
     fun getAllMySubmittedCategories(userId: String): List<UnderReviewCategory>
     fun getAllMyApprovedCategories(userId: String): List<Category>
+    fun rejectCategory(id: String, rejectMsg: String, userId: String): UnderReviewCategory
     //OLD STUFF ------------------------------------------------------------------------------------------------------
     fun createCategory(category: CategoryPostDto, userId: String): Category
     fun updateCategory(id: String, category: CategoryPostDto, userId: String): Category
