@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.ProblemPostDto
+import lt.skafis.bankas.model.UnderReviewProblem
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.service.ProblemService
 import org.springframework.http.HttpStatus
@@ -40,7 +41,33 @@ class ProblemController(
     fun getPublicProblemsCount(): ResponseEntity<CountDto> =
         ResponseEntity.ok(problemService.getPublicProblemCount())
 
-//    @PostMapping("/submit")
+    @PostMapping("/submit")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Should work. USER. Careful! Complex file and text upload logic AND not easily testable file upload!",
+        description = """
+            This endpoint allows uploading problem information as JSON along with optional image files.
+
+            **Request Type**: `multipart/form-data`
+            - Key `problem`: JSON string containing the problem information
+            - Key `problemImageFile`: (optional) Image file associated with the problem
+            - Key `answerImageFile`: (optional) Image file associated with the answer
+
+            **Logic**:
+            - If `problem.problemImageUrl` is a URL and `problemImageFile` is null, return `problemImagePath = problem.problemImage`.
+            - If `problem.problemImageUrl` is "" and `problemImageFile` is provided, upload the file and return `problemImagePath = "problems/SKF-..."`.
+            - If `problem.problemImageUrl` is "" and `problemImageFile` is null, return `problemImagePath = ""`.
+        """
+    )
+    fun submitProblem(@RequestPart("problem", required = true) problemString: String,
+                      @RequestPart("problemImageFile", required = false) problemImageFile: MultipartFile?,
+                      @RequestPart("answerImageFile", required = false) answerImageFile: MultipartFile?,
+                      principal: Principal
+    ): ResponseEntity<UnderReviewProblem> {
+        val problem = ObjectMapper().readValue(problemString, ProblemPostDto::class.java)
+        return ResponseEntity(problemService.submitProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
+    }
+
 //    @GetMapping("/underReview")
 //    @PostMapping("/{id}/approve")
 //    @GetMapping("/myAllSubmitted")
@@ -48,32 +75,7 @@ class ProblemController(
 //    @PutMapping("/{id}/fixMyUnderReview")
 //    @DeleteMapping("/underReview/{id}") - delete only your own
 
-//    @PostMapping
-//    @SecurityRequirement(name = "bearerAuth")
-//    @Operation(
-//        summary = "Careful! Complex file and text upload logic AND not easily testable file upload!",
-//        description = """
-//            This endpoint allows uploading problem information as JSON along with optional image files.
-//
-//            **Request Type**: `multipart/form-data`
-//            - Key `problem`: JSON string containing the problem information
-//            - Key `problemImageFile`: (optional) Image file associated with the problem
-//            - Key `answerImageFile`: (optional) Image file associated with the answer
-//
-//            **Logic**:
-//            - If `problem.problemImage` is a URL and `problemImageFile` is null, return `problemImagePath = problem.problemImage`.
-//            - If `problem.problemImage` is null and `problemImageFile` is provided, upload the file and return `problemImagePath = "problems/SKF-..."`.
-//            - If `problem.problemImage` is null and `problemImageFile` is null, return `problemImagePath = null`.
-//        """
-//    )
-//    fun createProblem(@RequestPart("problem") problemString: String,
-//                      @RequestPart("problemImageFile", required = false) problemImageFile: MultipartFile?,
-//                      @RequestPart("answerImageFile", required = false) answerImageFile: MultipartFile?,
-//                      principal: Principal
-//    ): ResponseEntity<ProblemViewDto> {
-//        val problem = ObjectMapper().readValue(problemString, ProblemPostDto::class.java)
-//        return ResponseEntity(problemService.createProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
-//    }
+
 //
 //    @PutMapping("/{id}")
 //    @SecurityRequirement(name = "bearerAuth")

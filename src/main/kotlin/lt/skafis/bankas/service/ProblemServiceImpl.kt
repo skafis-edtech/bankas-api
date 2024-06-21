@@ -7,6 +7,7 @@ import lt.skafis.bankas.dto.UnderReviewProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.UnderReviewProblem
 import lt.skafis.bankas.repository.FirestoreProblemRepository
+import lt.skafis.bankas.repository.FirestoreUnderReviewProblemRepository
 import lt.skafis.bankas.repository.StorageRepository
 import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
@@ -14,13 +15,14 @@ import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.webjars.NotFoundException
 import java.net.URI
-import java.time.Instant
 
 @Service
-class ProblemServiceImpl (
+class ProblemServiceImpl(
     val firestoreProblemRepository: FirestoreProblemRepository,
     val storageRepository: StorageRepository,
-    val problemMetaService: ProblemMetaService
+    val problemMetaService: ProblemMetaService,
+    val firestoreUnderReviewProblemRepository: FirestoreUnderReviewProblemRepository,
+    val userService: UserService
 ) : ProblemService {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -48,18 +50,54 @@ class ProblemServiceImpl (
         log.info("Problems count fetched successfully")
         return CountDto(count)
     }
-    //Unimplemented stuff
 
-
-    //OLD STUFF
-    override fun createProblem(
+    override fun submitProblem(
         problem: ProblemPostDto,
         userId: String,
         problemImageFile: MultipartFile?,
         answerImageFile: MultipartFile?
-    ): Problem {
-        TODO("Not yet implemented")
+    ): UnderReviewProblem {
+
+        val username = userService.getUsernameById(userId)
+        log.info("Uploading images to under review storage (if provided) by user: $username")
+
+        val newProblemId = firestoreUnderReviewProblemRepository.genNewProblemId()
+        val problemExtension = problemImageFile?.originalFilename?.split(".")?.lastOrNull()
+        val answerExtension = answerImageFile?.originalFilename?.split(".")?.lastOrNull()
+
+        val problemImagePath = uploadImageAndGetPath(
+            problem.problemImageUrl,
+            problemImageFile,
+            "/underReviewProblems/$newProblemId.$problemExtension"
+        )
+
+        val answerImagePath = uploadImageAndGetPath(
+            problem.answerImageUrl,
+            answerImageFile,
+            "/underReviewAnswers/$newProblemId.$answerExtension"
+        )
+
+        log.info("UnderReviewProblem images uploaded successfully")
+        log.info("Creating underReviewProblem in firestore for user: $userId")
+
+        val problemToCreate = UnderReviewProblem(
+            id = newProblemId,
+            problemText = problem.problemText,
+            answerText = problem.answerText,
+            problemImagePath = problemImagePath,
+            answerImagePath = answerImagePath,
+            categoryId = problem.categoryId,
+            author = username
+        )
+        val id = firestoreUnderReviewProblemRepository.createProblemWithGivenId(problemToCreate)
+        if (id.isBlank()) throw InternalException("Failed to create underReviewProblem")
+
+        log.info("UnderReviewProblem created in firestore successfully")
+        return problemToCreate
     }
+
+
+    //OLD STUFF
 
     override fun updateProblem(
         id: String,
@@ -76,82 +114,7 @@ class ProblemServiceImpl (
     }
 
 
-//    override fun createProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
-//
-//        log.info("Uploading images to storage (if provided) by user: $userId")
-//
-//        val newProblemCode = problemMetaService.getIncrementedLastUsedSkfCode()
-//        val problemExtension = problemImageFile?.originalFilename?.split(".")?.lastOrNull()
-//        val answerExtension = answerImageFile?.originalFilename?.split(".")?.lastOrNull()
-//
-//        var problemImagePath: String? = null
-//        var answerImagePath: String? = null
-//
-//        /*
-//        Input (same for answerImage):
-//        - CASE1: problem.problemImage is https://... string AND problemImageFile is null >>> Then just return problemImagePath = problem.problemImage
-//        - CASE2: problem.problemImage is null AND problemImageFile is not null >>> Then upload the file to storage and return problemImagePath = "problems/$newSkfCode"
-//        - CASE3: problem.problemImage is null AND problemImageFile is null >>> Then return problemImagePath = null
-//         */
-//
-//        if (!problem.problemImage.isNullOrEmpty() && problemImageFile == null) {
-//            //CASE1
-//            if (isValidUrl(problem.problemImage)) {
-//                problemImagePath = problem.problemImage
-//            } else {
-//                throw IllegalArgumentException("Invalid URL: ${problem.problemImage}")
-//            }
-//        } else if (problem.problemImage.isNullOrEmpty() && problemImageFile != null) {
-//            //CASE2
-//            problemImagePath = "problems/$newProblemCode.$problemExtension"
-//            val mediaLink = problemStorageRepository.uploadImage(problemImageFile, "$newProblemCode.$problemExtension")
-//            log.info("Problem image uploaded: $mediaLink")
-//        } else if (problem.problemImage.isNullOrEmpty() && problemImageFile == null) {
-//            //CASE3
-//            problemImagePath = null
-//        } else {
-//            throw IllegalArgumentException("Invalid problem image input")
-//        }
-//
-//        if (!problem.answerImage.isNullOrEmpty() && answerImageFile == null) {
-//            //CASE1
-//            if (isValidUrl(problem.answerImage)) {
-//                answerImagePath = problem.answerImage
-//            } else {
-//                throw IllegalArgumentException("Invalid URL: ${problem.answerImage}")
-//            }
-//        } else if (problem.answerImage.isNullOrEmpty() && answerImageFile != null) {
-//            //CASE2
-//            answerImagePath = "answers/$newProblemCode.$answerExtension"
-//            val mediaLink = answerStorageRepository.uploadImage(answerImageFile, "$newProblemCode.$answerExtension")
-//            log.info("Answer image uploaded: $mediaLink")
-//        } else if (problem.answerImage.isNullOrEmpty() && answerImageFile == null) {
-//            //CASE3
-//            answerImagePath = null
-//        } else {
-//            throw IllegalArgumentException("Invalid answer image input")
-//        }
-//
-//        log.info("Problem images uploaded successfully")
-//
-//        log.info("Creating problem in firestore for user: $userId")
-//
-//        val problemToCreate = ProblemViewDto(
-//            id = newProblemCode,
-//            problemText = problem.problemText,
-//            answerText = problem.answerText,
-//            problemImage = problemImagePath,
-//            answerImage = answerImagePath,
-//            categoryId = problem.categoryId,
-//            createdOn = Instant.now().toString()
-//        )
-//        val id = firestoreProblemRepository.createProblem(problemToCreate)
-//        if (id.isBlank()) throw InternalException("Failed to create problem")
-//        problemMetaService.incrementLastUsedSkfCode()
-//
-//        log.info("Problem created in firestore successfully")
-//        return problemToCreate
-//    }
+
 //
 //    override fun updateProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
 //        TODO("Not yet implemented")
@@ -188,6 +151,35 @@ class ProblemServiceImpl (
         val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
         return regex.matches(url)
     }
+
+    private fun uploadImageAndGetPath(url: String, file: MultipartFile?, fullPath: String): String =
+        /*
+        Input (same for answerImageUrl):
+        - CASE1: problem.problemImageUrl is https://... string AND problemImageFile is null >>> Then just return problemImagePath = problem.problemImage
+        - CASE2: problem.problemImageUrl is "" AND problemImageFile is not null >>> Then upload the file to storage and return problemImagePath = "problems/$newSkfCode"
+        - CASE3: problem.problemImageUrl is "" AND problemImageFile is null >>> Then return problemImagePath = ""
+         */
+
+        if (url.isNotEmpty() && file == null) {
+            //CASE1
+            if (isValidUrl(url)) {
+                URI(url)
+                url
+            } else {
+                throw IllegalArgumentException("Invalid URL: ${url}")
+            }
+        } else if (url.isEmpty() && file != null) {
+            //CASE2
+            val mediaLink = storageRepository.uploadImage(file, fullPath)
+            log.info("$fullPath image uploaded: $mediaLink")
+            fullPath
+        } else if (url.isEmpty() && file == null) {
+            //CASE3
+            ""
+        } else {
+            throw IllegalArgumentException("Invalid $fullPath image input")
+        }
+
 
     private fun problemMapToProblemDisplay(problem: Problem): ProblemDisplayViewDto {
         return ProblemDisplayViewDto(

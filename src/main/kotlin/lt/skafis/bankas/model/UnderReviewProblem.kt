@@ -1,5 +1,7 @@
 package lt.skafis.bankas.model
 
+import java.time.Instant
+
 data class UnderReviewProblem(
     val id: String = "",
     val problemText: String = "",
@@ -8,8 +10,8 @@ data class UnderReviewProblem(
     val answerImagePath: String = "",
     val categoryId: String = "",
     val author: String = "",
-    val createdOn: String = "",
-    val lastModifiedOn: String = "",
+    val createdOn: String = Instant.now().toString(),
+    val lastModifiedOn: String = Instant.now().toString(),
     val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
     val rejectedBy: String = "",
     val rejectedOn: String = "",
