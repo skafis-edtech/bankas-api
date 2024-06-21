@@ -108,5 +108,6 @@ class CategoryController(
         ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
+    //ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later...
 
 }

@@ -20,12 +20,33 @@ class ProblemController(
 ) {
 
     @GetMapping("/{id}")
+    @Operation(
+        summary = "Should work. PUBLIC"
+    )
     fun getPublicProblem(@PathVariable id: String): ResponseEntity<ProblemDisplayViewDto> =
         ResponseEntity.ok(problemService.getPublicProblemById(id))
 
     @GetMapping("/byCategory/{categoryId}")
+    @Operation(
+        summary = "Should work. PUBLIC"
+    )
     fun getPublicProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getPublicProblemsByCategoryId(categoryId))
+
+    @GetMapping("/count")
+    @Operation(
+        summary = "Should work. PUBLIC"
+    )
+    fun getPublicProblemsCount(): ResponseEntity<CountDto> =
+        ResponseEntity.ok(problemService.getPublicProblemCount())
+
+//    @PostMapping("/submit")
+//    @GetMapping("/underReview")
+//    @PostMapping("/{id}/approve")
+//    @GetMapping("/myAllSubmitted")
+//    @PatchMapping("/{id}/reject")
+//    @PutMapping("/{id}/fixMyUnderReview")
+//    @DeleteMapping("/underReview/{id}") - delete only your own
 
 //    @PostMapping
 //    @SecurityRequirement(name = "bearerAuth")
@@ -72,7 +93,5 @@ class ProblemController(
 //            ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
 //        }
 //
-//    @GetMapping("/count")
-//    fun getProblemsCount(): ResponseEntity<CountDto> =
-//        ResponseEntity.ok(problemService.getProblemCount())
+
 }
