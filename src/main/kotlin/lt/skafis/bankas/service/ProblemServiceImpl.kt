@@ -1,45 +1,73 @@
 package lt.skafis.bankas.service
-//
-//import lt.skafis.bankas.dto.CountDto
-//import lt.skafis.bankas.dto.ProblemDisplayViewDto
-//import lt.skafis.bankas.dto.ProblemPostDto
-//import lt.skafis.bankas.repository.AnswerStorageRepository
-//import lt.skafis.bankas.repository.FirestoreProblemRepository
-//import lt.skafis.bankas.repository.ProblemStorageRepository
-//import org.apache.logging.log4j.util.InternalException
-//import org.slf4j.LoggerFactory
-//import org.springframework.stereotype.Service
-//import org.springframework.web.multipart.MultipartFile
-//import org.webjars.NotFoundException
-//import java.net.URI
-//import java.time.Instant
-//
-//@Service
-//class ProblemServiceImpl (
-//    val firestoreProblemRepository: FirestoreProblemRepository,
-//    val problemStorageRepository: ProblemStorageRepository,
-//    val answerStorageRepository: AnswerStorageRepository,
-//    val problemMetaService: ProblemMetaService
-//) : ProblemService {
-//
-//    private val log = LoggerFactory.getLogger(javaClass)
-//
-//    override fun getProblemById(id: String): ProblemDisplayViewDto {
-//        log.info("Fetching problem by id: $id")
-//        val problem = firestoreProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
-//        return getImageSources(problem)
-//    }
-//
-//    override fun getProblemsByCategoryId(categoryId: String): List<ProblemDisplayViewDto> {
-//        log.info("Fetching problems by category id: $categoryId")
-//        val problems = firestoreProblemRepository.getProblemsByCategoryId(categoryId)
-//        val problemDisplayViewDtos = problems.map { problem ->
-//            getImageSources(problem)
-//        }
-//        log.info("Problems fetched successfully")
-//        return problemDisplayViewDtos
-//    }
-//
+
+import lt.skafis.bankas.dto.CountDto
+import lt.skafis.bankas.dto.ProblemDisplayViewDto
+import lt.skafis.bankas.dto.ProblemPostDto
+import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.repository.FirestoreProblemRepository
+import lt.skafis.bankas.repository.StorageRepository
+import org.apache.logging.log4j.util.InternalException
+import org.slf4j.LoggerFactory
+import org.springframework.stereotype.Service
+import org.springframework.web.multipart.MultipartFile
+import org.webjars.NotFoundException
+import java.net.URI
+import java.time.Instant
+
+@Service
+class ProblemServiceImpl (
+    val firestoreProblemRepository: FirestoreProblemRepository,
+    val storageRepository: StorageRepository,
+    val problemMetaService: ProblemMetaService
+) : ProblemService {
+
+    private val log = LoggerFactory.getLogger(javaClass)
+
+    override fun getPublicProblemById(id: String): ProblemDisplayViewDto {
+        log.info("Fetching problem by id: $id")
+        val problem = firestoreProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
+        return patchImageSources(problem)
+    }
+
+    override fun getPublicProblemsByCategoryId(categoryId: String): List<ProblemDisplayViewDto> {
+        log.info("Fetching problems by category id: $categoryId")
+        val problems = firestoreProblemRepository.getProblemsByCategoryId(categoryId)
+        val problemDisplayViewDtos = problems.map { problem ->
+            patchImageSources(problem)
+        }
+        log.info("Problems fetched successfully")
+        return problemDisplayViewDtos
+    }
+    //Unimplemented stuff
+
+
+    //OLD STUFF
+    override fun createProblem(
+        problem: ProblemPostDto,
+        userId: String,
+        problemImageFile: MultipartFile?,
+        answerImageFile: MultipartFile?
+    ): Problem {
+        TODO("Not yet implemented")
+    }
+
+    override fun updateProblem(
+        id: String,
+        problem: ProblemPostDto,
+        userId: String,
+        problemImageFile: MultipartFile?,
+        answerImageFile: MultipartFile?
+    ): Problem {
+        TODO("Not yet implemented")
+    }
+
+    override fun deleteProblem(id: String, userId: String): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getProblemCount(): CountDto {
+        TODO("Not yet implemented")
+    }
 //    override fun createProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
 //
 //        log.info("Uploading images to storage (if provided) by user: $userId")
@@ -133,49 +161,52 @@ package lt.skafis.bankas.service
 //        return CountDto(count)
 //    }
 //
-//    private fun getImageSources(problem: ProblemViewDto): ProblemDisplayViewDto {
-//        var problemImageSrc: String? = null
-//        var answerImageSrc: String? = null
-//
-//        if (!problem.problemImage.isNullOrEmpty()) {
-//            problemImageSrc = getImageSrc(problem.problemImage)
-//        }
-//        if (!problem.answerImage.isNullOrEmpty()) {
-//            answerImageSrc = getImageSrc(problem.answerImage)
-//        }
-//        return ProblemDisplayViewDto(
-//            id = problem.id,
-//            problemImageSrc = problemImageSrc,
-//            answerImageSrc = answerImageSrc,
-//            problemText = problem.problemText,
-//            answerText = problem.answerText,
-//            categoryId = problem.categoryId,
-//            createdOn = problem.createdOn
-//        )
-//    }
-//
-//    private fun getImageSrc(imagePath: String?): String? {
-//        return imagePath?.let {
-//            if (isValidUrl(it)) {
-//                // Validate the URL to prevent injection attacks
-//                URI(it)// This will throw an exception if the URL is not valid
-//                it
-//            } else if (it.startsWith("problems/") || it.startsWith("answers/")) {
-//                // Assume that if the path starts with "problems/" or "answers/", it's a storage path
-//                if (it.startsWith("problems/")) {
-//                    problemStorageRepository.getImageUrl(it.removePrefix("problems/"))
-//                } else {
-//                    answerStorageRepository.getImageUrl(it.removePrefix("answers/"))
-//                }
-//            } else {
-//                throw IllegalArgumentException("Invalid image path: $it")
-//            }
-//        }
-//    }
-//
-//    private fun isValidUrl(url: String): Boolean {
-//        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
-//        return regex.matches(url)
-//    }
-//
-//}
+    private fun patchImageSources(problem: Problem): ProblemDisplayViewDto {
+        var problemImageSrc: String = ""
+        var answerImageSrc: String = ""
+
+        if (problem.problemImagePath.isNotEmpty()) {
+            problemImageSrc = getImageSrc(problem.problemImagePath)
+        }
+        if (problem.answerImagePath.isNotEmpty()) {
+            answerImageSrc = getImageSrc(problem.answerImagePath)
+        }
+        return ProblemDisplayViewDto(
+            skfCode = problem.skfCode,
+            problemText = problem.problemText,
+            answerText = problem.answerText,
+            problemImageSrc = problemImageSrc,
+            answerImageSrc = answerImageSrc,
+            categoryId = problem.categoryId,
+            createdOn = problem.createdOn,
+            lastModifiedOn = problem.lastModifiedOn,
+            //TODO: LEFT HERE. Somehow manage to do al the logic for the underReview problems etc...
+        )
+    }
+
+    private fun getImageSrc(imagePath: String): String {
+        return imagePath.let {
+            if (isValidUrl(it)) {
+                // Validate the URL to prevent injection attacks
+                URI(it)// This will throw an exception if the URL is not valid
+                it
+            } else if (
+                it.startsWith("problems/") ||
+                it.startsWith("answers/") ||
+                it.startsWith("underReviewProblems/") ||
+                it.startsWith("underReviewAnswers/")
+                ) {
+                // Assume that if the path starts with "problems/" or "answers/" or "underReviewProblems/" or "underReviewAnswers/", it's a storage path
+                storageRepository.getImageUrl(it)
+            } else {
+                throw IllegalArgumentException("Invalid image path: $it")
+            }
+        }
+    }
+
+    private fun isValidUrl(url: String): Boolean {
+        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
+        return regex.matches(url)
+    }
+
+}

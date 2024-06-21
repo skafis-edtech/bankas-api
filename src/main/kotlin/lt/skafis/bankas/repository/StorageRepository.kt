@@ -8,32 +8,34 @@ import org.springframework.stereotype.Repository
 import org.springframework.web.multipart.MultipartFile
 
 @Repository
-class ProblemStorageRepository(private val storage: Storage) {
+class StorageRepository(
+    private val storage: Storage,
+) {
 
     @Value("\${firebase.storage.bucket}")
     private lateinit var bucketName: String
 
-    fun uploadImage(file: MultipartFile, fileName: String): String {
+    fun uploadImage(file: MultipartFile, filePath: String): String {
         val bucket: Bucket = storage.get(bucketName)
-        val blob: Blob = bucket.create("problems/$fileName", file.bytes, file.contentType)
+        val blob: Blob = bucket.create(filePath, file.bytes, file.contentType)
         return blob.mediaLink
     }
 
-    fun getImageUrl(fileName: String): String {
+    fun getImageUrl(filePath: String): String {
         val bucket: Bucket = storage.get(bucketName)
-        val blob: Blob = bucket.get("problems/$fileName")
+        val blob: Blob = bucket.get(filePath)
         return blob.mediaLink
     }
 
-    fun deleteImage(fileName: String) {
+    fun deleteImage(filePath: String) {
         val bucket: Bucket = storage.get(bucketName)
-        val blob: Blob = bucket.get("problems/$fileName")
+        val blob: Blob = bucket.get(filePath)
         blob.delete()
     }
 
-    fun listImages(): List<String> {
+    fun listImages(dirPath: String): List<String> {
         val bucket: Bucket = storage.get(bucketName)
-        val blobs = bucket.list(Storage.BlobListOption.prefix("problems/"))
+        val blobs = bucket.list(Storage.BlobListOption.prefix(dirPath))
         return blobs.iterateAll().map { it.name }
     }
 }
