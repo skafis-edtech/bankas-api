@@ -68,13 +68,13 @@ class ProblemServiceImpl(
         val problemImagePath = uploadImageAndGetPath(
             problem.problemImageUrl,
             problemImageFile,
-            "/underReviewProblems/$newProblemId.$problemExtension"
+            "underReviewProblems/$newProblemId.$problemExtension"
         )
 
         val answerImagePath = uploadImageAndGetPath(
             problem.answerImageUrl,
             answerImageFile,
-            "/underReviewAnswers/$newProblemId.$answerExtension"
+            "underReviewAnswers/$newProblemId.$answerExtension"
         )
 
         log.info("UnderReviewProblem images uploaded successfully")

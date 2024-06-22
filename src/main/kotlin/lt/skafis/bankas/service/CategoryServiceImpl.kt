@@ -53,10 +53,7 @@ class CategoryServiceImpl(
         val categoryToSubmit = UnderReviewCategory(
             name = category.name,
             description = category.description,
-            author = username,
-            createdOn =  DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
-            lastModifiedOn =  DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
-            reviewStatus =  ReviewStatus.PENDING,
+            author = username
         )
         val id = firestoreUnderReviewCategoryRepository.createCategory(categoryToSubmit)
         log.info("Category submitted successfully")
@@ -87,7 +84,6 @@ class CategoryServiceImpl(
             description = categoryToApprove.description,
             author = categoryToApprove.author,
             approvedBy = username,
-            approvedOn = DateTimeFormatter.ISO_INSTANT.format(Instant.now()),
             createdOn = categoryToApprove.createdOn,
             lastModifiedOn = categoryToApprove.lastModifiedOn
         )

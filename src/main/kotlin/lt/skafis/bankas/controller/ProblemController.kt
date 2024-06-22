@@ -44,7 +44,7 @@ class ProblemController(
     @PostMapping("/submit")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Should work. USER. Careful! Complex file and text upload logic AND not easily testable file upload!",
+        summary = "Works. USER. Careful! Complex file and text upload logic AND not easily testable file upload!",
         description = """
             This endpoint allows uploading problem information as JSON along with optional image files.
 
