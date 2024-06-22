@@ -98,7 +98,7 @@ class CategoryController(
 
     @DeleteMapping("/underReview/{id}/cascade")
     @Operation(
-        summary = "Not fully done - doesn't delete/reject under review problems. USER"
+        summary = "Works. USER"
     )
     @SecurityRequirement(name = "bearerAuth")
     fun deleteUnderReviewCategory(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
@@ -107,7 +107,4 @@ class CategoryController(
     } else {
         ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
     }
-
-    //ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later...
-
 }

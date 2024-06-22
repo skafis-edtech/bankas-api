@@ -8,6 +8,7 @@ import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.UnderReviewCategory
 import lt.skafis.bankas.repository.FirestoreCategoryRepository
 import lt.skafis.bankas.repository.FirestoreUnderReviewCategoryRepository
+import lt.skafis.bankas.repository.FirestoreUnderReviewProblemRepository
 import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -19,7 +20,8 @@ import java.time.format.DateTimeFormatter
 class CategoryServiceImpl(
     private val firestoreCategoryRepository: FirestoreCategoryRepository,
     private val userService: UserService,
-    private val firestoreUnderReviewCategoryRepository: FirestoreUnderReviewCategoryRepository
+    private val firestoreUnderReviewCategoryRepository: FirestoreUnderReviewCategoryRepository,
+    private val firestoreUnderReviewProblemRepository: FirestoreUnderReviewProblemRepository
 ) : CategoryService {
 
     private val log = LoggerFactory.getLogger(javaClass)
@@ -159,7 +161,22 @@ class CategoryServiceImpl(
         if (!success) throw InternalException("Failed to delete category")
         log.info("Category deleted successfully")
 
-        //TODO: delete my under review problems for that category, reject others' problems for that category, delete others' problems for that category
+        val problemsInQuestion = firestoreUnderReviewProblemRepository.getProblemsByCategoryId(id)
+        problemsInQuestion.forEach {
+            if (it.author == username) {
+                val successProblem = firestoreUnderReviewProblemRepository.deleteProblem(it.id)
+                if (!successProblem) throw InternalException("Failed to delete problem")
+            } else {
+                val newProblem = it.copy(
+                    reviewStatus = ReviewStatus.REJECTED,
+                    rejectedOn = Instant.now().toString(),
+                    rejectedBy = username,
+                    rejectionMessage = "Category was deleted by the category author. Please reassign a new category."
+                )
+                val successProblem = firestoreUnderReviewProblemRepository.updateProblem(newProblem)
+                if (!successProblem) throw InternalException("Failed to update problem")
+            }
+        }
 
         log.info("Problems deleted and rejected successfully")
         return true

@@ -105,4 +105,6 @@ Manage user roles (admin) at a spring level
 Manage Captcha and authentication in backend
 
 ## Todo
-Add release notes to github. With description about docker images and deploy. 
+Add release notes to github. With description about docker images and deploy.
+
+ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later...
