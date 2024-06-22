@@ -98,9 +98,13 @@ class ProblemController(
     @PatchMapping("/{id}/reject")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Should work. ADMIN"
+        summary = "Works. ADMIN"
     )
-    fun rejectProblem(@PathVariable id: String, @RequestBody rejectMsgDto: RejectMsgDto, principal: Principal): ResponseEntity<UnderReviewProblem> =
+    fun rejectProblem(
+        @PathVariable id: String,
+        @RequestBody rejectMsgDto: RejectMsgDto,
+        principal: Principal
+    ): ResponseEntity<UnderReviewProblem> =
         ResponseEntity.ok(problemService.rejectProblem(
             id,
             rejectMsg = rejectMsgDto.rejectionMessage,
@@ -110,17 +114,33 @@ class ProblemController(
     @PutMapping("/{id}/fixMyUnderReview")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Not implemented. USER"
+        summary = "Works. USER"
     )
-    fun fixMyUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
-        ResponseEntity.ok("In progress")
+    fun fixMyUnderReviewProblem(
+        @PathVariable id: String,
+        @RequestPart("problem", required = true) problemString: String,
+        @RequestPart("problemImageFile", required = false) problemImageFile: MultipartFile?,
+        @RequestPart("answerImageFile", required = false) answerImageFile: MultipartFile?,
+        principal: Principal
+    ): ResponseEntity<UnderReviewProblem> =
+        ResponseEntity.ok(problemService.updateMyUnderReviewProblem(
+            id,
+            ObjectMapper().readValue(problemString, ProblemPostDto::class.java),
+            principal.name,
+            problemImageFile,
+            answerImageFile,
+        ))
 
-    @DeleteMapping("/underReview/{id}") //- delete only your own
+    @DeleteMapping("/underReview/{id}")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Not implemented. USER"
+        summary = "Works. USER"
     )
-    fun deleteUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
-        ResponseEntity.ok("In progress")
+    fun deleteUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
+        if (problemService.deleteMyUnderReviewProblem(id, principal.name)) {
+            ResponseEntity(HttpStatus.NO_CONTENT)
+        } else {
+            ResponseEntity(HttpStatus.NOT_FOUND)
+        }
 
 }

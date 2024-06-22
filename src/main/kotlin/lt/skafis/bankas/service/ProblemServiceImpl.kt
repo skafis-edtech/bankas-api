@@ -212,22 +212,74 @@ class ProblemServiceImpl(
         log.info("Problem rejected successfully")
         return rejectedProblem
     }
-    //OLD STUFF
 
-    override fun updateProblem(
+    override fun updateMyUnderReviewProblem(
         id: String,
         problem: ProblemPostDto,
         userId: String,
         problemImageFile: MultipartFile?,
         answerImageFile: MultipartFile?
-    ): Problem {
-        TODO("Not yet implemented")
+    ): UnderReviewProblem {
+        val username = userService.getUsernameById(userId)
+        val currentProblem = firestoreUnderReviewProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
+        if (currentProblem.author != username) throw IllegalStateException("User is not the author of the problem")
+
+        log.info("Uploading images to under review storage (if provided) by user: $username")
+
+        val problemExtension = problemImageFile?.originalFilename?.split(".")?.lastOrNull()
+        val answerExtension = answerImageFile?.originalFilename?.split(".")?.lastOrNull()
+
+        val success1 = deleteImgIfExists(currentProblem.problemImagePath)
+        if (!success1) throw InternalException("Failed to delete problem image")
+        val problemImagePath = uploadImageAndGetPath(
+            problem.problemImageUrl,
+            problemImageFile,
+            "underReviewProblems/$id.$problemExtension"
+        )
+
+        val success2 = deleteImgIfExists(currentProblem.answerImagePath)
+        if (!success2) throw InternalException("Failed to delete answer image")
+        val answerImagePath = uploadImageAndGetPath(
+            problem.answerImageUrl,
+            answerImageFile,
+            "underReviewAnswers/$id.$answerExtension"
+        )
+
+        log.info("UnderReviewProblem images uploaded successfully")
+        log.info("Updating underReviewProblem in firestore for user: $userId")
+
+        val updatedProblem = currentProblem.copy(
+            problemText = problem.problemText,
+            answerText = problem.answerText,
+            problemImagePath = problemImagePath,
+            answerImagePath = answerImagePath,
+            categoryId = problem.categoryId,
+            lastModifiedOn = Instant.now().toString(),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        val success = firestoreUnderReviewProblemRepository.updateProblem(updatedProblem)
+        if (!success) throw InternalException("Failed to update underReviewProblem")
+        log.info("UnderReviewProblem updated in firestore successfully")
+        return updatedProblem
     }
 
-    override fun deleteProblem(id: String, userId: String): Boolean {
-        TODO("Not yet implemented")
+    override fun deleteMyUnderReviewProblem(id: String, userId: String): Boolean {
+        val username = userService.getUsernameById(userId)
+        val currentProblem = firestoreUnderReviewProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
+        if (currentProblem.author != username) throw IllegalStateException("User is not the author of the problem")
+
+        log.info("Deleting under review problem $id by user: $username")
+
+        val success1 = deleteImgIfExists(currentProblem.problemImagePath)
+        if (!success1) throw InternalException("Failed to delete problem image")
+        val success2 = deleteImgIfExists(currentProblem.answerImagePath)
+        if (!success2) throw InternalException("Failed to delete answer image")
+
+        val success3 = firestoreUnderReviewProblemRepository.deleteProblem(id)
+        if (!success3) throw InternalException("Failed to delete problem")
+        log.info("Under review problem deleted successfully")
+        return true
     }
-    //------------
 
     private fun getImageSrc(imagePath: String): String {
         return imagePath.let {
@@ -284,6 +336,12 @@ class ProblemServiceImpl(
             throw IllegalArgumentException("Invalid $fullPath image input")
         }
 
+    private fun deleteImgIfExists(url: String): Boolean {
+        if (url.isNotEmpty() && !isValidUrl(url)) {
+            storageRepository.deleteImage(url)
+        }
+        return true
+    }
 
     private fun problemMapToProblemDisplay(problem: Problem): ProblemDisplayViewDto {
         return ProblemDisplayViewDto(
