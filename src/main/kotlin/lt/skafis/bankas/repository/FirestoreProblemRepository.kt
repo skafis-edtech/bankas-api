@@ -9,9 +9,7 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
 
     private val collectionPath = "problems"
 
-    //Input: Problem with unnecessary id field
-    //Output: id of the created problem
-    fun createProblem(problem: Problem): String {
+    fun createProblemWithSpecifiedId(problem: Problem): String {
         val docRef = firestore.collection(collectionPath).document()
         val problemWithId = problem.copy(id = docRef.id)
         docRef.set(problemWithId)

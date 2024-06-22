@@ -6,6 +6,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.ProblemPostDto
+import lt.skafis.bankas.dto.UnderReviewProblemDisplayViewDto
+import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.UnderReviewProblem
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.service.ProblemService
@@ -20,23 +22,23 @@ class ProblemController(
     private val problemService: ProblemService
 ) {
 
-    @GetMapping("/{id}")
+    @GetMapping("/{skfCode}")
     @Operation(
-        summary = "Should work. PUBLIC"
+        summary = "Works. PUBLIC"
     )
-    fun getPublicProblem(@PathVariable id: String): ResponseEntity<ProblemDisplayViewDto> =
-        ResponseEntity.ok(problemService.getPublicProblemById(id))
+    fun getPublicProblem(@PathVariable skfCode: String): ResponseEntity<ProblemDisplayViewDto> =
+        ResponseEntity.ok(problemService.getPublicProblemBySkfCode(skfCode))
 
     @GetMapping("/byCategory/{categoryId}")
     @Operation(
-        summary = "Should work. PUBLIC"
+        summary = "Works. PUBLIC"
     )
     fun getPublicProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getPublicProblemsByCategoryId(categoryId))
 
     @GetMapping("/count")
     @Operation(
-        summary = "Should work. PUBLIC"
+        summary = "Works. PUBLIC"
     )
     fun getPublicProblemsCount(): ResponseEntity<CountDto> =
         ResponseEntity.ok(problemService.getPublicProblemCount())
@@ -68,8 +70,22 @@ class ProblemController(
         return ResponseEntity(problemService.submitProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
     }
 
-//    @GetMapping("/underReview")
-//    @PostMapping("/{id}/approve")
+    @GetMapping("/underReview")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Works. ADMIN"
+    )
+    fun getAllUnderReviewProblems(principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
+        ResponseEntity.ok(problemService.getAllUnderReviewProblems(principal.name))
+
+    @PostMapping("/{id}/approve")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Works. ADMIN"
+    )
+    fun approveProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Problem> =
+        ResponseEntity.ok(problemService.approveProblem(id, principal.name))
+
 //    @GetMapping("/myAllSubmitted")
 //    @PatchMapping("/{id}/reject")
 //    @PutMapping("/{id}/fixMyUnderReview")

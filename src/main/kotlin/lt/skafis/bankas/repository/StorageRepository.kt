@@ -38,4 +38,19 @@ class StorageRepository(
         val blobs = bucket.list(Storage.BlobListOption.prefix(dirPath))
         return blobs.iterateAll().map { it.name }
     }
+
+    fun getBlob(filePath: String): Blob? {
+        val bucket: Bucket = storage.get(bucketName)
+        return bucket.get(filePath)
+    }
+
+    fun getBucket(): Bucket {
+        return storage.get(bucketName)
+    }
+
+    fun createBlob(filePath: String): Blob {
+        val bucket: Bucket = storage.get(bucketName)
+        return bucket.create(filePath, ByteArray(0)) // Create an empty blob
+    }
+
 }

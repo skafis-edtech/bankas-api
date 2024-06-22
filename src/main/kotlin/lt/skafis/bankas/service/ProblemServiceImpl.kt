@@ -1,10 +1,12 @@
 package lt.skafis.bankas.service
 
+import com.google.cloud.storage.Bucket
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.ProblemPostDto
 import lt.skafis.bankas.dto.UnderReviewProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.UnderReviewProblem
 import lt.skafis.bankas.repository.FirestoreProblemRepository
 import lt.skafis.bankas.repository.FirestoreUnderReviewProblemRepository
@@ -27,10 +29,17 @@ class ProblemServiceImpl(
 
     private val log = LoggerFactory.getLogger(javaClass)
 
-    override fun getPublicProblemById(id: String): ProblemDisplayViewDto {
+    override fun getPublicProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
+        log.info("Fetching problem by skfCode: $skfCode")
+        val problem = firestoreProblemRepository.getProblemBySkfCode(skfCode) ?: throw NotFoundException("Problem not found")
+        return problemMapToProblemDisplay(problem)
+    }
+
+    override fun getPublicProblemById(id: String): Problem {
         log.info("Fetching problem by id: $id")
         val problem = firestoreProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
-        return problemMapToProblemDisplay(problem)
+        log.info("Problem fetched successfully")
+        return problem
     }
 
     override fun getPublicProblemsByCategoryId(categoryId: String): List<ProblemDisplayViewDto> {
@@ -96,6 +105,69 @@ class ProblemServiceImpl(
         return problemToCreate
     }
 
+    override fun getAllUnderReviewProblems(userId: String): List<UnderReviewProblemDisplayViewDto> {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Fetching all under review problems by user: $username")
+        val problems = firestoreUnderReviewProblemRepository.getAllProblems()
+        val underReviewProblemDisplayViewDtoList = problems.map { problem ->
+            underReviewProblemMapToProblemDisplay(problem)
+        }
+        log.info("Under review problems fetched successfully")
+        return underReviewProblemDisplayViewDtoList
+    }
+
+    override fun approveProblem(id: String, userId: String): Problem {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Approving problem $id by user: $username")
+
+        val newSkfId = problemMetaService.getIncrementedLastUsedSkfCode()
+        val problemToApprove = firestoreUnderReviewProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
+        val newProblemImagePath = underReviewImagePathToMainPath(problemToApprove.problemImagePath, newSkfId)
+        val newAnswerImagePath = underReviewImagePathToMainPath(problemToApprove.answerImagePath, newSkfId)
+        val newProblem = Problem(
+            id = id,
+            skfCode = newSkfId,
+            problemText = problemToApprove.problemText,
+            problemImagePath = newProblemImagePath,
+            answerText = problemToApprove.answerText,
+            answerImagePath = newAnswerImagePath,
+            categoryId = problemToApprove.categoryId,
+            author = problemToApprove.author,
+            approvedBy = username,
+            createdOn = problemToApprove.createdOn,
+            lastModifiedOn = problemToApprove.lastModifiedOn
+        )
+        firestoreProblemRepository.createProblemWithSpecifiedId(newProblem)
+        problemMetaService.incrementLastUsedSkfCode()
+        log.info("Problem created in main collection")
+
+        val success = firestoreUnderReviewProblemRepository.deleteProblem(id)
+        if (!success) throw InternalException("Failed to delete problem from under review collection")
+        log.info("Problem deleted from under review collection")
+
+        if (problemToApprove.problemImagePath.isNotEmpty() && !isValidUrl(problemToApprove.problemImagePath) && problemToApprove.problemImagePath.startsWith("underReviewProblems/")
+             && newProblemImagePath.isNotEmpty() && !isValidUrl(newProblemImagePath) && newProblemImagePath.startsWith("problems/")
+            ) {
+            copyImageInFirebaseStorage(problemToApprove.problemImagePath, newProblemImagePath)
+            storageRepository.deleteImage(problemToApprove.problemImagePath)
+        }
+        if (problemToApprove.answerImagePath.isNotEmpty() && !isValidUrl(problemToApprove.answerImagePath) && problemToApprove.answerImagePath.startsWith("underReviewAnswers/")
+             && newAnswerImagePath.isNotEmpty() && !isValidUrl(newAnswerImagePath) && newAnswerImagePath.startsWith("answers/"))
+            {
+            copyImageInFirebaseStorage(problemToApprove.answerImagePath, newAnswerImagePath)
+            storageRepository.deleteImage(problemToApprove.answerImagePath)
+        }
+        log.info("Problem images (if exist) copied to main storage and deleted from review storage")
+
+        log.info("Problem approved successfully")
+        return newProblem
+    }
 
     //OLD STUFF
 
@@ -112,18 +184,7 @@ class ProblemServiceImpl(
     override fun deleteProblem(id: String, userId: String): Boolean {
         TODO("Not yet implemented")
     }
-
-
-
-//
-//    override fun updateProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): ProblemViewDto {
-//        TODO("Not yet implemented")
-//    }
-//
-//    override fun deleteProblem(id: String, userId: String): Boolean {
-//        TODO("Not yet implemented")
-//    }
-
+    //------------
 
     private fun getImageSrc(imagePath: String): String {
         return imagePath.let {
@@ -214,6 +275,28 @@ class ProblemServiceImpl(
             rejectedOn = problem.rejectedOn,
             rejectionMessage = problem.rejectionMessage,
         )
+    }
+
+    private fun underReviewImagePathToMainPath(imagePath: String, newSkfId: String): String {
+        return if (imagePath.startsWith("underReviewProblems/") || imagePath.startsWith("underReviewAnswers/")) {
+            val replImg = imagePath.replace("underReviewProblems/", "problems/").replace("underReviewAnswers/", "answers/")
+            replImg.replaceAfterLast("/", "$newSkfId.${replImg.substringAfterLast(".")}") //WARNING: some magic happening here!
+        } else {
+            imagePath
+        }
+    }
+
+    private fun copyImageInFirebaseStorage(sourcePath: String, destinationPath: String) {
+        val sourceBlob = storageRepository.getBlob(sourcePath)
+        val bucket: Bucket = storageRepository.getBucket()
+
+        if (sourceBlob != null) {
+            val content = sourceBlob.getContent()
+            val destinationBlob = bucket.create(destinationPath, content, sourceBlob.contentType)
+            log.info("Image copied from $sourcePath to $destinationPath")
+        } else {
+            log.warn("Source image at $sourcePath not found")
+        }
     }
 
 }
