@@ -6,6 +6,7 @@ import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.ProblemPostDto
 import lt.skafis.bankas.dto.UnderReviewProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.UnderReviewProblem
 import lt.skafis.bankas.repository.FirestoreProblemRepository
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import org.threeten.bp.Instant
 import org.webjars.NotFoundException
 import java.net.URI
 
@@ -189,6 +191,26 @@ class ProblemServiceImpl(
         }
         log.info("Approved problems fetched successfully")
         return problemDisplayViewDtoList
+    }
+
+    override fun rejectProblem(id: String, rejectMsg: String, userId: String): UnderReviewProblem {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Rejecting problem $id by user: $username")
+
+        val problemToReject = firestoreUnderReviewProblemRepository.getProblemById(id) ?: throw NotFoundException("Problem not found")
+        val rejectedProblem = problemToReject.copy(
+            reviewStatus = ReviewStatus.REJECTED,
+            rejectedBy = username,
+            rejectedOn = Instant.now().toString(),
+            rejectionMessage = rejectMsg
+        )
+        val success = firestoreUnderReviewProblemRepository.updateProblem(rejectedProblem)
+        if (!success) throw InternalException("Failed to reject problem")
+        log.info("Problem rejected successfully")
+        return rejectedProblem
     }
     //OLD STUFF
 

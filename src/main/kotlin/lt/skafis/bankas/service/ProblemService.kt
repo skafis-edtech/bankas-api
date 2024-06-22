@@ -18,6 +18,7 @@ interface ProblemService {
     fun approveProblem(id: String, userId: String): Problem
     fun getAllUnderReviewProblemsForAuthor(userId: String): List<UnderReviewProblemDisplayViewDto>
     fun getAllApprovedProblemsForAuthor(userId: String): List<ProblemDisplayViewDto>
+    fun rejectProblem(id: String, rejectMsg: String, userId: String): UnderReviewProblem
     //OLD STUFF
     fun updateProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): Problem
     fun deleteProblem(id: String, userId: String): Boolean

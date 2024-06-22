@@ -98,10 +98,14 @@ class ProblemController(
     @PatchMapping("/{id}/reject")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Not implemented. ADMIN"
+        summary = "Should work. ADMIN"
     )
-    fun rejectProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
-        ResponseEntity.ok("In progress")
+    fun rejectProblem(@PathVariable id: String, @RequestBody rejectMsgDto: RejectMsgDto, principal: Principal): ResponseEntity<UnderReviewProblem> =
+        ResponseEntity.ok(problemService.rejectProblem(
+            id,
+            rejectMsg = rejectMsgDto.rejectionMessage,
+            userId = principal.name
+        ))
 
     @PutMapping("/{id}/fixMyUnderReview")
     @SecurityRequirement(name = "bearerAuth")
