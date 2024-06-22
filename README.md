@@ -103,3 +103,6 @@ Not using postgresql - this for later - but do all the review stuff and namings 
 Manage user roles (admin) at a spring level
 
 Manage Captcha and authentication in backend
+
+## Todo
+Add release notes to github. With description about docker images and deploy. 

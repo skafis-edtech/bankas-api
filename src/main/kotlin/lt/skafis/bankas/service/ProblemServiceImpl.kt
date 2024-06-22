@@ -169,6 +169,27 @@ class ProblemServiceImpl(
         return newProblem
     }
 
+    override fun getAllUnderReviewProblemsForAuthor(userId: String): List<UnderReviewProblemDisplayViewDto> {
+        val username = userService.getUsernameById(userId)
+        log.info("Fetching all under review problems for author: $username")
+        val problems = firestoreUnderReviewProblemRepository.getProblemsByAuthor(username)
+        val underReviewProblemDisplayViewDtoList = problems.map { problem ->
+            underReviewProblemMapToProblemDisplay(problem)
+        }
+        log.info("Under review problems fetched successfully")
+        return underReviewProblemDisplayViewDtoList
+    }
+
+    override fun getAllApprovedProblemsForAuthor(userId: String): List<ProblemDisplayViewDto> {
+        val username = userService.getUsernameById(userId)
+        log.info("Fetching all approved problems for author: $username")
+        val problems = firestoreProblemRepository.getProblemsByAuthor(username)
+        val problemDisplayViewDtoList = problems.map { problem ->
+            problemMapToProblemDisplay(problem)
+        }
+        log.info("Approved problems fetched successfully")
+        return problemDisplayViewDtoList
+    }
     //OLD STUFF
 
     override fun updateProblem(

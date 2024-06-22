@@ -3,10 +3,7 @@ package lt.skafis.bankas.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import lt.skafis.bankas.dto.CountDto
-import lt.skafis.bankas.dto.ProblemDisplayViewDto
-import lt.skafis.bankas.dto.ProblemPostDto
-import lt.skafis.bankas.dto.UnderReviewProblemDisplayViewDto
+import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.UnderReviewProblem
 import org.springframework.web.bind.annotation.*
@@ -86,30 +83,40 @@ class ProblemController(
     fun approveProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Problem> =
         ResponseEntity.ok(problemService.approveProblem(id, principal.name))
 
-//    @GetMapping("/myAllSubmitted")
-//    @PatchMapping("/{id}/reject")
-//    @PutMapping("/{id}/fixMyUnderReview")
-//    @DeleteMapping("/underReview/{id}") - delete only your own
+    @GetMapping("/myAllSubmitted")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Works. USER"
+    )
+    fun getMyAllSubmittedProblems(principal: Principal): ResponseEntity<ProblemsForAuthor> =
+        ResponseEntity.ok(
+            ProblemsForAuthor(
+            problemService.getAllUnderReviewProblemsForAuthor(principal.name),
+            problemService.getAllApprovedProblemsForAuthor(principal.name)
+        ))
 
+    @PatchMapping("/{id}/reject")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Not implemented. ADMIN"
+    )
+    fun rejectProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
+        ResponseEntity.ok("In progress")
 
-//
-//    @PutMapping("/{id}")
-//    @SecurityRequirement(name = "bearerAuth")
-//    fun updateProblem(@PathVariable id: String,
-//                      @RequestBody problem: ProblemPostDto,
-//                      @RequestParam("problemImageFile") problemImageFile: MultipartFile?,
-//                      @RequestParam("answerImageFile") answerImageFile: MultipartFile?,
-//                      principal: Principal): ResponseEntity<ProblemViewDto> =
-//        ResponseEntity.ok(problemService.updateProblem(id, problem, principal.name, problemImageFile, answerImageFile))
-//
-//    @DeleteMapping("/{id}")
-//    @SecurityRequirement(name = "bearerAuth")
-//    fun deleteProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
-//        if (problemService.deleteProblem(id, principal.name)) {
-//            ResponseEntity(HttpStatus.NO_CONTENT)
-//        } else {
-//            ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR)
-//        }
-//
+    @PutMapping("/{id}/fixMyUnderReview")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Not implemented. USER"
+    )
+    fun fixMyUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
+        ResponseEntity.ok("In progress")
+
+    @DeleteMapping("/underReview/{id}") //- delete only your own
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(
+        summary = "Not implemented. USER"
+    )
+    fun deleteUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<String> =
+        ResponseEntity.ok("In progress")
 
 }

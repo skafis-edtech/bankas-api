@@ -16,6 +16,8 @@ interface ProblemService {
     fun submitProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): UnderReviewProblem
     fun getAllUnderReviewProblems(userId: String): List<UnderReviewProblemDisplayViewDto>
     fun approveProblem(id: String, userId: String): Problem
+    fun getAllUnderReviewProblemsForAuthor(userId: String): List<UnderReviewProblemDisplayViewDto>
+    fun getAllApprovedProblemsForAuthor(userId: String): List<ProblemDisplayViewDto>
     //OLD STUFF
     fun updateProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): Problem
     fun deleteProblem(id: String, userId: String): Boolean
