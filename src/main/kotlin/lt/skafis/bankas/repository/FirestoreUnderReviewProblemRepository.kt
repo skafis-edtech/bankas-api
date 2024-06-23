@@ -1,44 +1,39 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
-import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.UnderReviewProblem
 import org.springframework.stereotype.Repository
 
 @Repository
-class FirestoreProblemRepository(private val firestore: Firestore) {
+class FirestoreUnderReviewProblemRepository(private val firestore: Firestore) {
 
-    private val collectionPath = "problems"
+    private val collectionPath = "underReviewProblems"
 
-    fun createProblemWithSpecifiedId(problem: Problem): String {
-        val docRef = firestore.collection(collectionPath).document()
-        val problemWithId = problem.copy(id = docRef.id)
-        docRef.set(problemWithId)
+    fun genNewProblemId(): String {
+        return firestore.collection(collectionPath).document().id
+    }
+
+    fun createProblemWithGivenId(problem: UnderReviewProblem): String {
+        val docRef = firestore.collection(collectionPath).document(problem.id)
+        docRef.set(problem)
         return docRef.id
     }
 
-    fun getProblemById(id: String): Problem? {
+    fun getProblemById(id: String): UnderReviewProblem? {
         val docRef = firestore.collection(collectionPath).document(id)
         val docSnapshot = docRef.get().get()
         return if (docSnapshot.exists()) {
-            docSnapshot.toObject(Problem::class.java)
+            val problemDto = docSnapshot.toObject(UnderReviewProblem::class.java)
+            problemDto?.copy(id = docSnapshot.id)
         } else {
             null
         }
     }
 
-    fun getProblemBySkfCode(skfCode: String): Problem? {
-        val querySnapshot = firestore.collection(collectionPath)
-            .whereEqualTo("skfCode", skfCode)
-            .get()
-            .get()
-
-        return querySnapshot.documents.firstOrNull()?.toObject(Problem::class.java)
-    }
-
-    fun updateProblem(problem: Problem): Boolean {
+    fun updateProblem(problem: UnderReviewProblem): Boolean {
         val docRef = firestore.collection(collectionPath).document(problem.id)
         return try {
-            docRef.set(problem).get()
+            docRef.set(problem.copy(id = problem.id)).get()
             true
         } catch (e: Exception) {
             false
@@ -55,10 +50,10 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
         }
     }
 
-    fun getAllProblems(): List<Problem> {
+    fun getAllProblems(): List<UnderReviewProblem> {
         val collection = firestore.collection(collectionPath).get().get()
         return collection.documents.mapNotNull {
-            it.toObject(Problem::class.java)
+            it.toObject(UnderReviewProblem::class.java)
         }
     }
 
@@ -69,25 +64,27 @@ class FirestoreProblemRepository(private val firestore: Firestore) {
         return countQuerySnapshot.count
     }
 
-    fun getProblemsByCategoryId(categoryId: String): List<Problem> {
+    fun getProblemsByCategoryId(categoryId: String): List<UnderReviewProblem> {
         val querySnapshot = firestore.collection(collectionPath)
             .whereEqualTo("categoryId", categoryId)
             .get()
             .get()
 
         return querySnapshot.documents.mapNotNull {
-            it.toObject(Problem::class.java)
+            val problemDto = it.toObject(UnderReviewProblem::class.java)
+            problemDto.copy(id = it.id)
         }
     }
 
-    fun getProblemsByAuthor(author: String): List<Problem> {
+    fun getProblemsByAuthor(author: String): List<UnderReviewProblem> {
         val querySnapshot = firestore.collection(collectionPath)
             .whereEqualTo("author", author)
             .get()
             .get()
 
         return querySnapshot.documents.mapNotNull {
-            it.toObject(Problem::class.java)
+            val problemDto = it.toObject(UnderReviewProblem::class.java)
+            problemDto.copy(id = it.id)
         }
     }
 }
