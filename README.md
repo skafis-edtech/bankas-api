@@ -14,7 +14,7 @@ AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed ser
 1. Somehow get firebase-admin.json file (from firebase console) - have it anywhere on your computer
 2. Set environment variable `FIREBASE_SERVICE_ACCOUNT_PATH` to the path of the file (on intellij - edit configuration, or just add args to bootRun command), or if running with docker compose - replace "path/on/your/device/firebase-admin.json" with the path to the file
 3. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
-4. Open http://localhost:8080/swagger-ui/index.html in browser
+4. Open http://localhost/swagger-ui/index.html in browser
 
 ## Prod
 1. Build the image `docker build -t naglissul/bankas-skafis-api:latest .`
@@ -22,7 +22,7 @@ AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed ser
 3. `docker compose up -d`
 4. deploy to Render - upload firebase-admin.json file to render secrets /etc/secrets/firebase-admin.json, set env var FIREBASE_SERVICE_ACCOUNT_PATH to /etc/secrets/firebase-admin.json
 5. add custom domain to Render AND for you domain provider add CNAME record to Render domain
-
+   
 ## Prod deploy - for me
 Just run `basic_deploy.ps1` script on your computer and check `basic_deploy_logs.txt` for errors
 
@@ -95,3 +95,16 @@ Then, create an EC2 instance and setup jenkins (here tutorial):
 
 Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just made cron job on ubuntu and that's it. It sends GET problem count every 14 mins.
 `*/14 * * * * curl -X GET https://bankas-skafis-api-latest.onrender.com/api/problems/count >> curl_job.log`
+
+## Stuff -2024-06-18
+Not using postgresql - this for later - but do all the review stuff and namings immediately. Not later. Also writing postman tests, gonna add collections later. 
+
+## Later
+Manage user roles (admin) at a spring level
+
+Manage Captcha and authentication in backend
+
+## Todo
+Add release notes to github. With description about docker images and deploy.
+
+ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later...

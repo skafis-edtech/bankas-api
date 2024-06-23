@@ -1,16 +1,19 @@
 package lt.skafis.bankas.dto
 
-data class ProblemDisplayViewDto(
+import lt.skafis.bankas.model.ReviewStatus
+
+data class UnderReviewProblemDisplayViewDto(
     val id: String = "",
-    val skfCode: String = "",
     val problemText: String = "",
-    val problemImageSrc: String = "",
     val answerText: String = "",
+    val problemImageSrc: String = "",
     val answerImageSrc: String = "",
     val categoryId: String = "",
     val author: String = "",
-    val approvedBy: String = "",
-    val approvedOn: String = "",
     val createdOn: String = "",
     val lastModifiedOn: String = "",
+    val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
+    val rejectedBy: String = "",
+    val rejectedOn: String = "",
+    val rejectionMessage: String = "",
 )

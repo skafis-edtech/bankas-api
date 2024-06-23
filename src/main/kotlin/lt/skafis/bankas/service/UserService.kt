@@ -1,9 +1,12 @@
 package lt.skafis.bankas.service
 
-import lt.skafis.bankas.dto.UserViewDto
+import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.User
 
 interface UserService {
-    fun getUserById(userId: String): UserViewDto?
-    fun getUsernameById(userId: String): String?
-    fun getRoleById(userId: String): String?
+    fun getUserById(userId: String): User
+    fun getUsernameById(userId: String): String
+    fun getRoleById(userId: String): Role
+    fun updateBio(bio: String, userId: String): Boolean
+    fun getBio(username: String): String
 }
