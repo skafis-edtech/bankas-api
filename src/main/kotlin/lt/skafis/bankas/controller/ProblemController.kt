@@ -20,30 +20,24 @@ class ProblemController(
 ) {
 
     @GetMapping("/{skfCode}")
-    @Operation(
-        summary = "Works. PUBLIC"
-    )
+    @Operation(summary = "PUBLIC")
     fun getPublicProblem(@PathVariable skfCode: String): ResponseEntity<ProblemDisplayViewDto> =
         ResponseEntity.ok(problemService.getPublicProblemBySkfCode(skfCode))
 
     @GetMapping("/byCategory/{categoryId}")
-    @Operation(
-        summary = "Works. PUBLIC"
-    )
+    @Operation(summary = "PUBLIC")
     fun getPublicProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getPublicProblemsByCategoryId(categoryId))
 
     @GetMapping("/count")
-    @Operation(
-        summary = "Works. PUBLIC"
-    )
+    @Operation(summary = "PUBLIC")
     fun getPublicProblemsCount(): ResponseEntity<CountDto> =
         ResponseEntity.ok(problemService.getPublicProblemCount())
 
     @PostMapping("/submit")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(
-        summary = "Works. USER. Careful! Complex file and text upload logic AND not easily testable file upload!",
+        summary = "USER. Careful! Complex file and text upload logic AND not easily testable file upload!",
         description = """
             This endpoint allows uploading problem information as JSON along with optional image files.
 
@@ -69,25 +63,19 @@ class ProblemController(
 
     @GetMapping("/underReview")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. ADMIN"
-    )
+    @Operation(summary = "ADMIN")
     fun getAllUnderReviewProblems(principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getAllUnderReviewProblems(principal.name))
 
     @PostMapping("/{id}/approve")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. ADMIN"
-    )
+    @Operation(summary = "ADMIN")
     fun approveProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Problem> =
         ResponseEntity.ok(problemService.approveProblem(id, principal.name))
 
     @GetMapping("/myAllSubmitted")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. USER"
-    )
+    @Operation(summary = "USER")
     fun getMyAllSubmittedProblems(principal: Principal): ResponseEntity<ProblemsForAuthor> =
         ResponseEntity.ok(
             ProblemsForAuthor(
@@ -97,9 +85,7 @@ class ProblemController(
 
     @PatchMapping("/{id}/reject")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. ADMIN"
-    )
+    @Operation(summary = "ADMIN")
     fun rejectProblem(
         @PathVariable id: String,
         @RequestBody rejectMsgDto: RejectMsgDto,
@@ -113,9 +99,7 @@ class ProblemController(
 
     @PutMapping("/{id}/fixMyUnderReview")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. USER"
-    )
+    @Operation(summary = "USER")
     fun fixMyUnderReviewProblem(
         @PathVariable id: String,
         @RequestPart("problem", required = true) problemString: String,
@@ -133,9 +117,7 @@ class ProblemController(
 
     @DeleteMapping("/underReview/{id}")
     @SecurityRequirement(name = "bearerAuth")
-    @Operation(
-        summary = "Works. USER"
-    )
+    @Operation(summary = "USER")
     fun deleteUnderReviewProblem(@PathVariable id: String, principal: Principal): ResponseEntity<Void> =
         if (problemService.deleteMyUnderReviewProblem(id, principal.name)) {
             ResponseEntity(HttpStatus.NO_CONTENT)
