@@ -53,7 +53,7 @@ class CategoryController(
     @GetMapping("/myUnderReview")
     @Operation(summary = "USER")
     @SecurityRequirement(name = "bearerAuth")
-    fun getMyAllSubmittedCategories(principal: Principal): ResponseEntity<List<UnderReviewCategory>> =
+    fun getMyUnderReviewCategories(principal: Principal): ResponseEntity<List<UnderReviewCategory>> =
         ResponseEntity.ok(
             categoryService.getAllMySubmittedCategories(principal.name)
         )
