@@ -14,11 +14,11 @@ interface ProblemService {
     fun getPublicProblemsByCategoryId(categoryId: String): List<ProblemDisplayViewDto>
     fun getPublicProblemCount(): CountDto
     fun submitProblem(problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): UnderReviewProblem
-    fun getAllUnderReviewProblems(userId: String): List<UnderReviewProblemDisplayViewDto>
     fun approveProblem(id: String, userId: String): Problem
     fun getAllUnderReviewProblemsForAuthor(userId: String): List<UnderReviewProblemDisplayViewDto>
     fun getAllApprovedProblemsForAuthor(userId: String): List<ProblemDisplayViewDto>
     fun rejectProblem(id: String, rejectMsg: String, userId: String): UnderReviewProblem
     fun updateMyUnderReviewProblem(id: String, problem: ProblemPostDto, userId: String, problemImageFile: MultipartFile?, answerImageFile: MultipartFile?): UnderReviewProblem
     fun deleteMyUnderReviewProblem(id: String, userId: String): Boolean
+    fun getUnderReviewProblemsByArbitraryCategory(categoryId: String, userId: String): List<UnderReviewProblemDisplayViewDto>
 }

@@ -107,20 +107,6 @@ class ProblemServiceImpl(
         return problemToCreate
     }
 
-    override fun getAllUnderReviewProblems(userId: String): List<UnderReviewProblemDisplayViewDto> {
-        val role = userService.getRoleById(userId)
-        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
-        val username = userService.getUsernameById(userId)
-
-        log.info("Fetching all under review problems by user: $username")
-        val problems = firestoreUnderReviewProblemRepository.getAllProblems()
-        val underReviewProblemDisplayViewDtoList = problems.map { problem ->
-            underReviewProblemMapToProblemDisplay(problem)
-        }
-        log.info("Under review problems fetched successfully")
-        return underReviewProblemDisplayViewDtoList
-    }
-
     override fun approveProblem(id: String, userId: String): Problem {
         val role = userService.getRoleById(userId)
         if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
@@ -279,6 +265,23 @@ class ProblemServiceImpl(
         if (!success3) throw InternalException("Failed to delete problem")
         log.info("Under review problem deleted successfully")
         return true
+    }
+
+    override fun getUnderReviewProblemsByArbitraryCategory(
+        categoryId: String,
+        userId: String
+    ): List<UnderReviewProblemDisplayViewDto> {
+        val role = userService.getRoleById(userId)
+        if (role != Role.ADMIN) throw IllegalStateException("User is not an admin")
+        val username = userService.getUsernameById(userId)
+
+        log.info("Fetching under review problems  by under review category by user: $username")
+        val problems = firestoreUnderReviewProblemRepository.getProblemsByCategoryId(categoryId)
+        val underReviewProblemDisplayViewDtoList = problems.map { problem ->
+            underReviewProblemMapToProblemDisplay(problem)
+        }
+        log.info("Under review problems fetched successfully")
+        return underReviewProblemDisplayViewDtoList
     }
 
     private fun getImageSrc(imagePath: String): String {

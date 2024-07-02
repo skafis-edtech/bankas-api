@@ -62,12 +62,6 @@ class ProblemController(
         return ResponseEntity(problemService.submitProblem(problem, principal.name, problemImageFile, answerImageFile), HttpStatus.CREATED)
     }
 
-    @GetMapping("/underReview")
-    @SecurityRequirement(name = "bearerAuth")
-    @Operation(summary = "ADMIN")
-    fun getAllUnderReviewProblems(principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
-        ResponseEntity.ok(problemService.getAllUnderReviewProblems(principal.name))
-
     @PostMapping("/{id}/approve")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "ADMIN")
@@ -110,7 +104,7 @@ class ProblemController(
     ): ResponseEntity<UnderReviewProblem> =
         ResponseEntity.ok(problemService.updateMyUnderReviewProblem(
             id,
-            problem,//ObjectMapper().readValue(problemString, ProblemPostDto::class.java),
+            problem,
             principal.name,
             problemImageFile,
             answerImageFile,
@@ -125,5 +119,11 @@ class ProblemController(
         } else {
             ResponseEntity(HttpStatus.NOT_FOUND)
         }
+
+    @GetMapping("/underReview/byArbitraryCategory/{categoryId}")
+    @SecurityRequirement(name = "bearerAuth")
+    @Operation(summary = "ADMIN", description = "This will fetch a list of problems under review by doesn't matter - under review or approved - category ID.")
+    fun getUnderReviewProblemsByUnderReviewCategory(@PathVariable categoryId: String, principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
+        ResponseEntity.ok(problemService.getUnderReviewProblemsByArbitraryCategory(categoryId, principal.name))
 
 }
