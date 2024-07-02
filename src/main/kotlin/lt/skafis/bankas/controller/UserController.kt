@@ -27,5 +27,4 @@ class UserController(
     @Operation(summary = "PUBLIC")
     fun getBio(@PathVariable username: String): ResponseEntity<UserBioDto> =
         ResponseEntity.ok(UserBioDto(userService.getBio(username)))
-
 }
