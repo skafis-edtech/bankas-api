@@ -1,6 +1,5 @@
 package lt.skafis.bankas.controller
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
@@ -123,7 +122,7 @@ class ProblemController(
     @GetMapping("/underReview/byArbitraryCategory/{categoryId}")
     @SecurityRequirement(name = "bearerAuth")
     @Operation(summary = "ADMIN", description = "This will fetch a list of problems under review by doesn't matter - under review or approved - category ID.")
-    fun getUnderReviewProblemsByUnderReviewCategory(@PathVariable categoryId: String, principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
+    fun getUnderReviewProblemsByArbitraryCategory(@PathVariable categoryId: String, principal: Principal): ResponseEntity<List<UnderReviewProblemDisplayViewDto>> =
         ResponseEntity.ok(problemService.getUnderReviewProblemsByArbitraryCategory(categoryId, principal.name))
 
 }
