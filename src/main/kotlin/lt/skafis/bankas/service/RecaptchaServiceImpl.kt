@@ -8,17 +8,14 @@ import org.springframework.web.client.RestTemplate
 
 @Service
 class RecaptchaServiceImpl(
-    @Value("\${recaptcha.site.key}") private val recaptchaSiteKey: String,
-    @Value("\${recaptcha.api.key}") private val recaptchaApiKey: String
+    @Value("\${recaptcha.secret.key}") private val recaptchaSecretKey: String
 ): RecaptchaService {
-    private val recaptchaVerifyUrl = "https://recaptchaenterprise.googleapis.com/v1/projects/bankas-skafis/assessments?key=$recaptchaApiKey"
+    private val recaptchaVerifyUrl = "https://www.google.com/recaptcha/api/siteverify?secret=$recaptchaSecretKey&response="
 
     override fun validateRecaptcha(response: String): RecaptchaResponse? {
         val restTemplate = RestTemplate()
-        val recaptchaResponse = restTemplate.postForObject(recaptchaVerifyUrl, RecaptchaRequest(
-            token = response,
-            sitekey = recaptchaSiteKey
-        ), RecaptchaResponse::class.java)
+        val url = recaptchaVerifyUrl + response
+        val recaptchaResponse = restTemplate.postForObject(url, null, RecaptchaResponse::class.java)
         return recaptchaResponse
     }
 }
