@@ -51,4 +51,13 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         log.info("Bio found")
         return user.bio
     }
+
+    override fun grantRoleAtLeast(role: Role, userId: String) {
+        val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
+        if (!(role === Role.USER && (user.role === Role.USER || user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
+                role === Role.ADMIN && (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
+                role === Role.SUPER_ADMIN && user.role === Role.SUPER_ADMIN)) {
+            throw IllegalArgumentException("Unauthorized access")
+        }
+    }
 }
