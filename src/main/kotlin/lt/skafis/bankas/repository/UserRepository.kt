@@ -19,6 +19,11 @@ class UserRepository(private val firestore: Firestore) {
         }
     }
 
+    fun getUserByUsername(username: String): User? {
+        val query = firestore.collection(collectionPath).whereEqualTo("username", username).get().get()
+        return query.documents.firstOrNull()?.toObject(User::class.java)
+    }
+
     fun updateUserBio(id: String, bio: String): Boolean {
         val docRef = firestore.collection(collectionPath).document(id)
         val docSnapshot = docRef.get().get()

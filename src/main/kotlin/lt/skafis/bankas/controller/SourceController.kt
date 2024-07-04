@@ -1,3 +1,5 @@
+package lt.skafis.bankas.controller
+
 import lt.skafis.bankas.dto.SourcePostDto
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.service.SourceService
@@ -7,7 +9,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/source")
-class SourceController {
+class SourceController(
+) {
 
     @Autowired
     private lateinit var sourceService: SourceService

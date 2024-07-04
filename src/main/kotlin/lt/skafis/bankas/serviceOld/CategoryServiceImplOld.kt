@@ -1,11 +1,12 @@
 package lt.skafis.bankas.serviceOld
 
-import lt.skafis.bankas.dtoOld.CategoryPostDto
+import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.dtoOld.CountDto
 import lt.skafis.bankas.modelOld.*
 import lt.skafis.bankas.repositoryOld.FirestoreCategoryRepository
 import lt.skafis.bankas.repositoryOld.FirestoreUnderReviewCategoryRepository
 import lt.skafis.bankas.repositoryOld.FirestoreUnderReviewProblemRepository
+import lt.skafis.bankas.service.UserService
 import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -14,7 +15,7 @@ import java.time.Instant
 import java.time.format.DateTimeFormatter
 
 @Service
-class CategoryServiceImpl(
+class CategoryServiceImplOld(
     private val firestoreCategoryRepository: FirestoreCategoryRepository,
     private val userService: UserService,
     private val firestoreUnderReviewCategoryRepository: FirestoreUnderReviewCategoryRepository,

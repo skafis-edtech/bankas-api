@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class ProblemMetaServiceImpl(
+class ProblemMetaServiceImp(
     private val firestoreMetaRepository: MetaRepository
 ) : ProblemMetaService {
 

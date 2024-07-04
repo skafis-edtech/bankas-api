@@ -1,4 +1,4 @@
-package lt.skafis.bankas.dtoOld
+package lt.skafis.bankas.dto
 
 data class CategoryPostDto(
     val name: String,

@@ -1,7 +1,7 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
-import lt.skafis.bankas.modelOld.Category
+import lt.skafis.bankas.model.Category
 import org.springframework.stereotype.Repository
 
 @Repository

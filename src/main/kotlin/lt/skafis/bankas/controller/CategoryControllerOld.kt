@@ -1,7 +1,9 @@
-package lt.skafis.bankas.controllerOld
+package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import lt.skafis.bankas.dto.CategoryPostDto
+import lt.skafis.bankas.dto.RejectMsgDto
 import lt.skafis.bankas.dtoOld.*
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.modelOld.Category
@@ -13,7 +15,7 @@ import java.security.Principal
 
 @RestController
 @RequestMapping("/categoryOld")
-class CategoryController(
+class CategoryControllerOld(
     private val categoryService: CategoryService,
 ) {
 

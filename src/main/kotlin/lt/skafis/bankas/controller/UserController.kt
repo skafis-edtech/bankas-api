@@ -1,10 +1,10 @@
-package lt.skafis.bankas.controllerOld
+package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import lt.skafis.bankas.dtoOld.UserBioDto
 import org.springframework.web.bind.annotation.*
-import lt.skafis.bankas.serviceOld.UserService
+import lt.skafis.bankas.service.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.security.Principal

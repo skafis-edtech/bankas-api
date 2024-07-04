@@ -1,4 +1,4 @@
-package lt.skafis.bankas.dtoOld
+package lt.skafis.bankas.dto
 
 data class ProblemPostDto(
     val problemImageUrl: String = "", //should be empty if uploading image or no image
@@ -6,4 +6,5 @@ data class ProblemPostDto(
     val problemText: String = "",
     val answerText: String = "",
     val categoryId: String = "",
+    val sourceId: String = "",
 )

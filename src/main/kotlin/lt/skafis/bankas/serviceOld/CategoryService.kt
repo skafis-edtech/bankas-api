@@ -1,6 +1,6 @@
 package lt.skafis.bankas.serviceOld
 
-import lt.skafis.bankas.dtoOld.CategoryPostDto
+import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.dtoOld.CountDto
 import lt.skafis.bankas.modelOld.Category
 import lt.skafis.bankas.modelOld.UnderReviewCategory

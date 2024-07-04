@@ -3,7 +3,7 @@ package lt.skafis.bankas.serviceOld
 import com.google.cloud.storage.Bucket
 import lt.skafis.bankas.dtoOld.CountDto
 import lt.skafis.bankas.dtoOld.ProblemDisplayViewDto
-import lt.skafis.bankas.dtoOld.ProblemPostDto
+import lt.skafis.bankas.dto.ProblemPostDto
 import lt.skafis.bankas.dtoOld.UnderReviewProblemDisplayViewDto
 import lt.skafis.bankas.modelOld.Problem
 import lt.skafis.bankas.modelOld.ReviewStatus
@@ -12,6 +12,7 @@ import lt.skafis.bankas.modelOld.UnderReviewProblem
 import lt.skafis.bankas.repositoryOld.FirestoreProblemRepository
 import lt.skafis.bankas.repositoryOld.FirestoreUnderReviewProblemRepository
 import lt.skafis.bankas.repository.StorageRepository
+import lt.skafis.bankas.service.UserService
 import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -21,7 +22,7 @@ import org.webjars.NotFoundException
 import java.net.URI
 
 @Service
-class ProblemServiceImpl(
+class ProblemServiceImplOld(
     val firestoreProblemRepository: FirestoreProblemRepository,
     val storageRepository: StorageRepository,
     val problemMetaService: ProblemMetaService,

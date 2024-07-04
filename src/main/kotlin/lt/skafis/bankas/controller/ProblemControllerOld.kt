@@ -1,8 +1,10 @@
-package lt.skafis.bankas.controllerOld
+package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import lt.skafis.bankas.dto.ProblemPostDto
+import lt.skafis.bankas.dto.RejectMsgDto
 import lt.skafis.bankas.dtoOld.*
 import lt.skafis.bankas.modelOld.Problem
 import lt.skafis.bankas.modelOld.UnderReviewProblem
@@ -15,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile
 import java.security.Principal
 
 @RestController
-@RequestMapping("/problem")
-class ProblemController(
+@RequestMapping("/problemOld")
+class ProblemControllerOld(
     private val problemService: ProblemService
 ) {
 

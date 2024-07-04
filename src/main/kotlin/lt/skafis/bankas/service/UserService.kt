@@ -1,4 +1,4 @@
-package lt.skafis.bankas.serviceOld
+package lt.skafis.bankas.service
 
 import lt.skafis.bankas.modelOld.Role
 import lt.skafis.bankas.modelOld.User

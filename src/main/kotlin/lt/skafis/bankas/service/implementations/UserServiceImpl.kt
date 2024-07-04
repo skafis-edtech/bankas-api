@@ -1,8 +1,9 @@
-package lt.skafis.bankas.serviceOld
+package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.modelOld.Role
 import lt.skafis.bankas.modelOld.User
 import lt.skafis.bankas.repository.UserRepository
+import lt.skafis.bankas.service.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service

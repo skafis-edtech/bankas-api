@@ -3,6 +3,8 @@ package lt.skafis.bankas.serviceOld
 import lt.skafis.bankas.modelOld.Role
 import lt.skafis.bankas.modelOld.User
 import lt.skafis.bankas.repository.UserRepository
+import lt.skafis.bankas.service.UserService
+import lt.skafis.bankas.service.implementations.UserServiceImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
