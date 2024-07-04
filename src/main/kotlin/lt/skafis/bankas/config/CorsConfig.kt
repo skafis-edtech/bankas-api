@@ -12,10 +12,10 @@ class CorsConfig {
         return object : WebMvcConfigurer {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")
-                    .allowedOrigins("*",)
-                    .allowedMethods("GET", "POST", "PUT", "DELETE")
+                    .allowedOrigins("https://bankas.skafis.lt", "http://localhost:5173")
+                    .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                     .allowedHeaders("*")
-//                    .allowCredentials(true)
+                    .allowCredentials(true)
                     .maxAge(3600)
             }
         }

@@ -6,6 +6,7 @@ import com.google.cloud.storage.Storage
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Repository
 import org.springframework.web.multipart.MultipartFile
+import java.util.concurrent.TimeUnit
 
 @Repository
 class StorageRepository(
@@ -24,7 +25,11 @@ class StorageRepository(
     fun getImageUrl(filePath: String): String {
         val bucket: Bucket = storage.get(bucketName)
         val blob: Blob = bucket.get(filePath)
-        return blob.mediaLink
+
+        // Generate a signed URL
+        val url = blob.signUrl(15, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature())
+
+        return url.toString()
     }
 
     fun deleteImage(filePath: String) {

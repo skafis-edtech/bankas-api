@@ -16,9 +16,7 @@ class UserController(
 ) {
 
     @PatchMapping("/bio")
-    @Operation(
-        summary = "Works. USER"
-    )
+    @Operation(summary = "USER")
     @SecurityRequirement(name = "bearerAuth")
     fun updateBio(@RequestBody userBioDto: UserBioDto, principal: Principal): ResponseEntity<Void> {
         userService.updateBio(userBioDto.bio, principal.name)
@@ -26,10 +24,7 @@ class UserController(
     }
 
     @GetMapping("/bio/{username}")
-    @Operation(
-        summary = "Works. PUBLIC"
-    )
+    @Operation(summary = "PUBLIC")
     fun getBio(@PathVariable username: String): ResponseEntity<UserBioDto> =
         ResponseEntity.ok(UserBioDto(userService.getBio(username)))
-
 }
