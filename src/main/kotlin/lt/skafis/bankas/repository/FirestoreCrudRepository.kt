@@ -6,13 +6,13 @@ abstract class FirestoreCrudRepository<T : Any>(private val firestore: Firestore
 
     abstract val collectionPath: String
 
-    fun create(document: T): String {
+    fun create(document: T): T {
         val docRef = firestore.collection(collectionPath).document()
         docRef.set(document)
-        return docRef.id
+        return docRef.get().get().toObject(clazz)!!
     }
 
-    fun getById(id: String): T? {
+    fun findById(id: String): T? {
         val docRef = firestore.collection(collectionPath).document(id)
         val docSnapshot = docRef.get().get()
         return if (docSnapshot.exists()) docSnapshot.toObject(clazz) else null
@@ -38,7 +38,7 @@ abstract class FirestoreCrudRepository<T : Any>(private val firestore: Firestore
         }
     }
 
-    fun getAll(): List<T> {
+    fun findAll(): List<T> {
         val collection = firestore.collection(collectionPath).get().get()
         return collection.documents.mapNotNull { it.toObject(clazz) }
     }
