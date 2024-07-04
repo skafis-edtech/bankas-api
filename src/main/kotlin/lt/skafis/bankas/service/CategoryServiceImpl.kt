@@ -2,10 +2,7 @@ package lt.skafis.bankas.service
 
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.dto.CountDto
-import lt.skafis.bankas.model.Category
-import lt.skafis.bankas.model.ReviewStatus
-import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.model.UnderReviewCategory
+import lt.skafis.bankas.model.*
 import lt.skafis.bankas.repository.FirestoreCategoryRepository
 import lt.skafis.bankas.repository.FirestoreUnderReviewCategoryRepository
 import lt.skafis.bankas.repository.FirestoreUnderReviewProblemRepository
@@ -178,7 +175,6 @@ class CategoryServiceImpl(
             }
         }
 
-        log.info("Problems deleted and rejected successfully")
         return true
     }
 }
