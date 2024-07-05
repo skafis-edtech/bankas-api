@@ -1,4 +1,6 @@
-package lt.skafis.bankas.model
+package lt.skafis.bankas.modelOld
+
+import java.time.Instant
 
 data class Problem (
     val id: String = "",
@@ -8,6 +10,9 @@ data class Problem (
     val answerText: String = "",
     val answerImagePath: String = "",
     val categoryId: String = "",
-    val sourceId: String = "",
-    val isApproved: Boolean = false,
+    val author: String = "",
+    val approvedBy: String = "",
+    val approvedOn: String = Instant.now().toString(),
+    val createdOn: String = "",
+    val lastModifiedOn: String = "",
 )

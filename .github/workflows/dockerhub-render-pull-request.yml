@@ -1,0 +1,36 @@
+name: Build and Deploy
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Log in to DockerHub
+        run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login -u naglissul --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t naglissul/bankas-skafis-api:latest .
+
+      - name: Push Docker image to DockerHub
+        run: docker push naglissul/bankas-skafis-api:latest
+
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render deployment
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
+          -H 'Authorization: Bearer ${{ secrets.RENDER_API_KEY }}' \
+          -H 'Accept: application/json' \
+          -H 'Content-Type: application/json' \
+          -d '{"clearCache": false}'

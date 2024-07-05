@@ -6,4 +6,5 @@ data class ProblemPostDto(
     val problemText: String = "",
     val answerText: String = "",
     val categoryId: String = "",
+    val sourceId: String = "",
 )
