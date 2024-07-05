@@ -5,13 +5,15 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
 import org.springframework.security.config.Customizer
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity
 import org.springframework.security.web.SecurityFilterChain
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
 
 @Configuration
 @EnableWebSecurity
-class SecurityConfig {
+class SecurityConfig() {
 
     private val logger = LoggerFactory.getLogger(javaClass)
 
@@ -19,11 +21,8 @@ class SecurityConfig {
     fun genericFilterChain(http: HttpSecurity): SecurityFilterChain {
         return http.authorizeHttpRequests { authorize ->
             authorize
-                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/index.html").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/index.html", "/error").permitAll()
                 .requestMatchers("/**").permitAll()
-//                .requestMatchers(HttpMethod.GET, "/source/**").authenticated()
-//                .requestMatchers(HttpMethod.POST, "/source/**").hasAnyRole("USER", "ADMIN", "SUPER_ADMIN")
-//                .requestMatchers(HttpMethod.DELETE, "/source/**").hasRole("SUPER_ADMIN")
                 .anyRequest().denyAll()
         }
             .oauth2ResourceServer { oauth2 ->

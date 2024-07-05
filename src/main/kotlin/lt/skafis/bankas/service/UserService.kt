@@ -9,5 +9,6 @@ interface UserService {
     fun getRoleById(userId: String): Role
     fun updateBio(bio: String, userId: String): Boolean
     fun getBio(username: String): String
-    fun grantRoleAtLeast(role: Role, userId: String)
+    fun grantRoleAtLeast(role: Role)
+    fun getCurrentUserId(): String
 }

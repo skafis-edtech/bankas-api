@@ -1,5 +1,7 @@
 package lt.skafis.bankas.controller
 
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.service.CategoryService
@@ -9,6 +11,8 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/category")
+@Tag(name = "Category Controller", description = "SUPER_ADMIN")
+@SecurityRequirement(name = "bearerAuth")
 class CategoryController {
 
     @Autowired

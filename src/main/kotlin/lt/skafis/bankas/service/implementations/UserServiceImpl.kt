@@ -6,6 +6,7 @@ import lt.skafis.bankas.repository.UserRepository
 import lt.skafis.bankas.service.UserService
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
@@ -52,12 +53,17 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         return user.bio
     }
 
-    override fun grantRoleAtLeast(role: Role, userId: String) {
-        val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
+    override fun grantRoleAtLeast(role: Role) {
+        val user = userRepository.getUserById(getCurrentUserId()) ?: throw NotFoundException("User not found")
         if (!(role === Role.USER && (user.role === Role.USER || user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
                 role === Role.ADMIN && (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
                 role === Role.SUPER_ADMIN && user.role === Role.SUPER_ADMIN)) {
             throw IllegalArgumentException("Unauthorized access")
         }
+    }
+
+    override fun getCurrentUserId(): String {
+        val authentication = SecurityContextHolder.getContext().authentication
+        return authentication?.name ?: throw IllegalStateException("No authenticated user found")
     }
 }
