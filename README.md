@@ -107,4 +107,4 @@ Manage Captcha and authentication in backend
 ## Todo
 Add release notes to github. With description about docker images and deploy.
 
-ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later...
+ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later..
