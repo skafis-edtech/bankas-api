@@ -1,6 +1,6 @@
 package lt.skafis.bankas.dtoOld
 
-import lt.skafis.bankas.modelOld.ReviewStatus
+import lt.skafis.bankas.model.ReviewStatus
 
 data class UnderReviewProblemDisplayViewDto(
     val id: String = "",

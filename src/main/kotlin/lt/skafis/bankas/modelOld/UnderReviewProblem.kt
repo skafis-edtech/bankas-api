@@ -1,5 +1,6 @@
 package lt.skafis.bankas.modelOld
 
+import lt.skafis.bankas.model.ReviewStatus
 import java.time.Instant
 
 data class UnderReviewProblem(

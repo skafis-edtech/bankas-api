@@ -3,7 +3,7 @@ package lt.skafis.bankas.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import lt.skafis.bankas.dto.ProblemPostDto
+import lt.skafis.bankas.dtoOld.ProblemPostDtoOld
 import lt.skafis.bankas.dto.RejectMsgDto
 import lt.skafis.bankas.dtoOld.*
 import lt.skafis.bankas.modelOld.Problem
@@ -55,7 +55,7 @@ class ProblemControllerOld(
             ]
         )
     )
-    fun submitProblem(@RequestPart("problem") problem: ProblemPostDto,
+    fun submitProblem(@RequestPart("problem") problem: ProblemPostDtoOld,
                       @RequestPart(value = "problemImageFile", required = false) problemImageFile: MultipartFile?,
                       @RequestPart(value = "answerImageFile", required = false) answerImageFile: MultipartFile?,
                       principal: Principal
@@ -98,7 +98,7 @@ class ProblemControllerOld(
     @Operation(summary = "USER")
     fun fixMyUnderReviewProblem(
         @PathVariable id: String,
-        @RequestPart("problem", required = true) problem: ProblemPostDto,
+        @RequestPart("problem", required = true) problem: ProblemPostDtoOld,
         @RequestPart("problemImageFile", required = false) problemImageFile: MultipartFile?,
         @RequestPart("answerImageFile", required = false) answerImageFile: MultipartFile?,
         principal: Principal

@@ -2,6 +2,7 @@ package lt.skafis.bankas.serviceOld
 
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.dtoOld.CountDto
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.modelOld.*
 import lt.skafis.bankas.repositoryOld.FirestoreCategoryRepository
 import lt.skafis.bankas.repositoryOld.FirestoreUnderReviewCategoryRepository

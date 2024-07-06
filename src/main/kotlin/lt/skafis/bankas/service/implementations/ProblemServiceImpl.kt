@@ -12,7 +12,7 @@ import org.webjars.NotFoundException
 @Service
 class ProblemServiceImpl(
     private val problemRepository: ProblemRepository,
-    private val userService: UserService // Assuming userService is injected here
+    private val userService: UserService
 ): ProblemService {
     override fun getProblems(): List<Problem> {
         userService.grantRoleAtLeast(Role.SUPER_ADMIN)
@@ -28,10 +28,11 @@ class ProblemServiceImpl(
         userService.grantRoleAtLeast(Role.SUPER_ADMIN)
         return problemRepository.create(
             Problem(
+                skfCode = problemPostDto.skfCode,
                 problemText = problemPostDto.problemText,
-                problemImagePath = problemPostDto.problemImageUrl,
+                problemImagePath = problemPostDto.problemImagePath,
                 answerText = problemPostDto.answerText,
-                answerImagePath = problemPostDto.answerImageUrl,
+                answerImagePath = problemPostDto.answerImagePath,
                 categoryId = problemPostDto.categoryId,
                 sourceId = problemPostDto.sourceId
             )
@@ -42,10 +43,11 @@ class ProblemServiceImpl(
         userService.grantRoleAtLeast(Role.SUPER_ADMIN)
         var problemToUpdate = problemRepository.findById(id) ?: throw NotFoundException("Problem with id $id not found")
         problemToUpdate = problemToUpdate.copy(
+            skfCode = problemPostDto.skfCode,
             problemText = problemPostDto.problemText,
-            problemImagePath = problemPostDto.problemImageUrl,
+            problemImagePath = problemPostDto.problemImagePath,
             answerText = problemPostDto.answerText,
-            answerImagePath = problemPostDto.answerImageUrl,
+            answerImagePath = problemPostDto.answerImagePath,
             categoryId = problemPostDto.categoryId,
             sourceId = problemPostDto.sourceId
         )

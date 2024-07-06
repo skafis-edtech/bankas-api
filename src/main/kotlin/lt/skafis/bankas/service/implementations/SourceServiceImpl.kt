@@ -27,7 +27,17 @@ class SourceServiceImpl(
     override fun createSource(source: SourcePostDto): Source {
         userService.grantRoleAtLeast(Role.SUPER_ADMIN)
         return sourceRepository.create(
-            Source(name = source.name, description = source.description)
+            Source(
+                name = source.name,
+                description = source.description,
+                reviewStatus = source.reviewStatus,
+                reviewedBy = source.reviewedBy,
+                reviewedOn = source.reviewedOn,
+                reviewMessage = source.reviewMessage,
+                author = source.author,
+                createdOn = source.createdOn,
+                lastModifiedOn = source.lastModifiedOn
+            )
         )
     }
 
@@ -36,7 +46,14 @@ class SourceServiceImpl(
         var sourceToUpdate = sourceRepository.findById(id) ?: throw NotFoundException("Source with id $id not found")
         sourceToUpdate = sourceToUpdate.copy(
             name = source.name,
-            description = source.description
+            description = source.description,
+            reviewStatus = source.reviewStatus,
+            reviewedBy = source.reviewedBy,
+            reviewedOn = source.reviewedOn,
+            reviewMessage = source.reviewMessage,
+            author = source.author,
+            createdOn = source.createdOn,
+            lastModifiedOn = source.lastModifiedOn
         )
         val success = sourceRepository.update(sourceToUpdate, id)
         return if (success) sourceToUpdate
