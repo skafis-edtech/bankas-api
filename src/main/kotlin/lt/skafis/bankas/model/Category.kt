@@ -1,7 +1,7 @@
 package lt.skafis.bankas.model
 
-data class Category (
-    val id: String = "",
+data class Category(
+    override var id: String = "",
     val name: String = "",
     val description: String = "",
-)
+): Identifiable 
