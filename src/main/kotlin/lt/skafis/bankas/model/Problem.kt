@@ -1,7 +1,7 @@
 package lt.skafis.bankas.model
 
 data class Problem (
-    val id: String = "",
+    override var id: String = "",
     val skfCode: String = "",
     val problemText: String = "",
     val problemImagePath: String = "",
@@ -10,4 +10,4 @@ data class Problem (
     val categoryId: String = "",
     val sourceId: String = "",
     val isApproved: Boolean = false,
-)
+): Identifiable

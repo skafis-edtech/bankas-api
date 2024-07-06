@@ -1,14 +1,16 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
+import lt.skafis.bankas.model.Identifiable
 
-abstract class FirestoreCrudRepository<T : Any>(private val firestore: Firestore, private val clazz: Class<T>) {
+abstract class FirestoreCrudRepository<T : Identifiable>(private val firestore: Firestore, private val clazz: Class<T>) {
 
     abstract val collectionPath: String
 
     fun create(document: T): T {
         val docRef = firestore.collection(collectionPath).document()
-        docRef.set(document)
+        document.id = docRef.id
+        docRef.set(document).get()
         return docRef.get().get().toObject(clazz)!!
     }
 

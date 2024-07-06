@@ -4,7 +4,7 @@ import lt.skafis.bankas.modelOld.ReviewStatus
 import org.threeten.bp.Instant
 
 data class Source(
-    val id: String = "",
+    override var id: String = "",
     val name: String = "",
     val description: String = "",
     val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
@@ -13,4 +13,4 @@ data class Source(
     val reviewMessage: String = "",
     val createdOn: String = Instant.now().toString(),
     val lastModifiedOn: String = Instant.now().toString()
-)
+): Identifiable
