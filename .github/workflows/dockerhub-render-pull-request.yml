@@ -30,4 +30,3 @@ jobs:
       - name: Trigger Render deployment
         run: |
           curl https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_HOOK_KEY }}
-
