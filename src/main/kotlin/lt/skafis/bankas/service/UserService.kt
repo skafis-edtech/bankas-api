@@ -11,4 +11,5 @@ interface UserService {
     fun getBio(username: String): String
     fun grantRoleAtLeast(role: Role)
     fun getCurrentUserId(): String
+    fun getCurrentUserUsername(): String
 }

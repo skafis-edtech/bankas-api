@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/source")
 @Tag(name = "Source Controller", description = "SUPER_ADMIN")
 @SecurityRequirement(name = "bearerAuth")
-class SourceController(
-) {
+class SourceController {
 
     @Autowired
     private lateinit var sourceService: SourceService

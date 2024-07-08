@@ -66,4 +66,9 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         val authentication = SecurityContextHolder.getContext().authentication
         return authentication?.name ?: throw IllegalStateException("No authenticated user found")
     }
+
+    override fun getCurrentUserUsername(): String {
+        val userId = getCurrentUserId()
+        return getUsernameById(userId)
+    }
 }
