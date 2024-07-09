@@ -1,6 +1,6 @@
 package lt.skafis.bankas.service.implementations
 
-import lt.skafis.bankas.modelOld.Role
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.modelOld.User
 import lt.skafis.bankas.repository.UserRepository
 import lt.skafis.bankas.service.UserService
@@ -65,5 +65,10 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
     override fun getCurrentUserId(): String {
         val authentication = SecurityContextHolder.getContext().authentication
         return authentication?.name ?: throw IllegalStateException("No authenticated user found")
+    }
+
+    override fun getCurrentUserUsername(): String {
+        val userId = getCurrentUserId()
+        return getUsernameById(userId)
     }
 }

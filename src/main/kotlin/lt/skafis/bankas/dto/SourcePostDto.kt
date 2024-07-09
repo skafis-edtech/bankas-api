@@ -1,13 +1,15 @@
 package lt.skafis.bankas.dto
 
-import java.time.ZonedDateTime
+import lt.skafis.bankas.model.ReviewStatus
 
 data class SourcePostDto(
     val name: String,
     val description: String,
+    val reviewStatus: ReviewStatus,
     val reviewedBy: String,
-    val reviewedOn: ZonedDateTime,
+    val reviewedOn: String,
     val reviewMessage: String,
-    val createdOn: ZonedDateTime = ZonedDateTime.now(),
-    val lastModifiedOn: ZonedDateTime
+    val author: String,
+    val createdOn: String,
+    val lastModifiedOn: String,
 )

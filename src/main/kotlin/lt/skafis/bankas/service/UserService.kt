@@ -1,6 +1,6 @@
 package lt.skafis.bankas.service
 
-import lt.skafis.bankas.modelOld.Role
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.modelOld.User
 
 interface UserService {
@@ -11,4 +11,5 @@ interface UserService {
     fun getBio(username: String): String
     fun grantRoleAtLeast(role: Role)
     fun getCurrentUserId(): String
+    fun getCurrentUserUsername(): String
 }
