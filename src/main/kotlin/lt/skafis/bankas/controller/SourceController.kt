@@ -2,8 +2,10 @@ package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.SourcePostDto
 import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.service.SourceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -13,14 +15,15 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/source")
 @Tag(name = "Source Controller", description = "SUPER_ADMIN")
 @SecurityRequirement(name = "bearerAuth")
-class SourceController(
-) {
+@RequiresRoleAtLeast(Role.SUPER_ADMIN)
+class SourceController {
 
     @Autowired
     private lateinit var sourceService: SourceService
 
     @PostMapping
     fun createSource(@RequestBody sourcePostDto: SourcePostDto): ResponseEntity<Source> {
+        println(sourcePostDto)
         val source = sourceService.createSource(sourcePostDto)
         return ResponseEntity.ok(source)
     }

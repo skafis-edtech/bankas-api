@@ -1,4 +1,4 @@
-package lt.skafis.bankas.modelOld
+package lt.skafis.bankas.model
 
 enum class ReviewStatus {
     PENDING,

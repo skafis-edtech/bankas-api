@@ -2,8 +2,10 @@ package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.service.CategoryService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/category")
 @Tag(name = "Category Controller", description = "SUPER_ADMIN")
 @SecurityRequirement(name = "bearerAuth")
+@RequiresRoleAtLeast(Role.SUPER_ADMIN)
 class CategoryController {
 
     @Autowired
