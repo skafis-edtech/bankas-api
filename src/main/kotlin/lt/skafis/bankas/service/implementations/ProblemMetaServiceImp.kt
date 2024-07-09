@@ -1,6 +1,7 @@
-package lt.skafis.bankas.serviceOld
+package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.repository.MetaRepository
+import lt.skafis.bankas.service.ProblemMetaService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
@@ -36,6 +37,10 @@ class ProblemMetaServiceImp(
             throw NotFoundException("Failed to increment last used SKF code")
         }
         log.info("Last used SKF code incremented successfully")
+    }
+
+    override fun initializeLastUsedSkfCode() {
+        TODO("Not yet implemented")
     }
 
     private fun incrementSkf(skfCode: String): String {

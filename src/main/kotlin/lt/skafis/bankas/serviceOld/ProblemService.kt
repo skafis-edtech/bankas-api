@@ -1,6 +1,6 @@
 package lt.skafis.bankas.serviceOld
 
-import lt.skafis.bankas.dtoOld.CountDto
+import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dtoOld.ProblemDisplayViewDto
 import lt.skafis.bankas.dtoOld.ProblemPostDtoOld
 import lt.skafis.bankas.dtoOld.UnderReviewProblemDisplayViewDto

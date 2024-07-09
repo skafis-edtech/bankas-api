@@ -1,7 +1,7 @@
 name: Build and Deploy
 
 on:
-  pull_request:
+  push:
     branches:
       - main
 
@@ -29,4 +29,4 @@ jobs:
     steps:
       - name: Trigger Render deployment
         run: |
-          curl https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_HOOK_KEY }}
+          curl -X POST https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_HOOK_KEY }}

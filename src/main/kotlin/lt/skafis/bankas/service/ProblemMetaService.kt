@@ -1,6 +1,7 @@
-package lt.skafis.bankas.serviceOld
+package lt.skafis.bankas.service
 
 interface ProblemMetaService{
     fun getIncrementedLastUsedSkfCode(): String
     fun incrementLastUsedSkfCode()
+    fun initializeLastUsedSkfCode()
 }

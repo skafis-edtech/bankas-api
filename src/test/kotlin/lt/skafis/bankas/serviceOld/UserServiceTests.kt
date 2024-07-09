@@ -1,6 +1,6 @@
 package lt.skafis.bankas.serviceOld
 
-import lt.skafis.bankas.modelOld.Role
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.modelOld.User
 import lt.skafis.bankas.repository.UserRepository
 import lt.skafis.bankas.service.UserService

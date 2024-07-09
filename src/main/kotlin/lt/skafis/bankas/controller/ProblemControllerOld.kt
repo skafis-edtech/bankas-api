@@ -3,6 +3,7 @@ package lt.skafis.bankas.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
+import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dtoOld.ProblemPostDtoOld
 import lt.skafis.bankas.dto.RejectMsgDto
 import lt.skafis.bankas.dtoOld.*

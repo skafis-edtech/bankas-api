@@ -1,17 +1,18 @@
 package lt.skafis.bankas.serviceOld
 
 import com.google.cloud.storage.Bucket
-import lt.skafis.bankas.dtoOld.CountDto
+import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dtoOld.ProblemDisplayViewDto
 import lt.skafis.bankas.dtoOld.ProblemPostDtoOld
 import lt.skafis.bankas.dtoOld.UnderReviewProblemDisplayViewDto
 import lt.skafis.bankas.modelOld.Problem
 import lt.skafis.bankas.model.ReviewStatus
-import lt.skafis.bankas.modelOld.Role
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.modelOld.UnderReviewProblem
 import lt.skafis.bankas.repositoryOld.FirestoreProblemRepository
 import lt.skafis.bankas.repositoryOld.FirestoreUnderReviewProblemRepository
 import lt.skafis.bankas.repository.StorageRepository
+import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.UserService
 import org.apache.logging.log4j.util.InternalException
 import org.slf4j.LoggerFactory
