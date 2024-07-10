@@ -1,6 +1,4 @@
-package lt.skafis.bankas.modelOld
-
-import lt.skafis.bankas.model.Role
+package lt.skafis.bankas.model
 
 data class User (
     val id: String = "",

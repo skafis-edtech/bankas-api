@@ -2,6 +2,7 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.ProblemRepository
@@ -15,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
+import org.webjars.NotFoundException
 import java.net.URI
 import java.util.*
 
@@ -84,6 +86,32 @@ class ApprovalServiceImpl: ApprovalService {
         return createdProblem.id
     }
 
+    override fun getMySources(): List<Source> {
+        val username = userService.getCurrentUserUsername()
+        log.info("Getting sources by user: $username")
+        return sourceRepository.getByAuthor(username)
+    }
+
+    override fun getProblemsBySource(sourceId: String): List<ProblemDisplayViewDto> {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        if (source.author != username  && source.reviewStatus != ReviewStatus.APPROVED) {
+            userService.grantRoleAtLeast(Role.ADMIN)
+        }
+
+        log.info("Getting problems by source: $sourceId")
+        return problemRepository.getBySourceId(sourceId)
+            .map {
+                ProblemDisplayViewDto(
+                    id = it.id,
+                    problemText = it.problemText,
+                    problemImageSrc = getImageSrc(it.problemImagePath),
+                    answerText = it.answerText,
+                    answerImageSrc = getImageSrc(it.answerImagePath),
+                )
+            }
+    }
+
     private fun getNewPath(imageUrl: String, storagePathOrEmpty: String): String =
         if (imageUrl.isNotEmpty() && storagePathOrEmpty.isEmpty()) {
             if (isValidUrl(imageUrl)) {
@@ -103,5 +131,23 @@ class ApprovalServiceImpl: ApprovalService {
     private fun isValidUrl(url: String): Boolean {
         val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
         return regex.matches(url)
+    }
+
+    private fun getImageSrc(imagePath: String): String {
+        return imagePath.let {
+            if (isValidUrl(it)) {
+                URI(it)
+                it
+            } else if (
+                it.startsWith("problems/") ||
+                it.startsWith("answers/")
+            ) {
+                storageRepository.getImageUrl(it)
+            } else if (it.isEmpty()) {
+                ""
+            } else {
+                throw IllegalArgumentException("Invalid image path: $it")
+            }
+        }
     }
 }

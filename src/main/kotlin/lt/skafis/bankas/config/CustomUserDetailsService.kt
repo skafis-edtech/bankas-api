@@ -1,6 +1,6 @@
 package lt.skafis.bankas.config
 
-import lt.skafis.bankas.modelOld.User
+import lt.skafis.bankas.model.User
 import lt.skafis.bankas.repository.UserRepository
 import org.springframework.security.core.GrantedAuthority
 import org.springframework.security.core.authority.SimpleGrantedAuthority

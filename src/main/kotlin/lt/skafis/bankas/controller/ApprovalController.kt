@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
 import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.ProblemSubmitDto
+import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.Source
 
 @RestController
 @RequestMapping("/approval")
@@ -56,5 +58,26 @@ class ApprovalController {
     ): ResponseEntity<IdDto> {
         val problemId = approvalService.submitProblem(sourceId, problem, problemImageFile, answerImageFile)
         return ResponseEntity(IdDto(problemId), HttpStatus.CREATED)
+    }
+
+    @GetMapping("/mySources")
+    @Operation(
+        summary = "USER. Get my sources",
+        description = "Get all sources submitted by the current user.",
+    )
+    @RequiresRoleAtLeast(Role.USER)
+    fun getMySources(): ResponseEntity<List<Source>> {
+        val sources = approvalService.getMySources()
+        return ResponseEntity(sources, HttpStatus.OK)
+    }
+
+    @GetMapping("/problemsBySource/{sourceId}")
+    @Operation(
+        summary = "Either USER with it's problems, or ADMIN, or PUBLIC && source.reviewStatus === ReviewStatus.APPROVED. Get problems by source",
+        description = "Get all problems submitted for the source.",
+    )
+    fun getProblemsBySource(@PathVariable sourceId: String): ResponseEntity<List<ProblemDisplayViewDto>> {
+        val problems = approvalService.getProblemsBySource(sourceId)
+        return ResponseEntity(problems, HttpStatus.OK)
     }
 }
