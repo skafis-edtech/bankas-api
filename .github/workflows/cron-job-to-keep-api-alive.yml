@@ -1,0 +1,14 @@
+name: HTTP Request every 14 minutes
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+
+jobs:
+  send_requests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send HTTP GET request
+        run: |
+          curl -X GET "https://api.bankas.skafis.lt/swagger-ui/index.html"
