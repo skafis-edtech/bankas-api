@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.dto.IdDto
 import lt.skafis.bankas.dto.SourceSubmitDto
 import lt.skafis.bankas.service.ApprovalService
@@ -21,6 +22,7 @@ import lt.skafis.bankas.model.Role
 @RequestMapping("/approval")
 @Tag(name = "Approval Controller", description = "USER and ADMIN")
 @SecurityRequirement(name = "bearerAuth")
+@Logged
 class ApprovalController {
 
     @Autowired
@@ -31,8 +33,8 @@ class ApprovalController {
         summary = "USER. Submit source data",
         description = "Submit source data for approval. Returns the ID of the created source.",
     )
+    @RequiresRoleAtLeast(Role.USER)
     fun submitSourceData(@RequestBody sourceData: SourceSubmitDto): ResponseEntity<IdDto> {
-        println(sourceData)
         val sourceId = approvalService.submitSourceData(sourceData)
         return ResponseEntity(IdDto(sourceId), HttpStatus.CREATED)
     }
@@ -45,6 +47,7 @@ class ApprovalController {
             content = [Content(mediaType = "multipart/form-data")]
         )
     )
+    @RequiresRoleAtLeast(Role.USER)
     fun submitProblem(
         @PathVariable sourceId: String,
         @RequestPart("problem") problem: ProblemSubmitDto,
