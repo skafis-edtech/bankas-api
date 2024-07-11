@@ -1,5 +1,5 @@
 package lt.skafis.bankas.dto
 
-data class RejectMsgDto(
+data class ReviewMsgDto(
     val reviewMessage: String,
 )

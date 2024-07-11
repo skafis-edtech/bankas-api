@@ -3,14 +3,21 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.ProblemPostDto
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.repository.ProblemRepository
+import lt.skafis.bankas.repository.StorageRepository
 import lt.skafis.bankas.service.ProblemService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
+import java.net.URI
 
 @Service
-class ProblemServiceImpl(
-    private val problemRepository: ProblemRepository,
-): ProblemService {
+class ProblemServiceImpl: ProblemService {
+
+    @Autowired
+    private lateinit var problemRepository: ProblemRepository
+
+    @Autowired
+    private lateinit var storageRepository: StorageRepository
 
     override fun getProblems(): List<Problem> =
         problemRepository.findAll()
@@ -54,4 +61,44 @@ class ProblemServiceImpl(
         val success = problemRepository.delete(id)
         if (!success) throw Exception("Failed to delete problem with id $id")
     }
+
+    override fun utilsGetNewPath(imageUrl: String, storagePathOrEmpty: String): String =
+        if (imageUrl.isNotEmpty() && storagePathOrEmpty.isEmpty()) {
+            if (isValidUrl(imageUrl)) {
+                URI(imageUrl)
+                imageUrl
+            } else {
+                throw IllegalArgumentException("Invalid URL: $imageUrl")
+            }
+        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isNotEmpty()) {
+            storagePathOrEmpty
+        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isEmpty()) {
+            ""
+        } else {
+            throw IllegalArgumentException("Invalid image input (only one image for question and one image for answer is allowed per problem)")
+        }
+
+    override fun utilsGetImageSrc(imagePath: String): String {
+        return imagePath.let {
+            if (isValidUrl(it)) {
+                URI(it)
+                it
+            } else if (
+                it.startsWith("problems/") ||
+                it.startsWith("answers/")
+            ) {
+                storageRepository.getImageUrl(it)
+            } else if (it.isEmpty()) {
+                ""
+            } else {
+                throw IllegalArgumentException("Invalid image path: $it")
+            }
+        }
+    }
+
+    private fun isValidUrl(url: String): Boolean {
+        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
+        return regex.matches(url)
+    }
+
 }

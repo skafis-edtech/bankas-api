@@ -16,4 +16,14 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
             .documents
             .map { it.toObject(Problem::class.java) }
     }
+
+    fun getByCategoryId(categoryId: String): List<Problem> {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("categoryId", categoryId)
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Problem::class.java) }
+    }
+
 }
