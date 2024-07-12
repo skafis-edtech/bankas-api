@@ -23,34 +23,63 @@ class SortController {
     @Autowired
     private lateinit var sortService: SortService
 
-    @GetMapping("/sortedProblems")
+    @GetMapping("/mySortedProblems")
     @Operation(
-        summary = "ADMIN - gets all, USER - gets owned. Get all problems sorted by author",
+        summary = "USER. Get all problems sorted by author",
         description = "Get all problems sorted by author. Returns a list of problems.",
     )
     @RequiresRoleAtLeast(Role.USER)
     fun getSortedProblems(): ResponseEntity<List<ProblemDisplayViewDto>> {
-        return ResponseEntity.ok(sortService.getSortedProblems())
+        return ResponseEntity.ok(sortService.getMySortedProblems())
     }
 
-    @GetMapping("/unsortedProblems")
+    @GetMapping("/myUnsortedProblems")
     @Operation(
-        summary = "ADMIN - gets all, USER - gets owned. Get all problems unsorted",
+        summary = "USER. Get all problems unsorted",
         description = "Get all problems unsorted. Returns a list of problems.",
     )
     @RequiresRoleAtLeast(Role.USER)
     fun getUnsortedProblems(): ResponseEntity<List<ProblemDisplayViewDto>> {
-        return ResponseEntity.ok(sortService.getUnsortedProblems())
+        return ResponseEntity.ok(sortService.getMyUnsortedProblems())
     }
 
-    @PatchMapping("/sort/{problemId}/{categoryId}")
+    @PatchMapping("/sortMy/{problemId}/{categoryId}")
     @Operation(
-        summary = "ADMIN - sort any, USER - sort owned. Sort a problem into a category",
+        summary = "USER. Sort a problem into a category",
         description = "Sort a problem into a category. Returns problem firestore entity.",
     )
     @RequiresRoleAtLeast(Role.USER)
     fun sortProblem(@PathVariable problemId: String, @PathVariable categoryId: String): ResponseEntity<Problem> {
-        return ResponseEntity.ok(sortService.sortProblem(problemId, categoryId))
+        return ResponseEntity.ok(sortService.sortMyProblem(problemId, categoryId))
     }
 
+    @GetMapping("/notMySortedProblems")
+    @Operation(
+        summary = "ADMIN. Get all problems sorted by !author",
+        description = "Get all problems sorted by !author. Returns a list of problems.",
+    )
+    @RequiresRoleAtLeast(Role.ADMIN)
+    fun getNotMySortedProblems(): ResponseEntity<List<ProblemDisplayViewDto>> {
+        return ResponseEntity.ok(sortService.getNotMySortedProblems())
+    }
+
+    @GetMapping("/notMyUnsortedProblems")
+    @Operation(
+        summary = "ADMIN. Get all problems unsorted by !author",
+        description = "Get all problems unsorted by !author. Returns a list of problems.",
+    )
+    @RequiresRoleAtLeast(Role.ADMIN)
+    fun getNotMyUnsortedProblems(): ResponseEntity<List<ProblemDisplayViewDto>> {
+        return ResponseEntity.ok(sortService.getNotMyUnsortedProblems())
+    }
+
+    @PatchMapping("/sortNotMy/{problemId}/{categoryId}")
+    @Operation(
+        summary = "ADMIN. Sort a not owned problem into a category",
+        description = "Sort a problem into a category. Returns problem firestore entity.",
+    )
+    @RequiresRoleAtLeast(Role.ADMIN)
+    fun sortNotMyProblem(@PathVariable problemId: String, @PathVariable categoryId: String): ResponseEntity<Problem> {
+        return ResponseEntity.ok(sortService.sortNotMyProblem(problemId, categoryId))
+    }
 }

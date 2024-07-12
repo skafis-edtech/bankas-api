@@ -201,36 +201,6 @@ class ApprovalServiceImpl: ApprovalService {
         problemImageFile: MultipartFile?,
         answerImageFile: MultipartFile?
     ): Problem {
-        val username = userService.getCurrentUserUsername()
-        val imagesUUID = UUID.randomUUID()
-
-        log.info("Updating problem: $problemId by user: $username")
-        val problemToUpdate = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
-        val updatedProblem = problemToUpdate.copy(
-            problemText = problem.problemText,
-            problemImagePath = problemService.utilsGetNewPath(problem.problemImageUrl, if (problemImageFile == null) "" else "problems/${imagesUUID}.${
-                problemImageFile.originalFilename?.split(".")?.last() ?: ""
-            }"),
-            answerText = problem.answerText,
-            answerImagePath = problemService.utilsGetNewPath(problem.answerImageUrl, if (answerImageFile == null) "" else "answers/${imagesUUID}.${
-                answerImageFile.originalFilename?.split(".")?.last() ?: ""
-            }"),
-        )
-        problemRepository.update(updatedProblem, problemId)
-
-        problemImageFile?.let {
-            storageRepository.uploadImage(problemImageFile, "problems/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
-        }
-        answerImageFile?.let {
-            storageRepository.uploadImage(answerImageFile, "answers/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
-        }
-        problemToUpdate.problemImagePath.takeIf { it.startsWith("problems/") }?.let {
-            storageRepository.deleteImage(it)
-        }
-        problemToUpdate.answerImagePath.takeIf { it.startsWith("answers/") }?.let {
-            storageRepository.deleteImage(it)
-        }
-
-        return updatedProblem
+        TODO("Not yet implemented")
     }
 }

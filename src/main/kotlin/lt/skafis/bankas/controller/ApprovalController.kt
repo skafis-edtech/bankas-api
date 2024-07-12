@@ -134,7 +134,7 @@ class ApprovalController {
     @PutMapping("/problem/update/{id}")
     @Operation(
         summary = "USER but owning. Update problem data",
-        description = "Update problem data by ID. Images: if it was problems/uuid.png and sent the same - ??? like send KEEP_FILE_THE_SAME??",
+        description = "Update problem data by ID. Images: if it was problems/uuid.png and sends KEEP_FILE_THE_SAME, then nothing with files. If string doesn't start with problems/ TODO TODO:...- check the sent file - if there is any, upload it, if there's not - the image got deleted, or it wasn't there at all",
     )
     @RequiresRoleAtLeast(Role.USER)
     fun updateProblem(
