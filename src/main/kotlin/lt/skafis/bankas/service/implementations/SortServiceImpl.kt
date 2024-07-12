@@ -34,10 +34,13 @@ class SortServiceImpl: SortService {
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
+                skfCode = it.skfCode,
                 problemText = it.problemText,
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                categoryId = it.categoryId,
+                sourceId = it.sourceId,
             )
         }
     }
@@ -51,10 +54,13 @@ class SortServiceImpl: SortService {
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
+                skfCode = it.skfCode,
                 problemText = it.problemText,
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                categoryId = it.categoryId,
+                sourceId = it.sourceId,
             )
         }
     }
@@ -75,10 +81,13 @@ class SortServiceImpl: SortService {
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
+                skfCode = it.skfCode,
                 problemText = it.problemText,
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                categoryId = it.categoryId,
+                sourceId = it.sourceId,
             )
         }
     }
@@ -92,10 +101,13 @@ class SortServiceImpl: SortService {
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
+                skfCode = it.skfCode,
                 problemText = it.problemText,
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                categoryId = it.categoryId,
+                sourceId = it.sourceId,
             )
         }
     }

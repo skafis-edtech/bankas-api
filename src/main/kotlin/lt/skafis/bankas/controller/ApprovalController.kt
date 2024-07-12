@@ -17,6 +17,7 @@ import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.service.SourceService
 
 @RestController
 @RequestMapping("/approval")
@@ -27,6 +28,9 @@ class ApprovalController {
 
     @Autowired
     private lateinit var approvalService: ApprovalService
+
+    @Autowired
+    private lateinit var sourceService: SourceService
 
     @PostMapping("/submit/source")
     @Operation(
@@ -89,6 +93,16 @@ class ApprovalController {
         return ResponseEntity.ok(approvalService.approve(sourceId, reviewMsgDto.reviewMessage))
     }
 
+    @GetMapping("/sources")
+    @Operation(
+        summary = "ADMIN. Get all sources",
+        description = "Get all sources submitted for approval (or already approved).",
+    )
+    @RequiresRoleAtLeast(Role.ADMIN)
+    fun getSources(): ResponseEntity<List<Source>> {
+        return ResponseEntity.ok(sourceService.getSources())
+    }
+
     @PatchMapping("/reject/{sourceId}")
     @Operation(
         summary = "ADMIN. Reject source with problems",
@@ -105,7 +119,7 @@ class ApprovalController {
         description = "Delete source with all problems by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun delete(@PathVariable id: String): ResponseEntity<Void> {
+    fun deleteSource(@PathVariable id: String): ResponseEntity<Void> {
         approvalService.deleteSource(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -133,7 +147,7 @@ class ApprovalController {
 
     @PutMapping("/problem/update/{id}")
     @Operation(
-        summary = "USER but owning. Update problem data",
+        summary = "USER but owning. Update problem data. NOT IMPLEMENTED YET!!!!!",
         description = "Update problem data by ID. Images: if it was problems/uuid.png and sends KEEP_FILE_THE_SAME, then nothing with files. If string doesn't start with problems/ TODO TODO:...- check the sent file - if there is any, upload it, if there's not - the image got deleted, or it wasn't there at all",
     )
     @RequiresRoleAtLeast(Role.USER)

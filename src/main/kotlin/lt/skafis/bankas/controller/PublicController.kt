@@ -37,6 +37,11 @@ class PublicController {
         return ResponseEntity.ok(publicService.getProblemsByCategory(categoryId))
     }
 
+    @GetMapping("/problemsUnsorted")
+    fun getProblemsUnsorted(): ResponseEntity<List<ProblemDisplayViewDto>> {
+        return ResponseEntity.ok(publicService.getProblemsByCategory(""))
+    }
+
     @GetMapping("/category/{categoryId}")
     fun getCategoryById(@PathVariable categoryId: String): ResponseEntity<Category> {
         return ResponseEntity.ok(publicService.getCategoryById(categoryId))
@@ -47,9 +52,9 @@ class PublicController {
         return ResponseEntity.ok(publicService.getCategories())
     }
 
-    @GetMapping("/problem/{problemId}")
-    fun getProblemById(@PathVariable problemId: String): ResponseEntity<ProblemDisplayViewDto> {
-        return ResponseEntity.ok(publicService.getProblemById(problemId))
+    @GetMapping("/problem/{skfCode}")
+    fun getProblemBySkfCode(@PathVariable skfCode: String): ResponseEntity<ProblemDisplayViewDto> {
+        return ResponseEntity.ok(publicService.getProblemBySkfCode(skfCode))
     }
 
     @GetMapping("/source/{sourceId}")

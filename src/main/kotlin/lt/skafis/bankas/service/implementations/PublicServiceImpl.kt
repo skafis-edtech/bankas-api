@@ -2,6 +2,7 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.CategoryRepository
 import lt.skafis.bankas.repository.ProblemRepository
@@ -31,7 +32,7 @@ class PublicServiceImpl: PublicService {
     private lateinit var sourceService: SourceService
 
     override fun getProblemsCount(): Long {
-        return problemRepository.countDocuments()
+        return problemRepository.countApproved()
     }
 
     override fun getCategoriesCount(): Long {
@@ -40,6 +41,9 @@ class PublicServiceImpl: PublicService {
 
     override fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto> {
         return problemRepository.getByCategoryId(categoryId)
+            .filter {
+                it.isApproved
+            }
             .map {
                 ProblemDisplayViewDto(
                     id = it.id,
@@ -59,8 +63,10 @@ class PublicServiceImpl: PublicService {
         return categoryRepository.findAll()
     }
 
-    override fun getProblemById(problemId: String): ProblemDisplayViewDto {
-        val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
+    override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
+        val problem = problemRepository.getBySkfCode(skfCode)
+        if (!problem.isApproved) throw Exception("Problem with skfCode $skfCode is not approved")
+
         return ProblemDisplayViewDto(
             id = problem.id,
             problemText = problem.problemText,
@@ -71,11 +77,15 @@ class PublicServiceImpl: PublicService {
     }
 
     override fun getSourceById(sourceId: String): Source {
-        return sourceService.getSourceById(sourceId)
+        val source = sourceService.getSourceById(sourceId)
+        if (source.reviewStatus != ReviewStatus.APPROVED) throw Exception("Source with id $sourceId is not approved")
+        return source
     }
 
     override fun getSourcesByAuthor(authorUsername: String): List<Source> {
-        return sourceRepository.getByAuthor(authorUsername)
+        return sourceRepository.getByAuthor(authorUsername).filter {
+            it.reviewStatus == ReviewStatus.APPROVED
+        }
     }
 
 }

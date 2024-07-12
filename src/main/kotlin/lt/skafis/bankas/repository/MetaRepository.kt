@@ -29,4 +29,10 @@ class MetaRepository(private val firestore: Firestore) {
             false
         }
     }
+
+    fun init() {
+        val docRef = firestore.document(documentPath)
+        val problemMeta = ProblemMeta(lastUsedCode = "SKF-0")
+        docRef.set(problemMeta).get()
+    }
 }

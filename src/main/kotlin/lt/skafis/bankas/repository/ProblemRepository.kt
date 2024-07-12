@@ -26,4 +26,22 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
             .map { it.toObject(Problem::class.java) }
     }
 
+    fun getBySkfCode(skfCode: String): Problem {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("skfCode", skfCode)
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Problem::class.java) }
+            .firstOrNull() ?: throw Exception("Problem with skfCode $skfCode not found")
+    }
+
+    fun countApproved(): Long {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("isApproved", true)
+            .get()
+            .get()
+            .documents
+            .size.toLong()
+    }
 }

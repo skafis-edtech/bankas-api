@@ -10,7 +10,7 @@ interface PublicService {
     fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto>
     fun getCategoryById(categoryId: String): Category
     fun getCategories(): List<Category>
-    fun getProblemById(problemId: String): ProblemDisplayViewDto
+    fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto
     fun getSourceById(sourceId: String): Source
     fun getSourcesByAuthor(authorUsername: String): List<Source>
 }

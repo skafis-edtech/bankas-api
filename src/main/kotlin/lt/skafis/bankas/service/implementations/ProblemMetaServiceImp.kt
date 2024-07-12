@@ -40,7 +40,9 @@ class ProblemMetaServiceImp(
     }
 
     override fun initializeLastUsedSkfCode() {
-        TODO("Not yet implemented")
+        log.info("Initializing last used SKF code")
+        firestoreMetaRepository.init()
+        log.info("Last used SKF code initialized successfully")
     }
 
     private fun incrementSkf(skfCode: String): String {

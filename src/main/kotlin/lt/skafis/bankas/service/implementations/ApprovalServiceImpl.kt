@@ -9,6 +9,7 @@ import lt.skafis.bankas.repository.ProblemRepository
 import lt.skafis.bankas.repository.SourceRepository
 import lt.skafis.bankas.repository.StorageRepository
 import lt.skafis.bankas.service.ApprovalService
+import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.ProblemService
 import lt.skafis.bankas.service.UserService
 import org.slf4j.LoggerFactory
@@ -38,6 +39,9 @@ class ApprovalServiceImpl: ApprovalService {
 
     @Autowired
     private lateinit var storageRepository: StorageRepository
+
+    @Autowired
+    private lateinit var metaService: ProblemMetaService
 
     override fun submitSourceData(sourceData: SourceSubmitDto): String {
         val username = userService.getCurrentUserUsername()
@@ -106,10 +110,13 @@ class ApprovalServiceImpl: ApprovalService {
             .map {
                 ProblemDisplayViewDto(
                     id = it.id,
+                    skfCode = it.skfCode,
                     problemText = it.problemText,
                     problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
                     answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    sourceId = it.sourceId,
+                    categoryId = it.categoryId
                 )
             }
     }
@@ -125,6 +132,17 @@ class ApprovalServiceImpl: ApprovalService {
             reviewedOn = Instant.now().toString()
         )
         sourceRepository.update(updatedSource, sourceId)
+
+        val problems = problemRepository.getBySourceId(sourceId)
+        problems.forEach {
+            val skfCode = metaService.getIncrementedLastUsedSkfCode()
+            metaService.incrementLastUsedSkfCode()
+            val updatedProblem = it.copy(
+                skfCode = skfCode,
+                isApproved = true
+            )
+            problemRepository.update(updatedProblem, it.id)
+        }
         return updatedSource
     }
 
@@ -139,6 +157,15 @@ class ApprovalServiceImpl: ApprovalService {
             reviewedOn = Instant.now().toString()
         )
         sourceRepository.update(updatedSource, sourceId)
+
+        val problems = problemRepository.getBySourceId(sourceId)
+        problems.forEach {
+            val updatedProblem = it.copy(
+                skfCode = "",
+                isApproved = false
+            )
+            problemRepository.update(updatedProblem, it.id)
+        }
         return updatedSource
     }
 

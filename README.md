@@ -98,13 +98,3 @@ Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just m
 
 ## Stuff -2024-06-18
 Not using postgresql - this for later - but do all the review stuff and namings immediately. Not later. Also writing postman tests, gonna add collections later. 
-
-## Later
-Manage user roles (admin) at a spring level
-
-Manage Captcha and authentication in backend
-
-## Todo
-Add release notes to github. With description about docker images and deploy.
-
-ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later..
