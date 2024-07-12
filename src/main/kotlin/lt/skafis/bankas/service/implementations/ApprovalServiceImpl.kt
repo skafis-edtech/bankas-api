@@ -193,10 +193,10 @@ class ApprovalServiceImpl: ApprovalService {
         }
         problemRepository.delete(problemId)
         if (problem.problemImagePath.startsWith("problems/")) {
-            storageRepository.deleteImage("problems/${problem.problemImagePath}")
+            storageRepository.deleteImage(problem.problemImagePath)
         }
         if (problem.answerImagePath.startsWith("answers/")) {
-            storageRepository.deleteImage("answers/${problem.answerImagePath}")
+            storageRepository.deleteImage(problem.answerImagePath)
         }
         val modifiedSource = source.copy(
             lastModifiedOn = Instant.now().toString(),

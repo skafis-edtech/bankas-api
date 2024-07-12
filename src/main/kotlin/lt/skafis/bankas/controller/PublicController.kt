@@ -1,5 +1,6 @@
 package lt.skafis.bankas.controller
 
+import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
@@ -15,7 +16,6 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/public")
 @Tag(name = "Public Controller", description = "PUBLIC")
-@SecurityRequirement(name = "bearerAuth")
 @Logged
 class PublicController {
 
@@ -58,6 +58,11 @@ class PublicController {
     }
 
     @GetMapping("/source/{sourceId}")
+    @Operation(
+        summary = "PUBLIC if approved, USER if owned, ADMIN else",
+        description = "Get source by ID. Returns source entity.",
+    )
+    @SecurityRequirement(name = "bearerAuth")
     fun getSourceById(@PathVariable sourceId: String): ResponseEntity<Source> {
         return ResponseEntity.ok(publicService.getSourceById(sourceId))
     }
