@@ -8,7 +8,7 @@ interface PublicService {
     fun getProblemsCount(): Long
     fun getCategoriesCount(): Long
     fun getCategoryProblemCount(categoryId: String): Long
-    fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto>
+    fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto>
     fun getCategoryById(categoryId: String): Category
     fun getCategories(): List<Category>
     fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto
