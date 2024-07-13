@@ -83,6 +83,19 @@ class ApprovalServiceImpl: ApprovalService {
             storageRepository.uploadImage(answerImageFile, "answers/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
         }
 
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+
+        val modifiedSource = source.copy(
+            lastModifiedOn = Instant.now().toString(),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        sourceRepository.update(modifiedSource, sourceId)
+
+        val sourceProblems = problemRepository.getBySourceId(sourceId)
+        sourceProblems.forEach {
+            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+        }
+
         return createdProblem.id
     }
 
@@ -191,6 +204,10 @@ class ApprovalServiceImpl: ApprovalService {
             reviewStatus = ReviewStatus.PENDING
         )
         sourceRepository.update(modifiedSource, problem.sourceId)
+        val sourceProblems = problemRepository.getBySourceId(problem.sourceId)
+        sourceProblems.forEach {
+            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+        }
     }
 
     override fun updateSource(sourceId: String, sourceData: SourceSubmitDto): Source {
