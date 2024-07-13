@@ -15,7 +15,6 @@ class CorsConfigProd {
             override fun addCorsMappings(registry: CorsRegistry) {
                 registry.addMapping("/**")
                     .allowedOrigins("https://bankas.skafis.lt")
-                    .allowedOrigins("*")
                     .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
                     .allowedHeaders("*")
                     .allowCredentials(true)
