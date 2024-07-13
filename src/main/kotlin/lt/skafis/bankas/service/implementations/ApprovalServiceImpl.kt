@@ -2,26 +2,25 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.ProblemRepository
 import lt.skafis.bankas.repository.SourceRepository
 import lt.skafis.bankas.repository.StorageRepository
 import lt.skafis.bankas.service.ApprovalService
+import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.ProblemService
-import lt.skafis.bankas.service.SourceService
 import lt.skafis.bankas.service.UserService
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
-import java.net.URI
+import org.threeten.bp.Instant
+import org.webjars.NotFoundException
 import java.util.*
 
 @Service
 class ApprovalServiceImpl: ApprovalService {
-
-    private val log = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     private lateinit var userService: UserService
@@ -33,12 +32,17 @@ class ApprovalServiceImpl: ApprovalService {
     private lateinit var problemRepository: ProblemRepository
 
     @Autowired
+    private lateinit var problemService: ProblemService
+
+    @Autowired
     private lateinit var storageRepository: StorageRepository
+
+    @Autowired
+    private lateinit var metaService: ProblemMetaService
 
     override fun submitSourceData(sourceData: SourceSubmitDto): String {
         val username = userService.getCurrentUserUsername()
 
-        log.info("Creating source in firestore by user: $username")
         val createdSource = sourceRepository.create(
             Source(
                 name = sourceData.name,
@@ -58,22 +62,20 @@ class ApprovalServiceImpl: ApprovalService {
         val username = userService.getCurrentUserUsername()
         val imagesUUID = UUID.randomUUID()
 
-        log.info("Creating problem in firestore by user: $username")
         val createdProblem = problemRepository.create(
             Problem(
                 problemText = problem.problemText,
-                problemImagePath = getNewPath(problem.problemImageUrl, if (problemImageFile == null) "" else "problems/${imagesUUID}.${
+                problemImagePath = problemService.utilsGetNewPath(problem.problemImageUrl, if (problemImageFile == null) "" else "problems/${imagesUUID}.${
                     problemImageFile.originalFilename?.split(".")?.last() ?: ""
                 }"),
                 answerText = problem.answerText,
-                answerImagePath = getNewPath(problem.answerImageUrl, if (answerImageFile == null) "" else "answers/${imagesUUID}.${
+                answerImagePath = problemService.utilsGetNewPath(problem.answerImageUrl, if (answerImageFile == null) "" else "answers/${imagesUUID}.${
                     answerImageFile.originalFilename?.split(".")?.last() ?: ""
                 }"),
                 sourceId = sourceId
             )
         )
 
-        log.info("Uploading images to storage by user: $username")
         problemImageFile?.let {
             storageRepository.uploadImage(problemImageFile, "problems/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
         }
@@ -84,24 +86,135 @@ class ApprovalServiceImpl: ApprovalService {
         return createdProblem.id
     }
 
-    private fun getNewPath(imageUrl: String, storagePathOrEmpty: String): String =
-        if (imageUrl.isNotEmpty() && storagePathOrEmpty.isEmpty()) {
-            if (isValidUrl(imageUrl)) {
-                URI(imageUrl)
-                imageUrl
-            } else {
-                throw IllegalArgumentException("Invalid URL: $imageUrl")
-            }
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isNotEmpty()) {
-            storagePathOrEmpty
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isEmpty()) {
-            ""
-        } else {
-            throw IllegalArgumentException("Invalid image input (only one image for question and one image for answer is allowed per problem)")
+    override fun getMySources(): List<Source> {
+        val username = userService.getCurrentUserUsername()
+        return sourceRepository.getByAuthor(username)
+    }
+
+    override fun getProblemsBySource(sourceId: String): List<ProblemDisplayViewDto> {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        if (source.author != username  && source.reviewStatus != ReviewStatus.APPROVED) {
+            userService.grantRoleAtLeast(Role.ADMIN)
         }
 
-    private fun isValidUrl(url: String): Boolean {
-        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
-        return regex.matches(url)
+        return problemRepository.getBySourceId(sourceId)
+            .map {
+                ProblemDisplayViewDto(
+                    id = it.id,
+                    skfCode = it.skfCode,
+                    problemText = it.problemText,
+                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    answerText = it.answerText,
+                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    sourceId = it.sourceId,
+                    categoryId = it.categoryId
+                )
+            }
+    }
+
+    override fun approve(sourceId: String, reviewMessage: String): Source {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        val updatedSource = source.copy(
+            reviewStatus = ReviewStatus.APPROVED,
+            reviewMessage = reviewMessage,
+            reviewedBy = username,
+            reviewedOn = Instant.now().toString()
+        )
+        sourceRepository.update(updatedSource, sourceId)
+
+        val problems = problemRepository.getBySourceId(sourceId)
+        problems.forEach {
+            val skfCode = metaService.getIncrementedLastUsedSkfCode()
+            metaService.incrementLastUsedSkfCode()
+            val updatedProblem = it.copy(
+                skfCode = skfCode,
+                isApproved = true
+            )
+            problemRepository.update(updatedProblem, it.id)
+        }
+        return updatedSource
+    }
+
+    override fun reject(sourceId: String, reviewMessage: String): Source {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        val updatedSource = source.copy(
+            reviewStatus = ReviewStatus.REJECTED,
+            reviewMessage = reviewMessage,
+            reviewedBy = username,
+            reviewedOn = Instant.now().toString()
+        )
+        sourceRepository.update(updatedSource, sourceId)
+
+        val problems = problemRepository.getBySourceId(sourceId)
+        problems.forEach {
+            val updatedProblem = it.copy(
+                skfCode = "",
+                isApproved = false
+            )
+            problemRepository.update(updatedProblem, it.id)
+        }
+        return updatedSource
+    }
+
+    override fun deleteSource(sourceId: String) {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        if (source.author != username) {
+            throw IllegalAccessException("User $username does not own source $sourceId")
+        }
+        val problems = problemRepository.getBySourceId(sourceId)
+        if (problems.isNotEmpty()) {
+            throw IllegalAccessException("Source $sourceId has problems, delete them first")
+        }
+        sourceRepository.delete(sourceId)
+    }
+
+    override fun deleteProblem(problemId: String) {
+        val username = userService.getCurrentUserUsername()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.author != username) {
+            throw IllegalAccessException("User $username does not own source ${problem.sourceId}")
+        }
+        problemRepository.delete(problemId)
+        if (problem.problemImagePath.startsWith("problems/")) {
+            storageRepository.deleteImage(problem.problemImagePath)
+        }
+        if (problem.answerImagePath.startsWith("answers/")) {
+            storageRepository.deleteImage(problem.answerImagePath)
+        }
+        val modifiedSource = source.copy(
+            lastModifiedOn = Instant.now().toString(),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        sourceRepository.update(modifiedSource, problem.sourceId)
+    }
+
+    override fun updateSource(sourceId: String, sourceData: SourceSubmitDto): Source {
+        val username = userService.getCurrentUserUsername()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        if (source.author != username) {
+            throw IllegalAccessException("User $username does not own source $sourceId")
+        }
+        val updatedSource = source.copy(
+            name = sourceData.name,
+            description = sourceData.description,
+            lastModifiedOn = Instant.now().toString(),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        sourceRepository.update(updatedSource, sourceId)
+        return updatedSource
+    }
+
+    override fun updateProblem(
+        problemId: String,
+        problem: ProblemSubmitDto,
+        problemImageFile: MultipartFile?,
+        answerImageFile: MultipartFile?
+    ): Problem {
+        TODO("Not yet implemented")
     }
 }

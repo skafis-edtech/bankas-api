@@ -2,18 +2,22 @@ package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
-import lt.skafis.bankas.dtoOld.UserBioDto
+import lt.skafis.bankas.config.Logged
+import lt.skafis.bankas.dto.UserBioDto
 import org.springframework.web.bind.annotation.*
 import lt.skafis.bankas.service.UserService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import java.security.Principal
 
 @RestController
 @RequestMapping("/user")
-class UserController(
-    private val userService: UserService
-) {
+@Logged
+class UserController {
+
+    @Autowired
+    private lateinit var userService: UserService
 
     @PatchMapping("/bio")
     @Operation(summary = "USER")

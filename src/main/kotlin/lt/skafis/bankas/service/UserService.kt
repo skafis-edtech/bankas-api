@@ -1,7 +1,7 @@
 package lt.skafis.bankas.service
 
 import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.modelOld.User
+import lt.skafis.bankas.model.User
 
 interface UserService {
     fun getUserById(userId: String): User
