@@ -43,14 +43,14 @@ class SortController {
         return ResponseEntity.ok(sortService.getMyUnsortedProblems())
     }
 
-    @PatchMapping("/sortMy/{problemId}/{categoryId}")
+    @PatchMapping("/sort/{problemId}/{categoryId}")
     @Operation(
-        summary = "USER. Sort a problem into a category",
+        summary = "USER owned or ADMIN. Sort a problem into a category",
         description = "Sort a problem into a category. Returns problem firestore entity.",
     )
     @RequiresRoleAtLeast(Role.USER)
     fun sortProblem(@PathVariable problemId: String, @PathVariable categoryId: String): ResponseEntity<Problem> {
-        return ResponseEntity.ok(sortService.sortMyProblem(problemId, categoryId))
+        return ResponseEntity.ok(sortService.sortProblem(problemId, categoryId))
     }
 
     @GetMapping("/notMySortedProblems")
@@ -71,15 +71,5 @@ class SortController {
     @RequiresRoleAtLeast(Role.ADMIN)
     fun getNotMyUnsortedProblems(): ResponseEntity<List<ProblemDisplayViewDto>> {
         return ResponseEntity.ok(sortService.getNotMyUnsortedProblems())
-    }
-
-    @PatchMapping("/sortNotMy/{problemId}/{categoryId}")
-    @Operation(
-        summary = "ADMIN. Sort a not owned problem into a category",
-        description = "Sort a problem into a category. Returns problem firestore entity.",
-    )
-    @RequiresRoleAtLeast(Role.ADMIN)
-    fun sortNotMyProblem(@PathVariable problemId: String, @PathVariable categoryId: String): ResponseEntity<Problem> {
-        return ResponseEntity.ok(sortService.sortNotMyProblem(problemId, categoryId))
     }
 }

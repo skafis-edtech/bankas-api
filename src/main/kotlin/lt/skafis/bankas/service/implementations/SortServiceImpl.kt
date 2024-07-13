@@ -2,6 +2,7 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.repository.ProblemRepository
 import lt.skafis.bankas.repository.SourceRepository
 import lt.skafis.bankas.service.ProblemService
@@ -65,11 +66,11 @@ class SortServiceImpl: SortService {
         }
     }
 
-    override fun sortMyProblem(problemId: String, categoryId: String): Problem {
+    override fun sortProblem(problemId: String, categoryId: String): Problem {
         val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw Exception("Source with id ${problem.sourceId} not found")
         if (source.author != userService.getCurrentUserUsername()) {
-            throw Exception("You are not the author of this problem")
+            userService.grantRoleAtLeast(Role.ADMIN)
         }
         val updatedProblem = problem.copy(categoryId = categoryId)
         problemRepository.update(updatedProblem, problemId)
@@ -114,12 +115,5 @@ class SortServiceImpl: SortService {
                 sourceId = it.sourceId,
             )
         }
-    }
-
-    override fun sortNotMyProblem(problemId: String, categoryId: String): Problem {
-        val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
-        val updatedProblem = problem.copy(categoryId = categoryId)
-        problemRepository.update(updatedProblem, problemId)
-        return updatedProblem
     }
 }

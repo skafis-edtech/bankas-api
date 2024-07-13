@@ -4,6 +4,7 @@ import com.google.api.client.http.HttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.ProblemPostDto
 import lt.skafis.bankas.model.Problem
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "Problem Controller", description = "SUPER_ADMIN")
 @SecurityRequirement(name = "bearerAuth")
 @RequiresRoleAtLeast(Role.SUPER_ADMIN)
+@Logged
 class ProblemController {
 
     @Autowired

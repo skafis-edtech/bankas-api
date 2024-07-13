@@ -12,7 +12,6 @@ import lt.skafis.bankas.service.ApprovalService
 import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.ProblemService
 import lt.skafis.bankas.service.UserService
-import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
@@ -22,8 +21,6 @@ import java.util.*
 
 @Service
 class ApprovalServiceImpl: ApprovalService {
-
-    private val log = LoggerFactory.getLogger(javaClass)
 
     @Autowired
     private lateinit var userService: UserService
@@ -46,7 +43,6 @@ class ApprovalServiceImpl: ApprovalService {
     override fun submitSourceData(sourceData: SourceSubmitDto): String {
         val username = userService.getCurrentUserUsername()
 
-        log.info("Creating source in firestore by user: $username")
         val createdSource = sourceRepository.create(
             Source(
                 name = sourceData.name,
@@ -66,7 +62,6 @@ class ApprovalServiceImpl: ApprovalService {
         val username = userService.getCurrentUserUsername()
         val imagesUUID = UUID.randomUUID()
 
-        log.info("Creating problem in firestore by user: $username")
         val createdProblem = problemRepository.create(
             Problem(
                 problemText = problem.problemText,
@@ -81,7 +76,6 @@ class ApprovalServiceImpl: ApprovalService {
             )
         )
 
-        log.info("Uploading images to storage by user: $username")
         problemImageFile?.let {
             storageRepository.uploadImage(problemImageFile, "problems/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
         }
@@ -94,7 +88,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun getMySources(): List<Source> {
         val username = userService.getCurrentUserUsername()
-        log.info("Getting sources by user: $username")
         return sourceRepository.getByAuthor(username)
     }
 
@@ -105,7 +98,6 @@ class ApprovalServiceImpl: ApprovalService {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
 
-        log.info("Getting problems by source: $sourceId")
         return problemRepository.getBySourceId(sourceId)
             .map {
                 ProblemDisplayViewDto(
@@ -123,7 +115,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun approve(sourceId: String, reviewMessage: String): Source {
         val username = userService.getCurrentUserUsername()
-        log.info("Approving source: $sourceId with message: $reviewMessage by user: $username")
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.APPROVED,
@@ -148,7 +139,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun reject(sourceId: String, reviewMessage: String): Source {
         val username = userService.getCurrentUserUsername()
-        log.info("Rejecting source: $sourceId with message: $reviewMessage by user: $username")
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.REJECTED,
@@ -171,7 +161,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun deleteSource(sourceId: String) {
         val username = userService.getCurrentUserUsername()
-        log.info("Deleting source: $sourceId by user: $username")
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         if (source.author != username) {
             throw IllegalAccessException("User $username does not own source $sourceId")
@@ -185,7 +174,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun deleteProblem(problemId: String) {
         val username = userService.getCurrentUserUsername()
-        log.info("Deleting problem: $problemId by user: $username")
         val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
         if (source.author != username) {
@@ -207,7 +195,6 @@ class ApprovalServiceImpl: ApprovalService {
 
     override fun updateSource(sourceId: String, sourceData: SourceSubmitDto): Source {
         val username = userService.getCurrentUserUsername()
-        log.info("Updating source: $sourceId by user: $username")
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         if (source.author != username) {
             throw IllegalAccessException("User $username does not own source $sourceId")
