@@ -32,6 +32,16 @@ class PublicController {
         return ResponseEntity.ok(CountDto(publicService.getCategoriesCount()))
     }
 
+    @GetMapping("/categoryProblemCount/{categoryId}")
+    fun getCategoryProblemCount(@PathVariable categoryId: String): ResponseEntity<CountDto> {
+        return ResponseEntity.ok(CountDto(publicService.getCategoryProblemCount(categoryId)))
+    }
+
+    @GetMapping("/unsortedProblemsCount")
+    fun getUnsortedProblemsCount(): ResponseEntity<CountDto> {
+        return ResponseEntity.ok(CountDto(publicService.getCategoryProblemCount("")))
+    }
+
     @GetMapping("/problemsByCategory/{categoryId}")
     fun getProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> {
         return ResponseEntity.ok(publicService.getProblemsByCategory(categoryId))

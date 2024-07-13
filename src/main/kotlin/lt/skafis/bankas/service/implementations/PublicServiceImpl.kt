@@ -44,6 +44,10 @@ class PublicServiceImpl: PublicService {
         return categoryRepository.countDocuments()
     }
 
+    override fun getCategoryProblemCount(categoryId: String): Long {
+        return problemRepository.countApprovedByCategoryId(categoryId)
+    }
+
     override fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto> {
         return problemRepository.getByCategoryId(categoryId)
             .filter {
