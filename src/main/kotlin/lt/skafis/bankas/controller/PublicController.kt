@@ -44,12 +44,12 @@ class PublicController {
 
     @GetMapping("/problemsByCategory/{categoryId}")
     fun getProblemsByCategory(@PathVariable categoryId: String): ResponseEntity<List<ProblemDisplayViewDto>> {
-        return ResponseEntity.ok(publicService.getProblemsByCategory(categoryId))
+        return ResponseEntity.ok(publicService.getProblemsByCategoryShuffle(categoryId))
     }
 
     @GetMapping("/problemsUnsorted")
     fun getProblemsUnsorted(): ResponseEntity<List<ProblemDisplayViewDto>> {
-        return ResponseEntity.ok(publicService.getProblemsByCategory(""))
+        return ResponseEntity.ok(publicService.getProblemsByCategoryShuffle(""))
     }
 
     @GetMapping("/category/{categoryId}")

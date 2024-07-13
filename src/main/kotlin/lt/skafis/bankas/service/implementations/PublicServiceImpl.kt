@@ -48,7 +48,7 @@ class PublicServiceImpl: PublicService {
         return problemRepository.countApprovedByCategoryId(categoryId)
     }
 
-    override fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto> {
+    override fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto> {
         return problemRepository.getByCategoryId(categoryId)
             .filter {
                 it.isApproved
@@ -64,7 +64,7 @@ class PublicServiceImpl: PublicService {
                     categoryId = it.categoryId,
                     sourceId = it.sourceId,
                 )
-            }
+            }.shuffled()
     }
 
     override fun getCategoryById(categoryId: String): Category {
