@@ -64,4 +64,14 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
             .documents
             .size.toLong()
     }
+
+    fun countApprovedByCategoryId(categoryId: String): Long {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("isApproved", true)
+            .whereEqualTo("categoryId", categoryId)
+            .get()
+            .get()
+            .documents
+            .size.toLong()
+    }
 }
