@@ -4,8 +4,10 @@ services:
   backend:
     image: docker.io/naglissul/bankas-skafis-api:latest
     ports:
-      - "8080:8080"
+      - "9000:9000"
     environment:
       - FIREBASE_SERVICE_ACCOUNT_PATH=/etc/secrets/firebase-admin.json
+      - ENVIRONMENT=dev
+      - PORT=9000
     volumes:
       - path/on/your/device/firebase-admin.json:/etc/secrets/firebase-admin.json

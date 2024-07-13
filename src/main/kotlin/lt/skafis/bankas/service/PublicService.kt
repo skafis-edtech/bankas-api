@@ -7,6 +7,7 @@ import lt.skafis.bankas.model.Source
 interface PublicService {
     fun getProblemsCount(): Long
     fun getCategoriesCount(): Long
+    fun getCategoryProblemCount(categoryId: String): Long
     fun getProblemsByCategory(categoryId: String): List<ProblemDisplayViewDto>
     fun getCategoryById(categoryId: String): Category
     fun getCategories(): List<Category>
