@@ -4,13 +4,15 @@ import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.repository.CategoryRepository
 import lt.skafis.bankas.service.CategoryService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class CategoryServiceImpl(
-    private val categoryRepository: CategoryRepository,
-): CategoryService {
+class CategoryServiceImpl: CategoryService {
+
+    @Autowired
+    private lateinit var categoryRepository: CategoryRepository
 
     override fun getCategories(): List<Category> =
         categoryRepository.findAll()

@@ -7,4 +7,23 @@ import org.springframework.stereotype.Repository
 @Repository
 class SourceRepository(private val firestore: Firestore): FirestoreCrudRepository<Source>(firestore, Source::class.java) {
     override val collectionPath = "sources"
+
+    fun getByAuthor(author: String): List<Source> {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("author", author)
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Source::class.java) }
+    }
+
+    fun getByNotAuthor(author: String): List<Source> {
+        return firestore.collection(collectionPath)
+            .whereNotEqualTo("author", author)
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Source::class.java) }
+    }
+
 }

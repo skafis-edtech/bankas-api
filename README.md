@@ -14,7 +14,9 @@ AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed ser
 1. Somehow get firebase-admin.json file (from firebase console) - have it anywhere on your computer
 2. Set environment variable `FIREBASE_SERVICE_ACCOUNT_PATH` to the path of the file (on intellij - edit configuration, or just add args to bootRun command), or if running with docker compose - replace "path/on/your/device/firebase-admin.json" with the path to the file
 3. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
-4. Open http://localhost/swagger-ui/index.html in browser
+4. Open http://localhost:9000/swagger-ui/index.html in browser
+
+OR you can setup env vars ENVIRONMENT and PORT to prod and 80.
 
 ## Prod
 1. Build the image `docker build -t naglissul/bankas-skafis-api:latest .`
@@ -98,13 +100,3 @@ Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just m
 
 ## Stuff -2024-06-18
 Not using postgresql - this for later - but do all the review stuff and namings immediately. Not later. Also writing postman tests, gonna add collections later. 
-
-## Later
-Manage user roles (admin) at a spring level
-
-Manage Captcha and authentication in backend
-
-## Todo
-Add release notes to github. With description about docker images and deploy.
-
-ALSO ADD SUPER ADMIN ENDPOINTS to delete etc... But maybe later..

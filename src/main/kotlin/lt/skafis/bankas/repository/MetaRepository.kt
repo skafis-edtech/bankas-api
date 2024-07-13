@@ -2,7 +2,7 @@ package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.DocumentSnapshot
-import lt.skafis.bankas.modelOld.ProblemMeta
+import lt.skafis.bankas.model.ProblemMeta
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -28,5 +28,11 @@ class MetaRepository(private val firestore: Firestore) {
         } catch (e: Exception) {
             false
         }
+    }
+
+    fun init() {
+        val docRef = firestore.document(documentPath)
+        val problemMeta = ProblemMeta(lastUsedCode = "SKF-0")
+        docRef.set(problemMeta).get()
     }
 }

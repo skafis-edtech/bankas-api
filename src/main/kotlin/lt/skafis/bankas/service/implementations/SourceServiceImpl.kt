@@ -4,13 +4,15 @@ import lt.skafis.bankas.dto.SourcePostDto
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.SourceRepository
 import lt.skafis.bankas.service.SourceService
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class SourceServiceImpl(
-    private val sourceRepository: SourceRepository,
-): SourceService {
+class SourceServiceImpl: SourceService {
+
+    @Autowired
+    private lateinit var sourceRepository: SourceRepository
 
     override fun getSources(): List<Source> {
         return sourceRepository.findAll()
