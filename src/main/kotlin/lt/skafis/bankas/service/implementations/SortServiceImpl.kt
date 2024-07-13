@@ -29,7 +29,7 @@ class SortServiceImpl: SortService {
         val username = userService.getCurrentUserUsername()
         val sources = sourceRepository.getByAuthor(username)
         val problems = sources.flatMap { source ->
-            problemRepository.getBySourceId(source.id)
+            problemRepository.getBySourceSorted(source.id)
         }
         return problems.map {
             ProblemDisplayViewDto(
@@ -47,9 +47,9 @@ class SortServiceImpl: SortService {
 
     override fun getMyUnsortedProblems(): List<ProblemDisplayViewDto> {
         val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByAuthorSorted(username)
+        val sources = sourceRepository.getByAuthor(username)
         val problems = sources.flatMap { source ->
-            problemRepository.getBySourceId(source.id)
+            problemRepository.getBySourceUnsorted(source.id)
         }
         return problems.map {
             ProblemDisplayViewDto(
@@ -67,6 +67,10 @@ class SortServiceImpl: SortService {
 
     override fun sortMyProblem(problemId: String, categoryId: String): Problem {
         val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw Exception("Source with id ${problem.sourceId} not found")
+        if (source.author != userService.getCurrentUserUsername()) {
+            throw Exception("You are not the author of this problem")
+        }
         val updatedProblem = problem.copy(categoryId = categoryId)
         problemRepository.update(updatedProblem, problemId)
         return updatedProblem
@@ -74,9 +78,9 @@ class SortServiceImpl: SortService {
 
     override fun getNotMySortedProblems(): List<ProblemDisplayViewDto> {
         val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByNotAuthorSorted(username)
+        val sources = sourceRepository.getByNotAuthor(username)
         val problems = sources.flatMap { source ->
-            problemRepository.getBySourceId(source.id)
+            problemRepository.getBySourceSorted(source.id)
         }
         return problems.map {
             ProblemDisplayViewDto(
@@ -94,9 +98,9 @@ class SortServiceImpl: SortService {
 
     override fun getNotMyUnsortedProblems(): List<ProblemDisplayViewDto> {
         val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByNotAuthorUnsorted(username)
+        val sources = sourceRepository.getByNotAuthor(username)
         val problems = sources.flatMap { source ->
-            problemRepository.getBySourceId(source.id)
+            problemRepository.getBySourceUnsorted(source.id)
         }
         return problems.map {
             ProblemDisplayViewDto(

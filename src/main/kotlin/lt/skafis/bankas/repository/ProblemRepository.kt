@@ -17,6 +17,26 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
             .map { it.toObject(Problem::class.java) }
     }
 
+    fun getBySourceSorted(sourceId: String): List<Problem> {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("sourceId", sourceId)
+            .whereNotEqualTo("categoryId", "")
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Problem::class.java) }
+    }
+
+    fun getBySourceUnsorted(sourceId: String): List<Problem> {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("sourceId", sourceId)
+            .whereEqualTo("categoryId", "")
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Problem::class.java) }
+    }
+
     fun getByCategoryId(categoryId: String): List<Problem> {
         return firestore.collection(collectionPath)
             .whereEqualTo("categoryId", categoryId)

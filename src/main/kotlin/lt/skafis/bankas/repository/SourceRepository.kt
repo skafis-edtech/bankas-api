@@ -17,40 +17,9 @@ class SourceRepository(private val firestore: Firestore): FirestoreCrudRepositor
             .map { it.toObject(Source::class.java) }
     }
 
-    fun getByAuthorSorted(author: String): List<Source> {
-        return firestore.collection(collectionPath)
-            .whereEqualTo("author", author)
-            .whereNotEqualTo("categoryId", "")
-            .get()
-            .get()
-            .documents
-            .map { it.toObject(Source::class.java) }
-    }
-
-    fun getByNotAuthorSorted(author: String): List<Source> {
+    fun getByNotAuthor(author: String): List<Source> {
         return firestore.collection(collectionPath)
             .whereNotEqualTo("author", author)
-            .whereNotEqualTo("categoryId", "")
-            .get()
-            .get()
-            .documents
-            .map { it.toObject(Source::class.java) }
-    }
-
-    fun getByAuthorUnsorted(author: String): List<Source> {
-        return firestore.collection(collectionPath)
-            .whereEqualTo("author", author)
-            .whereEqualTo("categoryId", "")
-            .get()
-            .get()
-            .documents
-            .map { it.toObject(Source::class.java) }
-    }
-
-    fun getByNotAuthorUnsorted(author: String): List<Source> {
-        return firestore.collection(collectionPath)
-            .whereNotEqualTo("author", author)
-            .whereEqualTo("categoryId", "")
             .get()
             .get()
             .documents
