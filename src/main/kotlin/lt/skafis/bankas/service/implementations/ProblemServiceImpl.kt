@@ -97,7 +97,7 @@ class ProblemServiceImpl: ProblemService {
     }
 
     private fun isValidUrl(url: String): Boolean {
-        val regex = Regex("https://.*\\.(jpeg|gif|png|apng|svg|bmp|ico)")
+        val regex = Regex("https://.*")
         return regex.matches(url)
     }
 
