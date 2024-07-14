@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Send HTTP GET request
         run: |
-          curl -X GET "https://api.bankas.skafis.lt/swagger-ui/index.html"
+          curl -X GET "https://api.bankas.skafis.lt/public/problems/count"
