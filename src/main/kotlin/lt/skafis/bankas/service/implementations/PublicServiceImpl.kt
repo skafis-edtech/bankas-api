@@ -73,6 +73,9 @@ class PublicServiceImpl: PublicService {
 
     override fun getCategories(): List<Category> {
         return categoryRepository.findAll()
+            .sortedBy {
+                it.name
+            }
     }
 
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
