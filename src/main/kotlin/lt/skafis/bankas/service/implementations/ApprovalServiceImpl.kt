@@ -127,6 +127,7 @@ class ApprovalServiceImpl: ApprovalService {
             .map {
                 ProblemDisplayViewDto(
                     id = it.id,
+                    sourceListNr = it.sourceListNr,
                     skfCode = it.skfCode,
                     problemText = it.problemText,
                     problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),

@@ -56,6 +56,7 @@ class PublicServiceImpl: PublicService {
             .map {
                 ProblemDisplayViewDto(
                     id = it.id,
+                    sourceListNr = it.sourceListNr,
                     skfCode = it.skfCode,
                     problemText = it.problemText,
                     problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
@@ -84,6 +85,7 @@ class PublicServiceImpl: PublicService {
 
         return ProblemDisplayViewDto(
             id = problem.id,
+            sourceListNr = problem.sourceListNr,
             skfCode = problem.skfCode,
             problemText = problem.problemText,
             problemImageSrc = problemService.utilsGetImageSrc(problem.problemImagePath),
