@@ -16,6 +16,7 @@ class CategoryServiceImpl: CategoryService {
 
     override fun getCategories(): List<Category> =
         categoryRepository.findAll()
+            .sortedBy { it.name }
 
 
     override fun getCategoryById(id: String): Category =

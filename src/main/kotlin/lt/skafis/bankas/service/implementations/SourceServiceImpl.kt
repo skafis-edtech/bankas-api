@@ -16,6 +16,7 @@ class SourceServiceImpl: SourceService {
 
     override fun getSources(): List<Source> {
         return sourceRepository.findAll()
+            .sortedBy { it.lastModifiedOn }
     }
 
     override fun getSourceById(id: String): Source =
