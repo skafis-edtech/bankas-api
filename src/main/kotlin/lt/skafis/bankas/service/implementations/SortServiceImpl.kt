@@ -27,8 +27,8 @@ class SortServiceImpl: SortService {
     private lateinit var problemService: ProblemService
 
     override fun getMySortedProblems(): List<ProblemDisplayViewDto> {
-        val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByAuthor(username)
+        val userId = userService.getCurrentUserId()
+        val sources = sourceRepository.getByAuthor(userId)
         val problems = sources.flatMap { source ->
             problemRepository.getBySourceSorted(source.id)
         }
@@ -47,8 +47,8 @@ class SortServiceImpl: SortService {
     }
 
     override fun getMyUnsortedProblems(): List<ProblemDisplayViewDto> {
-        val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByAuthor(username)
+        val userId = userService.getCurrentUserId()
+        val sources = sourceRepository.getByAuthor(userId)
         val problems = sources.flatMap { source ->
             problemRepository.getBySourceUnsorted(source.id)
         }
@@ -69,7 +69,7 @@ class SortServiceImpl: SortService {
     override fun sortProblem(problemId: String, categoryId: String): Problem {
         val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw Exception("Source with id ${problem.sourceId} not found")
-        if (source.author != userService.getCurrentUserUsername()) {
+        if (source.author != userService.getCurrentUserId()) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val updatedProblem = problem.copy(categoryId = categoryId)
@@ -78,8 +78,8 @@ class SortServiceImpl: SortService {
     }
 
     override fun getNotMySortedProblems(): List<ProblemDisplayViewDto> {
-        val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByNotAuthor(username)
+        val userId = userService.getCurrentUserId()
+        val sources = sourceRepository.getByNotAuthor(userId)
         val problems = sources.flatMap { source ->
             problemRepository.getBySourceSorted(source.id)
         }
@@ -98,8 +98,8 @@ class SortServiceImpl: SortService {
     }
 
     override fun getNotMyUnsortedProblems(): List<ProblemDisplayViewDto> {
-        val username = userService.getCurrentUserUsername()
-        val sources = sourceRepository.getByNotAuthor(username)
+        val userId = userService.getCurrentUserId()
+        val sources = sourceRepository.getByNotAuthor(userId)
         val problems = sources.flatMap { source ->
             problemRepository.getBySourceUnsorted(source.id)
         }
