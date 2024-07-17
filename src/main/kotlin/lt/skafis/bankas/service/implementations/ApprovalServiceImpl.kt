@@ -108,7 +108,7 @@ class ApprovalServiceImpl: ApprovalService {
     override fun getMySources(): List<Source> {
         val userId = userService.getCurrentUserId()
         return sourceRepository.getByAuthor(userId)
-            .sortedBy {
+            .sortedByDescending {
                 it.lastModifiedOn
             }
     }
