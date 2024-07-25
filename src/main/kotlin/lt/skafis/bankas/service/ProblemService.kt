@@ -9,6 +9,5 @@ interface ProblemService {
     fun createProblem(problemPostDto: ProblemPostDto): Problem
     fun updateProblem(id: String, problemPostDto: ProblemPostDto): Problem
     fun deleteProblem(id: String)
-    fun utilsGetNewPath(imageUrl: String, storagePathOrEmpty: String): String
     fun utilsGetImageSrc(imagePath: String): String
 }

@@ -69,7 +69,7 @@ class SortServiceImpl: SortService {
     override fun sortProblem(problemId: String, categoryId: String): Problem {
         val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw Exception("Source with id ${problem.sourceId} not found")
-        if (source.author != userService.getCurrentUserId()) {
+        if (source.authorId != userService.getCurrentUserId()) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val updatedProblem = problem.copy(categoryId = categoryId)

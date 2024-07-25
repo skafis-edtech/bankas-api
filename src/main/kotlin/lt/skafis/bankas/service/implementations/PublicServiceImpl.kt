@@ -1,10 +1,8 @@
 package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
-import lt.skafis.bankas.model.Category
-import lt.skafis.bankas.model.ReviewStatus
-import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.dto.SourceDisplayDto
+import lt.skafis.bankas.model.*
 import lt.skafis.bankas.repository.CategoryRepository
 import lt.skafis.bankas.repository.ProblemRepository
 import lt.skafis.bankas.repository.SourceRepository
@@ -96,13 +94,15 @@ class PublicServiceImpl: PublicService {
         )
     }
 
-    override fun getSourceById(sourceId: String): Source {
+    override fun getSourceById(sourceId: String): SourceDisplayDto {
         val source = sourceService.getSourceById(sourceId)
-        if (source.reviewStatus != ReviewStatus.APPROVED && source.author != userService.getCurrentUserUsername())
+        if (source.reviewStatus != ReviewStatus.APPROVED && source.authorId != userService.getCurrentUserId())
         {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
-        return source
+        val authorUsername = userService.getUsernameById(source.authorId)
+        val reviewerUsername = userService.getUsernameById(source.reviewedById)
+        return source.toDisplayDto(authorUsername, reviewerUsername)
     }
 
     override fun getSourcesByAuthor(authorUsername: String): List<Source> {

@@ -62,28 +62,9 @@ class ProblemServiceImpl: ProblemService {
         if (!success) throw Exception("Failed to delete problem with id $id")
     }
 
-    override fun utilsGetNewPath(imageUrl: String, storagePathOrEmpty: String): String =
-        if (imageUrl.isNotEmpty() && storagePathOrEmpty.isEmpty()) {
-            if (isValidUrl(imageUrl)) {
-                URI(imageUrl)
-                imageUrl
-            } else {
-                throw IllegalArgumentException("Invalid URL: $imageUrl")
-            }
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isNotEmpty()) {
-            storagePathOrEmpty
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isEmpty()) {
-            ""
-        } else {
-            throw IllegalArgumentException("Invalid image input (only one image for question and one image for answer is allowed per problem)")
-        }
-
     override fun utilsGetImageSrc(imagePath: String): String {
         return imagePath.let {
-            if (isValidUrl(it)) {
-                URI(it)
-                it
-            } else if (
+            if (
                 it.startsWith("problems/") ||
                 it.startsWith("answers/")
             ) {
@@ -95,10 +76,4 @@ class ProblemServiceImpl: ProblemService {
             }
         }
     }
-
-    private fun isValidUrl(url: String): Boolean {
-        val regex = Regex("https://.*")
-        return regex.matches(url)
-    }
-
 }

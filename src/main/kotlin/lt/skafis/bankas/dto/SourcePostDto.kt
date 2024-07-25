@@ -6,10 +6,10 @@ data class SourcePostDto(
     val name: String,
     val description: String,
     val reviewStatus: ReviewStatus,
-    val reviewedBy: String,
+    val reviewedById: String,
     val reviewedOn: String,
     val reviewMessage: String,
-    val author: String,
+    val authorId: String,
     val createdOn: String,
     val lastModifiedOn: String,
 )

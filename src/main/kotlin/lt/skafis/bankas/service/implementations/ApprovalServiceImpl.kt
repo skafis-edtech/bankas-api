@@ -47,7 +47,7 @@ class ApprovalServiceImpl: ApprovalService {
             Source(
                 name = sourceData.name,
                 description = sourceData.description,
-                author = userId
+                authorId = userId
             )
         )
         return createdSource.id
@@ -62,7 +62,7 @@ class ApprovalServiceImpl: ApprovalService {
         val userId = userService.getCurrentUserId()
         val imagesUUID = UUID.randomUUID()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.author != userId) {
+        if (source.authorId != userId) {
             throw IllegalAccessException("User $userId does not own source $sourceId")
         }
         if (problem.sourceListNr < 1) {
@@ -116,7 +116,7 @@ class ApprovalServiceImpl: ApprovalService {
     override fun getProblemsBySource(sourceId: String): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.author != userId  && source.reviewStatus != ReviewStatus.APPROVED) {
+        if (source.authorId != userId  && source.reviewStatus != ReviewStatus.APPROVED) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
 
@@ -145,7 +145,7 @@ class ApprovalServiceImpl: ApprovalService {
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.APPROVED,
             reviewMessage = reviewMessage,
-            reviewedBy = userId,
+            reviewedById = userId,
             reviewedOn = Instant.now().toString()
         )
         sourceRepository.update(updatedSource, sourceId)
@@ -169,7 +169,7 @@ class ApprovalServiceImpl: ApprovalService {
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.REJECTED,
             reviewMessage = reviewMessage,
-            reviewedBy = userId,
+            reviewedById = userId,
             reviewedOn = Instant.now().toString()
         )
         sourceRepository.update(updatedSource, sourceId)
@@ -188,7 +188,7 @@ class ApprovalServiceImpl: ApprovalService {
     override fun deleteSource(sourceId: String) {
         val userId = userService.getCurrentUserId()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.author != userId) {
+        if (source.authorId != userId) {
             throw IllegalAccessException("User $userId does not own source $sourceId")
         }
         val problems = problemRepository.getBySourceId(sourceId)
@@ -202,7 +202,7 @@ class ApprovalServiceImpl: ApprovalService {
         val userId = userService.getCurrentUserId()
         val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
-        if (source.author != userId) {
+        if (source.authorId != userId) {
             throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
         }
         problemRepository.delete(problemId)
@@ -226,7 +226,7 @@ class ApprovalServiceImpl: ApprovalService {
     override fun updateSource(sourceId: String, sourceData: SourceSubmitDto): Source {
         val userId = userService.getCurrentUserId()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.author != userId) {
+        if (source.authorId != userId) {
             throw IllegalAccessException("User $userId does not own source $sourceId")
         }
         val updatedSource = source.copy(

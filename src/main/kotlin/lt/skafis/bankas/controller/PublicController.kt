@@ -6,6 +6,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
+import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.service.PublicService
@@ -73,7 +74,7 @@ class PublicController {
         description = "Get source by ID. Returns source entity.",
     )
     @SecurityRequirement(name = "bearerAuth")
-    fun getSourceById(@PathVariable sourceId: String): ResponseEntity<Source> {
+    fun getSourceById(@PathVariable sourceId: String): ResponseEntity<SourceDisplayDto> {
         return ResponseEntity.ok(publicService.getSourceById(sourceId))
     }
 

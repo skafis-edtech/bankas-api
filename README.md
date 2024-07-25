@@ -2,13 +2,13 @@
 [https://api.bankas.skafis.lt](https://api.bankas.skafis.lt)
 
 ## Tech
-NoSQL - Firebase Firestore
-Spring Boot - Kotlin
-Gradle
-Docker
-Render - deploy
-Jenkins - later...
-AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed service every 14 minutes)
+- NoSQL - Firebase Firestore
+- Spring Boot - Kotlin
+- Gradle
+- Docker
+- Render - deploy
+- Jenkins - later...
+- AWS EC2 - for cron job (using crontab on ubuntu) (to trigger Render deployed service every 14 minutes)
 
 ## Dev
 1. Somehow get firebase-admin.json file (from firebase console) - have it anywhere on your computer
