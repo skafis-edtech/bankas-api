@@ -62,7 +62,7 @@ class ProblemController {
 
     @PostMapping("/meta/init")
     fun initMeta(): ResponseEntity<Void> {
-        problemMetaService.initializeLastUsedSkfCode()
+        problemMetaService.clearUsedSkfCodeList()
         return ResponseEntity.ok().build()
     }
 }

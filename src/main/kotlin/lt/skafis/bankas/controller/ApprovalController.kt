@@ -68,7 +68,7 @@ class ApprovalController {
         description = "Get all sources submitted by the current user.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun getMySources(): ResponseEntity<List<Source>> {
+    fun getMySources(): ResponseEntity<List<SourceDisplayDto>> {
         val sources = approvalService.getMySources()
         return ResponseEntity(sources, HttpStatus.OK)
     }
@@ -89,7 +89,7 @@ class ApprovalController {
         description = "Approve source with problems by source ID.",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun approve(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<Source> {
+    fun approve(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<SourceDisplayDto> {
         return ResponseEntity.ok(approvalService.approve(sourceId, reviewMsgDto.reviewMessage))
     }
 
@@ -99,8 +99,8 @@ class ApprovalController {
         description = "Get all sources submitted for approval (or already approved).",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun getSources(): ResponseEntity<List<Source>> {
-        return ResponseEntity.ok(sourceService.getSources())
+    fun getSources(): ResponseEntity<List<SourceDisplayDto>> {
+        return ResponseEntity.ok(approvalService.getSources())
     }
 
     @PatchMapping("/reject/{sourceId}")
@@ -109,7 +109,7 @@ class ApprovalController {
         description = "Reject source with problems by source ID.",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun reject(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<Source> {
+    fun reject(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<SourceDisplayDto> {
         return ResponseEntity.ok(approvalService.reject(sourceId, reviewMsgDto.reviewMessage))
     }
 
@@ -141,7 +141,7 @@ class ApprovalController {
         description = "Update source data by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun update(@PathVariable id: String, @RequestBody sourceData: SourceSubmitDto): ResponseEntity<Source> {
+    fun update(@PathVariable id: String, @RequestBody sourceData: SourceSubmitDto): ResponseEntity<SourceDisplayDto> {
         return ResponseEntity.ok(approvalService.updateSource(id, sourceData))
     }
 

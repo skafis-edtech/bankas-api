@@ -14,22 +14,22 @@ data class Source(
     val authorId: String = "",
     val createdOn: String = Instant.now().toString(),
     val lastModifiedOn: String = Instant.now().toString()
-): Identifiable
-
-fun Source.toDisplayDto(
-    reviewedByUsername: String = "",
-    authorUsername: String = ""
-): SourceDisplayDto {
-    return SourceDisplayDto(
-        id = this.id,
-        name = this.name,
-        description = this.description,
-        reviewStatus = this.reviewStatus,
-        reviewedByUsername = reviewedByUsername,
-        reviewedOn = this.reviewedOn,
-        reviewMessage = this.reviewMessage,
-        authorUsername = authorUsername,
-        createdOn = this.createdOn,
-        lastModifiedOn = this.lastModifiedOn
-    )
+): Identifiable {
+    fun toDisplayDto(
+        reviewedByUsername: String = "",
+        authorUsername: String = ""
+    ): SourceDisplayDto {
+        return SourceDisplayDto(
+            id = this.id,
+            name = this.name,
+            description = this.description,
+            reviewStatus = this.reviewStatus,
+            reviewedByUsername = reviewedByUsername,
+            reviewedOn = this.reviewedOn,
+            reviewMessage = this.reviewMessage,
+            authorUsername = authorUsername,
+            createdOn = this.createdOn,
+            lastModifiedOn = this.lastModifiedOn
+        )
+    }
 }
