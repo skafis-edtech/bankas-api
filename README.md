@@ -100,3 +100,10 @@ Yeah, it was not enough space for jekins on a free tier EC2 instance, o I just m
 
 ## Stuff -2024-06-18
 Not using postgresql - this for later - but do all the review stuff and namings immediately. Not later. Also writing postman tests, gonna add collections later. 
+
+## Image logic
+
+1. Upload:  
+    When uploading image file, it's original name is amended with random UUID and saved in firebase, the path starting with problems/ or answers/ is saved to firestore. If no image, then path field is empty string.
+2. Display:  
+    If imageSrc field is non-empty, amend the text field with image src link.

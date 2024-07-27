@@ -61,6 +61,8 @@ class ApprovalServiceImpl: ApprovalService {
     ): String {
         val userId = userService.getCurrentUserId()
         val imagesUUID = UUID.randomUUID()
+        var problemImagePath = ""
+        var answerImagePath = ""
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         if (source.authorId != userId) {
             throw IllegalAccessException("User $userId does not own source $sourceId")
@@ -69,27 +71,25 @@ class ApprovalServiceImpl: ApprovalService {
             throw IllegalArgumentException("Source list number must be greater than 0")
         }
 
+        problemImageFile?.let {
+            problemImagePath = "problems/${imagesUUID}_${it.originalFilename}"
+            storageRepository.uploadImage(it, problemImagePath)
+        }
+        answerImageFile?.let {
+            answerImagePath = "answers/${imagesUUID}_${it.originalFilename}"
+            storageRepository.uploadImage(it, answerImagePath)
+        }
+
         val createdProblem = problemRepository.create(
             Problem(
                 sourceListNr = problem.sourceListNr,
                 problemText = problem.problemText,
-                problemImagePath = problemService.utilsGetNewPath(problem.problemImageUrl, if (problemImageFile == null) "" else "problems/${imagesUUID}.${
-                    problemImageFile.originalFilename?.split(".")?.last() ?: ""
-                }"),
+                problemImagePath = problemImagePath,
                 answerText = problem.answerText,
-                answerImagePath = problemService.utilsGetNewPath(problem.answerImageUrl, if (answerImageFile == null) "" else "answers/${imagesUUID}.${
-                    answerImageFile.originalFilename?.split(".")?.last() ?: ""
-                }"),
+                answerImagePath = answerImagePath,
                 sourceId = sourceId
             )
         )
-
-        problemImageFile?.let {
-            storageRepository.uploadImage(problemImageFile, "problems/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
-        }
-        answerImageFile?.let {
-            storageRepository.uploadImage(answerImageFile, "answers/${imagesUUID}.${it.originalFilename?.split(".")?.last()}")
-        }
 
         val modifiedSource = source.copy(
             lastModifiedOn = Instant.now().toString(),
