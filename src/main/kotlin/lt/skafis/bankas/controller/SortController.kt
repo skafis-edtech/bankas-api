@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.config.RequiresRoleAtLeast
+import lt.skafis.bankas.dto.CategoryListDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.Role
@@ -43,14 +44,14 @@ class SortController {
         return ResponseEntity.ok(sortService.getMyUnsortedProblems())
     }
 
-    @PatchMapping("/sort/{problemId}/{categoryId}")
+    @PatchMapping("/sort/{problemId}")
     @Operation(
         summary = "USER owned or ADMIN. Sort a problem into a category",
         description = "Sort a problem into a category. Returns problem firestore entity.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun sortProblem(@PathVariable problemId: String, @PathVariable categoryId: String): ResponseEntity<Problem> {
-        return ResponseEntity.ok(sortService.sortProblem(problemId, categoryId))
+    fun sortProblem(@PathVariable problemId: String, @RequestBody categories: CategoryListDto): ResponseEntity<Problem> {
+        return ResponseEntity.ok(sortService.sortProblem(problemId, categories.categories))
     }
 
     @GetMapping("/notMySortedProblems")

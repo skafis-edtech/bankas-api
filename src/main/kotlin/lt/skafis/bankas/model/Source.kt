@@ -16,8 +16,8 @@ data class Source(
     val lastModifiedOn: String = Instant.now().toString()
 ): Identifiable {
     fun toDisplayDto(
-        reviewedByUsername: String = "",
-        authorUsername: String = ""
+        authorUsername: String = "",
+        reviewedByUsername: String = ""
     ): SourceDisplayDto {
         return SourceDisplayDto(
             id = this.id,
