@@ -60,7 +60,7 @@ class PublicServiceImpl: PublicService {
                     problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
                     answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                    categoryId = it.categoryId,
+                    categories = it.categories,
                     sourceId = it.sourceId,
                 )
             }.shuffled()
@@ -89,7 +89,7 @@ class PublicServiceImpl: PublicService {
             problemImageSrc = problemService.utilsGetImageSrc(problem.problemImagePath),
             answerText = problem.answerText,
             answerImageSrc = problemService.utilsGetImageSrc(problem.answerImagePath),
-            categoryId = problem.categoryId,
+            categories = problem.categories,
             sourceId = problem.sourceId,
         )
     }

@@ -141,7 +141,7 @@ class ApprovalServiceImpl: ApprovalService {
                     answerText = it.answerText,
                     answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
                     sourceId = it.sourceId,
-                    categoryId = it.categoryId
+                    categories = it.categories
                 )
             }
     }
@@ -234,7 +234,9 @@ class ApprovalServiceImpl: ApprovalService {
         val sourceProblems = problemRepository.getBySourceId(problem.sourceId)
         sourceProblems.forEach {
             problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
-            metaService.removeSkfCodeFromUsedList(it.skfCode)
+            if (it.isApproved) {
+                metaService.removeSkfCodeFromUsedList(it.skfCode)
+            }
         }
     }
 

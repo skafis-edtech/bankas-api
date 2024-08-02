@@ -8,7 +8,6 @@ import lt.skafis.bankas.service.ProblemService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
-import java.net.URI
 
 @Service
 class ProblemServiceImpl: ProblemService {
@@ -35,7 +34,7 @@ class ProblemServiceImpl: ProblemService {
                 problemImagePath = problemPostDto.problemImagePath,
                 answerText = problemPostDto.answerText,
                 answerImagePath = problemPostDto.answerImagePath,
-                categoryId = problemPostDto.categoryId,
+                categories = problemPostDto.categories,
                 sourceId = problemPostDto.sourceId
             )
         )
@@ -49,7 +48,7 @@ class ProblemServiceImpl: ProblemService {
             problemImagePath = problemPostDto.problemImagePath,
             answerText = problemPostDto.answerText,
             answerImagePath = problemPostDto.answerImagePath,
-            categoryId = problemPostDto.categoryId,
+            categories = problemPostDto.categories,
             sourceId = problemPostDto.sourceId
         )
         val success = problemRepository.update(problemToUpdate, id)

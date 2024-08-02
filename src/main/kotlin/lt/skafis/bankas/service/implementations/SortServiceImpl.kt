@@ -40,7 +40,7 @@ class SortServiceImpl: SortService {
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                categoryId = it.categoryId,
+                categories = it.categories,
                 sourceId = it.sourceId,
             )
         }
@@ -60,7 +60,7 @@ class SortServiceImpl: SortService {
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                categoryId = it.categoryId,
+                categories = it.categories,
                 sourceId = it.sourceId,
             )
         }
@@ -72,7 +72,7 @@ class SortServiceImpl: SortService {
         if (source.authorId != userService.getCurrentUserId()) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
-        val updatedProblem = problem.copy(categoryId = categoryId)
+        val updatedProblem = problem.copy(categories = problem.categories + categoryId)
         problemRepository.update(updatedProblem, problemId)
         return updatedProblem
     }
@@ -91,7 +91,7 @@ class SortServiceImpl: SortService {
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                categoryId = it.categoryId,
+                categories = it.categories,
                 sourceId = it.sourceId,
             )
         }
@@ -111,7 +111,7 @@ class SortServiceImpl: SortService {
                 problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                 answerText = it.answerText,
                 answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                categoryId = it.categoryId,
+                categories = it.categories,
                 sourceId = it.sourceId,
             )
         }

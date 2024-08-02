@@ -20,7 +20,7 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
     fun getBySourceSorted(sourceId: String): List<Problem> {
         return firestore.collection(collectionPath)
             .whereEqualTo("sourceId", sourceId)
-            .whereNotEqualTo("categoryId", "")
+            .whereNotEqualTo("categories", emptyList<String>())
             .get()
             .get()
             .documents
@@ -30,7 +30,7 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
     fun getBySourceUnsorted(sourceId: String): List<Problem> {
         return firestore.collection(collectionPath)
             .whereEqualTo("sourceId", sourceId)
-            .whereEqualTo("categoryId", "")
+            .whereEqualTo("categories", emptyList<String>())
             .get()
             .get()
             .documents
@@ -39,7 +39,7 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
 
     fun getByCategoryId(categoryId: String): List<Problem> {
         return firestore.collection(collectionPath)
-            .whereEqualTo("categoryId", categoryId)
+            .whereArrayContains("categories", categoryId)
             .get()
             .get()
             .documents
@@ -68,7 +68,7 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
     fun countApprovedByCategoryId(categoryId: String): Long {
         return firestore.collection(collectionPath)
             .whereEqualTo("isApproved", true)
-            .whereEqualTo("categoryId", categoryId)
+            .whereArrayContains("categories", categoryId)
             .get()
             .get()
             .documents

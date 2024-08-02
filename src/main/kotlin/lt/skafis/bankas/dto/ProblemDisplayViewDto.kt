@@ -8,6 +8,6 @@ data class ProblemDisplayViewDto(
     val problemImageSrc: String = "",
     val answerText: String = "",
     val answerImageSrc: String = "",
-    val categoryId: String = "",
+    val categories: List<String> = emptyList(),
     val sourceId: String = "",
 )
