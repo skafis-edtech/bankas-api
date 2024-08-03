@@ -40,7 +40,7 @@ class PublicController {
 
     @GetMapping("/unsortedProblemsCount")
     fun getUnsortedProblemsCount(): ResponseEntity<CountDto> {
-        return ResponseEntity.ok(CountDto(publicService.getCategoryProblemCount("")))
+        return ResponseEntity.ok(CountDto(publicService.getUnsortedProblemsCount()))
     }
 
     @GetMapping("/problemsByCategory/{categoryId}")
@@ -50,7 +50,7 @@ class PublicController {
 
     @GetMapping("/problemsUnsorted")
     fun getProblemsUnsorted(): ResponseEntity<List<ProblemDisplayViewDto>> {
-        return ResponseEntity.ok(publicService.getProblemsByCategoryShuffle(""))
+        return ResponseEntity.ok(publicService.getUnsortedProblems())
     }
 
     @GetMapping("/category/{categoryId}")

@@ -74,4 +74,24 @@ class ProblemRepository(private val firestore: Firestore) : FirestoreCrudReposit
             .documents
             .size.toLong()
     }
+
+    fun countUnsortedApproved(): Long {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("isApproved", true)
+            .whereEqualTo("categories", emptyList<String>())
+            .get()
+            .get()
+            .documents
+            .size.toLong()
+    }
+
+    fun getUnsortedApprovedProblems(): List<Problem> {
+        return firestore.collection(collectionPath)
+            .whereEqualTo("isApproved", true)
+            .whereEqualTo("categories", emptyList<String>())
+            .get()
+            .get()
+            .documents
+            .map { it.toObject(Problem::class.java) }
+    }
 }

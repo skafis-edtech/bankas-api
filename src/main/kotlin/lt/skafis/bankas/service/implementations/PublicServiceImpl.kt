@@ -114,4 +114,26 @@ class PublicServiceImpl: PublicService {
         }
     }
 
+    override fun getUnsortedProblems(): List<ProblemDisplayViewDto> {
+        return problemRepository.getUnsortedApprovedProblems()
+            .map {
+                ProblemDisplayViewDto(
+                    id = it.id,
+                    sourceListNr = it.sourceListNr,
+                    skfCode = it.skfCode,
+                    problemText = it.problemText,
+                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    answerText = it.answerText,
+                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    categories = it.categories,
+                    sourceId = it.sourceId,
+                )
+            }
+            .shuffled()
+    }
+
+    override fun getUnsortedProblemsCount(): Long {
+        return problemRepository.countUnsortedApproved()
+    }
+
 }

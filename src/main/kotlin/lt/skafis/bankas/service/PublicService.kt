@@ -15,4 +15,6 @@ interface PublicService {
     fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto
     fun getSourceById(sourceId: String): SourceDisplayDto
     fun getSourcesByAuthor(authorUsername: String): List<Source>
+    fun getUnsortedProblems(): List<ProblemDisplayViewDto>
+    fun getUnsortedProblemsCount(): Long
 }
