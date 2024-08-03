@@ -29,10 +29,10 @@ class SourceServiceImpl: SourceService {
                 name = source.name,
                 description = source.description,
                 reviewStatus = source.reviewStatus,
-                reviewedBy = source.reviewedBy,
+                reviewedById = source.reviewedById,
                 reviewedOn = source.reviewedOn,
                 reviewMessage = source.reviewMessage,
-                author = source.author,
+                authorId = source.authorId,
                 createdOn = source.createdOn,
                 lastModifiedOn = source.lastModifiedOn
             )
@@ -45,10 +45,10 @@ class SourceServiceImpl: SourceService {
             name = source.name,
             description = source.description,
             reviewStatus = source.reviewStatus,
-            reviewedBy = source.reviewedBy,
+            reviewedById = source.reviewedById,
             reviewedOn = source.reviewedOn,
             reviewMessage = source.reviewMessage,
-            author = source.author,
+            authorId = source.authorId,
             createdOn = source.createdOn,
             lastModifiedOn = source.lastModifiedOn
         )

@@ -10,7 +10,7 @@ class SourceRepository(private val firestore: Firestore): FirestoreCrudRepositor
 
     fun getByAuthor(author: String): List<Source> {
         return firestore.collection(collectionPath)
-            .whereEqualTo("author", author)
+            .whereEqualTo("authorId", author)
             .get()
             .get()
             .documents
@@ -19,7 +19,7 @@ class SourceRepository(private val firestore: Firestore): FirestoreCrudRepositor
 
     fun getByNotAuthor(author: String): List<Source> {
         return firestore.collection(collectionPath)
-            .whereNotEqualTo("author", author)
+            .whereNotEqualTo("authorId", author)
             .get()
             .get()
             .documents
