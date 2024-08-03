@@ -11,43 +11,39 @@ class ProblemMetaServiceImp: ProblemMetaService {
 
     @Autowired
     private lateinit var firestoreMetaRepository: MetaRepository
-
-    override fun getIncrementedLastUsedSkfCode(): String {
-        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta with last used SKF code not found")
-        val lastUsedCode = problemMeta.lastUsedCode
-        if (lastUsedCode.isBlank()) {
-            throw NotFoundException("Last used SKF code in problemMeta empty or not found")
-        }
-        return incrementSkf(lastUsedCode)
+    override fun getLowestUnusedSkfCode(): String {
+        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta not found")
+        val usedSkfCodesNrs = problemMeta.usedSkfCodes.split(",")
+            .filter { it.isNotEmpty() }
+            .map { it.toInt() }
+            .toSet()
+        val lowestUnusedNumberUpToMillion = (1..1000000).first { !usedSkfCodesNrs.contains(it) }
+        return "SKF-$lowestUnusedNumberUpToMillion"
     }
 
-    override fun incrementLastUsedSkfCode() {
-        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta with last used SKF code not found")
-        val lastUsedCode = problemMeta.lastUsedCode
-        if (lastUsedCode.isBlank()) {
-            throw NotFoundException("Last used SKF code in problemMeta empty or not found")
-        }
-        val incrementedCode = incrementSkf(lastUsedCode)
-        val success = firestoreMetaRepository.updateProblemMeta(problemMeta.copy(lastUsedCode = incrementedCode.toString()))
-        if (!success) {
-            throw NotFoundException("Failed to increment last used SKF code")
-        }
+    override fun amendUsedSkfCodeList(skfCode: String) {
+        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta not found")
+        val usedSkfCodesNrs = problemMeta.usedSkfCodes.split(",").toMutableList()
+        val skfCodeNr = skfCode.split("-")[1].toInt()
+        usedSkfCodesNrs.add(skfCodeNr.toString())
+        val updatedProblemMeta = problemMeta.copy(usedSkfCodes = usedSkfCodesNrs.joinToString(","))
+        firestoreMetaRepository.updateProblemMeta(updatedProblemMeta)
     }
 
-    override fun initializeLastUsedSkfCode() {
-        firestoreMetaRepository.init()
+    override fun removeSkfCodeFromUsedList(skfCode: String) {
+        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta not found")
+        val usedSkfCodesNrs = problemMeta.usedSkfCodes.split(",").toMutableList()
+        val skfCodeNr = skfCode.split("-")[1].toInt()
+        usedSkfCodesNrs.remove(skfCodeNr.toString())
+        val updatedProblemMeta = problemMeta.copy(usedSkfCodes = usedSkfCodesNrs.joinToString(","))
+        firestoreMetaRepository.updateProblemMeta(updatedProblemMeta)
     }
 
-    private fun incrementSkf(skfCode: String): String {
-        val regex = Regex("SKF-(\\d+)")
-        val matchResult = regex.find(skfCode)
-
-        return if (matchResult != null) {
-            val number = matchResult.groupValues[1].toInt()
-            val incrementedNumber = number + 1
-            "SKF-$incrementedNumber"
-        } else {
-            throw IllegalArgumentException("Invalid SKF format")
-        }
+    override fun clearUsedSkfCodeList() {
+        val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta not found")
+        val updatedProblemMeta = problemMeta.copy(usedSkfCodes = "")
+        firestoreMetaRepository.updateProblemMeta(updatedProblemMeta)
     }
+
+
 }

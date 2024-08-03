@@ -10,7 +10,7 @@ data class Problem (
     val problemImagePath: String = "",
     val answerText: String = "",
     val answerImagePath: String = "",
-    val categoryId: String = "",
+    val categories: List<String> = emptyList(),
     val sourceId: String = "",
 
     @get:PropertyName("isApproved")

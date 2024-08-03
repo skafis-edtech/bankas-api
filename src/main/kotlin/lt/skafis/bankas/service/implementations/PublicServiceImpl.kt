@@ -1,10 +1,8 @@
 package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
-import lt.skafis.bankas.model.Category
-import lt.skafis.bankas.model.ReviewStatus
-import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.dto.SourceDisplayDto
+import lt.skafis.bankas.model.*
 import lt.skafis.bankas.repository.CategoryRepository
 import lt.skafis.bankas.repository.ProblemRepository
 import lt.skafis.bankas.repository.SourceRepository
@@ -62,7 +60,7 @@ class PublicServiceImpl: PublicService {
                     problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
                     answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
-                    categoryId = it.categoryId,
+                    categories = it.categories,
                     sourceId = it.sourceId,
                 )
             }.shuffled()
@@ -91,24 +89,51 @@ class PublicServiceImpl: PublicService {
             problemImageSrc = problemService.utilsGetImageSrc(problem.problemImagePath),
             answerText = problem.answerText,
             answerImageSrc = problemService.utilsGetImageSrc(problem.answerImagePath),
-            categoryId = problem.categoryId,
+            categories = problem.categories,
             sourceId = problem.sourceId,
         )
     }
 
-    override fun getSourceById(sourceId: String): Source {
+    override fun getSourceById(sourceId: String): SourceDisplayDto {
         val source = sourceService.getSourceById(sourceId)
-        if (source.reviewStatus != ReviewStatus.APPROVED && source.author != userService.getCurrentUserUsername())
+        if (source.reviewStatus != ReviewStatus.APPROVED && source.authorId != userService.getCurrentUserId())
         {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
-        return source
+        val authorUsername = userService.getUsernameById(source.authorId)
+        if (source.reviewedById.isNotEmpty()){
+            val reviewerUsername = userService.getUsernameById(source.reviewedById)
+            return source.toDisplayDto(authorUsername, reviewerUsername)
+        }
+        return source.toDisplayDto(authorUsername, "")
     }
 
     override fun getSourcesByAuthor(authorUsername: String): List<Source> {
         return sourceRepository.getByAuthor(authorUsername).filter {
             it.reviewStatus == ReviewStatus.APPROVED
         }
+    }
+
+    override fun getUnsortedProblems(): List<ProblemDisplayViewDto> {
+        return problemRepository.getUnsortedApprovedProblems()
+            .map {
+                ProblemDisplayViewDto(
+                    id = it.id,
+                    sourceListNr = it.sourceListNr,
+                    skfCode = it.skfCode,
+                    problemText = it.problemText,
+                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    answerText = it.answerText,
+                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    categories = it.categories,
+                    sourceId = it.sourceId,
+                )
+            }
+            .shuffled()
+    }
+
+    override fun getUnsortedProblemsCount(): Long {
+        return problemRepository.countUnsortedApproved()
     }
 
 }

@@ -7,6 +7,6 @@ data class ProblemPostDto(
     val answerImagePath: String,
     val problemText: String,
     val answerText: String,
-    val categoryId: String,
+    val categories: List<String>,
     val sourceId: String,
 )

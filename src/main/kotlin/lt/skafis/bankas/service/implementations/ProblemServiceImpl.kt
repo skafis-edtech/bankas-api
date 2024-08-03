@@ -8,7 +8,6 @@ import lt.skafis.bankas.service.ProblemService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
-import java.net.URI
 
 @Service
 class ProblemServiceImpl: ProblemService {
@@ -35,7 +34,7 @@ class ProblemServiceImpl: ProblemService {
                 problemImagePath = problemPostDto.problemImagePath,
                 answerText = problemPostDto.answerText,
                 answerImagePath = problemPostDto.answerImagePath,
-                categoryId = problemPostDto.categoryId,
+                categories = problemPostDto.categories,
                 sourceId = problemPostDto.sourceId
             )
         )
@@ -49,7 +48,7 @@ class ProblemServiceImpl: ProblemService {
             problemImagePath = problemPostDto.problemImagePath,
             answerText = problemPostDto.answerText,
             answerImagePath = problemPostDto.answerImagePath,
-            categoryId = problemPostDto.categoryId,
+            categories = problemPostDto.categories,
             sourceId = problemPostDto.sourceId
         )
         val success = problemRepository.update(problemToUpdate, id)
@@ -62,28 +61,9 @@ class ProblemServiceImpl: ProblemService {
         if (!success) throw Exception("Failed to delete problem with id $id")
     }
 
-    override fun utilsGetNewPath(imageUrl: String, storagePathOrEmpty: String): String =
-        if (imageUrl.isNotEmpty() && storagePathOrEmpty.isEmpty()) {
-            if (isValidUrl(imageUrl)) {
-                URI(imageUrl)
-                imageUrl
-            } else {
-                throw IllegalArgumentException("Invalid URL: $imageUrl")
-            }
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isNotEmpty()) {
-            storagePathOrEmpty
-        } else if (imageUrl.isEmpty() && storagePathOrEmpty.isEmpty()) {
-            ""
-        } else {
-            throw IllegalArgumentException("Invalid image input (only one image for question and one image for answer is allowed per problem)")
-        }
-
     override fun utilsGetImageSrc(imagePath: String): String {
         return imagePath.let {
-            if (isValidUrl(it)) {
-                URI(it)
-                it
-            } else if (
+            if (
                 it.startsWith("problems/") ||
                 it.startsWith("answers/")
             ) {
@@ -95,10 +75,4 @@ class ProblemServiceImpl: ProblemService {
             }
         }
     }
-
-    private fun isValidUrl(url: String): Boolean {
-        val regex = Regex("https://.*")
-        return regex.matches(url)
-    }
-
 }
