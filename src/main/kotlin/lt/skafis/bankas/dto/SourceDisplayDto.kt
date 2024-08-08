@@ -8,9 +8,7 @@ data class SourceDisplayDto(
     val name: String = "",
     val description: String = "",
     val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
-    val reviewedByUsername: String = "",
-    val reviewedOn: String = "",
-    val reviewMessage: String = "",
+    val reviewHistory: String = "",
     val authorUsername: String = "",
     val createdOn: String = Instant.now().toString(),
     val lastModifiedOn: String = Instant.now().toString()

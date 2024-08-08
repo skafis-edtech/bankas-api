@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 import org.webjars.NotFoundException
 import java.util.*
 
@@ -112,11 +114,7 @@ class ApprovalServiceImpl: ApprovalService {
                 it.lastModifiedOn
             }
             .map {
-                if (it.reviewedById.isNotEmpty()) {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), userService.getUsernameById(it.reviewedById))
-                } else {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), "")
-                }
+                it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
     }
 
@@ -147,13 +145,11 @@ class ApprovalServiceImpl: ApprovalService {
     }
 
     override fun approve(sourceId: String, reviewMessage: String): SourceDisplayDto {
-        val userId = userService.getCurrentUserId()
+        val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.APPROVED,
-            reviewMessage = reviewMessage,
-            reviewedById = userId,
-            reviewedOn = Instant.now().toString()
+            reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
         )
         sourceRepository.update(updatedSource, sourceId)
 
@@ -167,20 +163,15 @@ class ApprovalServiceImpl: ApprovalService {
             )
             problemRepository.update(updatedProblem, it.id)
         }
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun reject(sourceId: String, reviewMessage: String): SourceDisplayDto {
-        val userId = userService.getCurrentUserId()
+        val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.REJECTED,
-            reviewMessage = reviewMessage,
-            reviewedById = userId,
-            reviewedOn = Instant.now().toString()
+            reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
         )
         sourceRepository.update(updatedSource, sourceId)
 
@@ -193,10 +184,7 @@ class ApprovalServiceImpl: ApprovalService {
             problemRepository.update(updatedProblem, it.id)
             metaService.removeSkfCodeFromUsedList(it.skfCode)
         }
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun deleteSource(sourceId: String) {
@@ -253,10 +241,7 @@ class ApprovalServiceImpl: ApprovalService {
             reviewStatus = ReviewStatus.PENDING
         )
         sourceRepository.update(updatedSource, sourceId)
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun updateProblem(
@@ -274,11 +259,7 @@ class ApprovalServiceImpl: ApprovalService {
                 it.lastModifiedOn
             }
             .map {
-                if (it.reviewedById.isNotEmpty()) {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), userService.getUsernameById(it.reviewedById))
-                } else {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), "")
-                }
+                it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
     }
 }

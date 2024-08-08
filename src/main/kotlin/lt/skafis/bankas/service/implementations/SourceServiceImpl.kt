@@ -29,9 +29,7 @@ class SourceServiceImpl: SourceService {
                 name = source.name,
                 description = source.description,
                 reviewStatus = source.reviewStatus,
-                reviewedById = source.reviewedById,
-                reviewedOn = source.reviewedOn,
-                reviewMessage = source.reviewMessage,
+                reviewHistory = source.reviewHistory,
                 authorId = source.authorId,
                 createdOn = source.createdOn,
                 lastModifiedOn = source.lastModifiedOn
@@ -45,9 +43,7 @@ class SourceServiceImpl: SourceService {
             name = source.name,
             description = source.description,
             reviewStatus = source.reviewStatus,
-            reviewedById = source.reviewedById,
-            reviewedOn = source.reviewedOn,
-            reviewMessage = source.reviewMessage,
+            reviewHistory = source.reviewHistory,
             authorId = source.authorId,
             createdOn = source.createdOn,
             lastModifiedOn = source.lastModifiedOn
