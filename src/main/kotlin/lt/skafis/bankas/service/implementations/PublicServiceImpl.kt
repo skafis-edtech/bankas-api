@@ -101,11 +101,7 @@ class PublicServiceImpl: PublicService {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val authorUsername = userService.getUsernameById(source.authorId)
-        if (source.reviewedById.isNotEmpty()){
-            val reviewerUsername = userService.getUsernameById(source.reviewedById)
-            return source.toDisplayDto(authorUsername, reviewerUsername)
-        }
-        return source.toDisplayDto(authorUsername, "")
+        return source.toDisplayDto(authorUsername)
     }
 
     override fun getSourcesByAuthor(authorUsername: String): List<Source> {

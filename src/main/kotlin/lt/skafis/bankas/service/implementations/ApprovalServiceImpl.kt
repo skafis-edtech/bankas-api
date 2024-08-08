@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.threeten.bp.Instant
+import org.threeten.bp.ZoneId
+import org.threeten.bp.format.DateTimeFormatter
 import org.webjars.NotFoundException
 import java.util.*
 
@@ -97,11 +99,15 @@ class ApprovalServiceImpl: ApprovalService {
         )
         sourceRepository.update(modifiedSource, sourceId)
 
-        val sourceProblems = problemRepository.getBySourceId(sourceId)
-        sourceProblems.forEach {
-            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+        if (source.reviewStatus == ReviewStatus.APPROVED) {
+            val sourceProblems = problemRepository.getBySourceId(sourceId)
+            sourceProblems.forEach {
+                problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+                if (it.isApproved) {
+                    metaService.removeSkfCodeFromUsedList(it.skfCode)
+                }
+            }
         }
-
         return createdProblem.id
     }
 
@@ -112,11 +118,7 @@ class ApprovalServiceImpl: ApprovalService {
                 it.lastModifiedOn
             }
             .map {
-                if (it.reviewedById.isNotEmpty()) {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), userService.getUsernameById(it.reviewedById))
-                } else {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), "")
-                }
+                it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
     }
 
@@ -147,56 +149,51 @@ class ApprovalServiceImpl: ApprovalService {
     }
 
     override fun approve(sourceId: String, reviewMessage: String): SourceDisplayDto {
-        val userId = userService.getCurrentUserId()
+        val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.APPROVED,
-            reviewMessage = reviewMessage,
-            reviewedById = userId,
-            reviewedOn = Instant.now().toString()
+            reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
         )
         sourceRepository.update(updatedSource, sourceId)
 
-        val problems = problemRepository.getBySourceId(sourceId)
-        problems.forEach {
-            val skfCode = metaService.getLowestUnusedSkfCode()
-            metaService.amendUsedSkfCodeList(skfCode)
-            val updatedProblem = it.copy(
-                skfCode = skfCode,
-                isApproved = true
-            )
-            problemRepository.update(updatedProblem, it.id)
+        if (source.reviewStatus != ReviewStatus.APPROVED) {
+            val problems = problemRepository.getBySourceId(sourceId)
+            problems.forEach {
+                val skfCode = metaService.getLowestUnusedSkfCode()
+                metaService.amendUsedSkfCodeList(skfCode)
+                val updatedProblem = it.copy(
+                    skfCode = skfCode,
+                    isApproved = true
+                )
+                problemRepository.update(updatedProblem, it.id)
+            }
         }
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
+
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun reject(sourceId: String, reviewMessage: String): SourceDisplayDto {
-        val userId = userService.getCurrentUserId()
+        val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
         val updatedSource = source.copy(
             reviewStatus = ReviewStatus.REJECTED,
-            reviewMessage = reviewMessage,
-            reviewedById = userId,
-            reviewedOn = Instant.now().toString()
+            reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
         )
         sourceRepository.update(updatedSource, sourceId)
 
-        val problems = problemRepository.getBySourceId(sourceId)
-        problems.forEach {
-            val updatedProblem = it.copy(
-                skfCode = "",
-                isApproved = false
-            )
-            problemRepository.update(updatedProblem, it.id)
-            metaService.removeSkfCodeFromUsedList(it.skfCode)
+        if (source.reviewStatus == ReviewStatus.APPROVED) {
+            val problems = problemRepository.getBySourceId(sourceId)
+            problems.forEach {
+                val updatedProblem = it.copy(
+                    skfCode = "",
+                    isApproved = false
+                )
+                problemRepository.update(updatedProblem, it.id)
+                metaService.removeSkfCodeFromUsedList(it.skfCode)
+            }
         }
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun deleteSource(sourceId: String) {
@@ -226,18 +223,7 @@ class ApprovalServiceImpl: ApprovalService {
         if (problem.answerImagePath.startsWith("answers/")) {
             storageRepository.deleteImage(problem.answerImagePath)
         }
-        val modifiedSource = source.copy(
-            lastModifiedOn = Instant.now().toString(),
-            reviewStatus = ReviewStatus.PENDING
-        )
-        sourceRepository.update(modifiedSource, problem.sourceId)
-        val sourceProblems = problemRepository.getBySourceId(problem.sourceId)
-        sourceProblems.forEach {
-            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
-            if (it.isApproved) {
-                metaService.removeSkfCodeFromUsedList(it.skfCode)
-            }
-        }
+        unapproveSource(source)
     }
 
     override fun updateSource(sourceId: String, sourceData: SourceSubmitDto): SourceDisplayDto {
@@ -252,20 +238,8 @@ class ApprovalServiceImpl: ApprovalService {
             lastModifiedOn = Instant.now().toString(),
             reviewStatus = ReviewStatus.PENDING
         )
-        sourceRepository.update(updatedSource, sourceId)
-        if (source.reviewedById.isNotEmpty()) {
-            return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), userService.getUsernameById(updatedSource.reviewedById))
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId), "")
-    }
-
-    override fun updateProblem(
-        problemId: String,
-        problem: ProblemSubmitDto,
-        problemImageFile: MultipartFile?,
-        answerImageFile: MultipartFile?
-    ): Problem {
-        TODO("Not yet implemented")
+        unapproveSource(updatedSource)
+        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun getSources(): List<SourceDisplayDto> {
@@ -274,11 +248,113 @@ class ApprovalServiceImpl: ApprovalService {
                 it.lastModifiedOn
             }
             .map {
-                if (it.reviewedById.isNotEmpty()) {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), userService.getUsernameById(it.reviewedById))
-                } else {
-                    it.toDisplayDto(userService.getUsernameById(it.authorId), "")
-                }
+                it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
+    }
+
+    override fun updateProblemTexts(problemId: String, problemTextsDto: ProblemTextsDto) {
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
+        }
+        val updatedProblem = problem.copy(
+            sourceListNr = problem.sourceListNr,
+            problemText = problemTextsDto.problemText,
+            answerText = problemTextsDto.answerText,
+        )
+        problemRepository.update(updatedProblem, problemId)
+
+        unapproveSource(source)
+    }
+
+    override fun deleteProblemImage(problemId: String) {
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
+        }
+        if (problem.problemImagePath.startsWith("problems/")) {
+            storageRepository.deleteImage(problem.problemImagePath)
+        } else {
+            throw IllegalAccessException("Problem $problemId does not have a problem image")
+        }
+        val updatedProblem = problem.copy(
+            problemImagePath = ""
+        )
+        problemRepository.update(updatedProblem, problemId)
+        unapproveSource(source)
+    }
+
+    override fun deleteAnswerImage(problemId: String) {
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
+        }
+        if (problem.answerImagePath.startsWith("answers/")) {
+            storageRepository.deleteImage(problem.answerImagePath)
+        } else {
+            throw IllegalAccessException("Problem $problemId does not have an answer image")
+        }
+        val updatedProblem = problem.copy(
+            answerImagePath = ""
+        )
+        problemRepository.update(updatedProblem, problemId)
+        unapproveSource(source)
+    }
+
+    override fun uploadProblemImage(problemId: String, image: MultipartFile): String {
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
+        }
+        val imagesUUID = UUID.randomUUID()
+        val problemImagePath = "problems/${imagesUUID}_${image.originalFilename}"
+        storageRepository.uploadImage(image, problemImagePath)
+        val updatedProblem = problem.copy(
+            problemImagePath = problemImagePath
+        )
+        problemRepository.update(updatedProblem, problemId)
+        unapproveSource(source)
+        return problemImagePath
+    }
+
+    override fun uploadAnswerImage(problemId: String, image: MultipartFile): String {
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
+        }
+        val imagesUUID = UUID.randomUUID()
+        val answerImagePath = "answers/${imagesUUID}_${image.originalFilename}"
+        storageRepository.uploadImage(image, answerImagePath)
+        val updatedProblem = problem.copy(
+            answerImagePath = answerImagePath
+        )
+        problemRepository.update(updatedProblem, problemId)
+        unapproveSource(source)
+        return answerImagePath
+    }
+
+    private fun unapproveSource(source: Source) {
+        val modifiedSource = source.copy(
+            lastModifiedOn = Instant.now().toString(),
+            reviewStatus = ReviewStatus.PENDING
+        )
+        sourceRepository.update(modifiedSource, source.id)
+        val problems = problemRepository.getBySourceId(source.id)
+        problems.forEach {
+            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+            if (it.isApproved) {
+                metaService.removeSkfCodeFromUsedList(it.skfCode)
+            }
+        }
     }
 }

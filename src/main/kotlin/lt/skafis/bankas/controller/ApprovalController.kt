@@ -113,7 +113,7 @@ class ApprovalController {
         return ResponseEntity.ok(approvalService.reject(sourceId, reviewMsgDto.reviewMessage))
     }
 
-    @DeleteMapping("/source/delete/{id}")
+    @DeleteMapping("/source/{id}")
     @Operation(
         summary = "USER but owning. Delete source with all problems",
         description = "Delete source with all problems by ID.",
@@ -124,7 +124,7 @@ class ApprovalController {
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
-    @DeleteMapping("/problem/delete/{id}")
+    @DeleteMapping("/problem/{id}")
     @Operation(
         summary = "USER but owning. Delete problem",
         description = "Delete problem by ID.",
@@ -135,7 +135,7 @@ class ApprovalController {
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
 
-    @PutMapping("/source/update/{id}")
+    @PutMapping("/source/{id}")
     @Operation(
         summary = "USER but owning. Update source data",
         description = "Update source data by ID.",
@@ -145,19 +145,63 @@ class ApprovalController {
         return ResponseEntity.ok(approvalService.updateSource(id, sourceData))
     }
 
-    @PutMapping("/problem/update/{id}")
+    @PutMapping("/problem/texts/{id}")
     @Operation(
-        summary = "NOT IMPLEMENTED YET!!!! USER but owning. Update problem data. NOT IMPLEMENTED YET!!!!!",
-        description = "Update problem data by ID. Images: if it was problems/uuid.png and sends KEEP_FILE_THE_SAME, then nothing with files. If string doesn't start with problems/ TODO TODO:...- check the sent file - if there is any, upload it, if there's not - the image got deleted, or it wasn't there at all",
+        summary = "USER but owning. Update problem texts",
+        description = "Update problem texts by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun updateProblem(
-        @PathVariable id: String,
-        @RequestPart("problem") problem: ProblemSubmitDto,
-        @RequestPart(value = "problemImageFile", required = false) problemImageFile: MultipartFile?,
-        @RequestPart(value = "answerImageFile", required = false) answerImageFile: MultipartFile?,
-    ): ResponseEntity<Problem> {
-        return ResponseEntity.ok(approvalService.updateProblem(id, problem, problemImageFile, answerImageFile))
+    fun updateProblemTexts(@PathVariable id: String, @RequestBody problemTexts: ProblemTextsDto): ResponseEntity<Void> {
+        approvalService.updateProblemTexts(id, problemTexts)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    @DeleteMapping("/problem/problemImage/{id}")
+    @Operation(
+        summary = "USER but owning. Delete problem image",
+        description = "Delete problem image by ID.",
+    )
+    @RequiresRoleAtLeast(Role.USER)
+    fun deleteProblemImage(@PathVariable id: String): ResponseEntity<Void> {
+        approvalService.deleteProblemImage(id)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    @DeleteMapping("/problem/answerImage/{id}")
+    @Operation(
+        summary = "USER but owning. Delete answer image",
+        description = "Delete answer image by ID.",
+    )
+    @RequiresRoleAtLeast(Role.USER)
+    fun deleteAnswerImage(@PathVariable id: String): ResponseEntity<Void> {
+        approvalService.deleteAnswerImage(id)
+        return ResponseEntity(HttpStatus.NO_CONTENT)
+    }
+
+    @PostMapping("/problem/problemImage/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @Operation(
+        summary = "USER but owning. Upload problem image",
+        description = "Upload problem image by ID.",
+        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = [Content(mediaType = "multipart/form-data")]
+        )
+    )
+    @RequiresRoleAtLeast(Role.USER)
+    fun uploadProblemImage(@PathVariable id: String, @RequestPart("problemImageFile") problemImageFile: MultipartFile): ResponseEntity<ImageSrcDto> {
+        return ResponseEntity.ok(ImageSrcDto(approvalService.uploadProblemImage(id, problemImageFile)))
+    }
+
+    @PostMapping("/problem/answerImage/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
+    @Operation(
+        summary = "USER but owning. Upload answer image",
+        description = "Upload answer image by ID.",
+        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
+            content = [Content(mediaType = "multipart/form-data")]
+        )
+    )
+    @RequiresRoleAtLeast(Role.USER)
+    fun uploadAnswerImage(@PathVariable id: String, @RequestPart("answerImageFile") answerImageFile: MultipartFile): ResponseEntity<ImageSrcDto> {
+        return ResponseEntity.ok(ImageSrcDto(approvalService.uploadAnswerImage(id, answerImageFile)))
     }
 
 }
