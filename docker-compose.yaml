@@ -10,4 +10,4 @@ services:
       - ENVIRONMENT=dev
       - PORT=9000
     volumes:
-      - /home/home/Desktop/DONT_DELETE/bankas-skafis-api_GETTING_CONFUSING/firebase-admin.json:/etc/secrets/firebase-admin.json
+      - /local/path/to/firebase-admin.json:/etc/secrets/firebase-admin.json
