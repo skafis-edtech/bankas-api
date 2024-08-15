@@ -222,6 +222,7 @@ class ApprovalServiceImpl: ApprovalService {
             throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
         }
         problemRepository.delete(problemId)
+        metaService.removeSkfCodeFromUsedList(problem.skfCode)
         if (problem.problemImagePath.startsWith("problems/")) {
             storageRepository.deleteImage(problem.problemImagePath)
         }
