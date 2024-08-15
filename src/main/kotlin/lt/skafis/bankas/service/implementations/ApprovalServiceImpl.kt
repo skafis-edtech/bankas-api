@@ -160,13 +160,20 @@ class ApprovalServiceImpl: ApprovalService {
         if (source.reviewStatus != ReviewStatus.APPROVED) {
             val problems = problemRepository.getBySourceId(sourceId)
             problems.forEach {
-                val skfCode = metaService.getLowestUnusedSkfCode()
-                metaService.amendUsedSkfCodeList(skfCode)
-                val updatedProblem = it.copy(
-                    skfCode = skfCode,
-                    isApproved = true
-                )
-                problemRepository.update(updatedProblem, it.id)
+                if (it.skfCode.isEmpty()) {
+                    val skfCode = metaService.getLowestUnusedSkfCode()
+                    metaService.amendUsedSkfCodeList(skfCode)
+                    val updatedProblem = it.copy(
+                        skfCode = skfCode,
+                        isApproved = true
+                    )
+                    problemRepository.update(updatedProblem, it.id)
+                } else {
+                    val updatedProblem = it.copy(
+                        isApproved = true
+                    )
+                    problemRepository.update(updatedProblem, it.id)
+                }
             }
         }
 
@@ -186,11 +193,9 @@ class ApprovalServiceImpl: ApprovalService {
             val problems = problemRepository.getBySourceId(sourceId)
             problems.forEach {
                 val updatedProblem = it.copy(
-                    skfCode = "",
                     isApproved = false
                 )
                 problemRepository.update(updatedProblem, it.id)
-                metaService.removeSkfCodeFromUsedList(it.skfCode)
             }
         }
         return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
@@ -351,10 +356,7 @@ class ApprovalServiceImpl: ApprovalService {
         sourceRepository.update(modifiedSource, source.id)
         val problems = problemRepository.getBySourceId(source.id)
         problems.forEach {
-            problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
-            if (it.isApproved) {
-                metaService.removeSkfCodeFromUsedList(it.skfCode)
-            }
+            problemRepository.update(it.copy(isApproved = false), it.id)
         }
     }
 }
