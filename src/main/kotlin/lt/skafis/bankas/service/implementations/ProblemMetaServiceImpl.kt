@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class ProblemMetaServiceImp: ProblemMetaService {
+class ProblemMetaServiceImpl: ProblemMetaService {
 
     @Autowired
     private lateinit var firestoreMetaRepository: MetaRepository

@@ -11,10 +11,11 @@ interface PublicService {
     fun getCategoryProblemCount(categoryId: String): Long
     fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto>
     fun getCategoryById(categoryId: String): Category
-    fun getCategories(): List<Category>
+    fun getCategories(page: Int, size: Int, search: String): List<Category>
     fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto
     fun getSourceById(sourceId: String): SourceDisplayDto
-    fun getSourcesByAuthor(authorUsername: String): List<Source>
+    fun getSourcesByAuthor(authorUsername: String): List<SourceDisplayDto>
     fun getUnsortedProblems(): List<ProblemDisplayViewDto>
     fun getUnsortedProblemsCount(): Long
+    fun getApprovedSources(): List<SourceDisplayDto>
 }

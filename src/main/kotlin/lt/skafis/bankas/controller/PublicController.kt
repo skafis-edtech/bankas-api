@@ -3,6 +3,7 @@ package lt.skafis.bankas.controller
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.websocket.server.PathParam
 import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
@@ -59,8 +60,12 @@ class PublicController {
     }
 
     @GetMapping("/categories")
-    fun getCategories(): ResponseEntity<List<Category>> {
-        return ResponseEntity.ok(publicService.getCategories())
+    fun getCategories(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+        @RequestParam(required = false, defaultValue = "") search: String
+    ): ResponseEntity<List<Category>> {
+        return ResponseEntity.ok(publicService.getCategories(page, size, search))
     }
 
     @GetMapping("/problem/{skfCode}")
@@ -79,8 +84,13 @@ class PublicController {
     }
 
     @GetMapping("/sourcesByAuthor/{authorUsername}")
-    fun getSourcesByAuthor(@PathVariable authorUsername: String): ResponseEntity<List<Source>> {
+    fun getSourcesByAuthor(@PathVariable authorUsername: String): ResponseEntity<List<SourceDisplayDto>> {
         return ResponseEntity.ok(publicService.getSourcesByAuthor(authorUsername))
+    }
+
+    @GetMapping("/approvedSources")
+    fun getApprovedSources(): ResponseEntity<List<SourceDisplayDto>> {
+        return ResponseEntity.ok(publicService.getApprovedSources())
     }
 
 }
