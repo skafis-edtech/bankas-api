@@ -9,8 +9,9 @@ import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class UserServiceImpl(private val userRepository: UserRepository) : UserService {
-
+class UserServiceImpl(
+    private val userRepository: UserRepository,
+) : UserService {
     override fun getUserById(userId: String): User {
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
         return user
@@ -31,7 +32,10 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         return user.role
     }
 
-    override fun updateBio(bio: String, userId: String): Boolean {
+    override fun updateBio(
+        bio: String,
+        userId: String,
+    ): Boolean {
         val success = userRepository.updateUserBio(userId, bio)
         if (!success) {
             throw NotFoundException("User not found")
@@ -46,9 +50,15 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
 
     override fun grantRoleAtLeast(role: Role) {
         val user = userRepository.getUserById(getCurrentUserId()) ?: throw NotFoundException("User not found")
-        if (!(role === Role.USER && (user.role === Role.USER || user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
-                role === Role.ADMIN && (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
-                role === Role.SUPER_ADMIN && user.role === Role.SUPER_ADMIN)) {
+        if (!(
+                role === Role.USER &&
+                    (user.role === Role.USER || user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
+                    role === Role.ADMIN &&
+                    (user.role === Role.ADMIN || user.role === Role.SUPER_ADMIN) ||
+                    role === Role.SUPER_ADMIN &&
+                    user.role === Role.SUPER_ADMIN
+            )
+        ) {
             throw IllegalArgumentException("Unauthorized access")
         }
     }

@@ -5,19 +5,17 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
+import lt.skafis.bankas.config.RequiresRoleAtLeast
+import lt.skafis.bankas.dto.*
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.service.ApprovalService
+import lt.skafis.bankas.service.SourceService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.multipart.MultipartFile
-import lt.skafis.bankas.config.RequiresRoleAtLeast
-import lt.skafis.bankas.dto.*
-import lt.skafis.bankas.model.Problem
-import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.model.Source
-import lt.skafis.bankas.service.SourceService
 
 @RestController
 @RequestMapping("/approval")
@@ -25,7 +23,6 @@ import lt.skafis.bankas.service.SourceService
 @SecurityRequirement(name = "bearerAuth")
 @Logged
 class ApprovalController {
-
     @Autowired
     private lateinit var approvalService: ApprovalService
 
@@ -38,7 +35,9 @@ class ApprovalController {
         description = "Submit source data for approval. Returns the ID of the created source.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun submitSourceData(@RequestBody sourceData: SourceSubmitDto): ResponseEntity<IdDto> {
+    fun submitSourceData(
+        @RequestBody sourceData: SourceSubmitDto,
+    ): ResponseEntity<IdDto> {
         val sourceId = approvalService.submitSourceData(sourceData)
         return ResponseEntity(IdDto(sourceId), HttpStatus.CREATED)
     }
@@ -47,9 +46,10 @@ class ApprovalController {
     @Operation(
         summary = "USER. Submit problem data with images",
         description = "Doesn't work from swagger... responds with 415. Submit problem data with images for approval. Returns the ID of the created problem.",
-        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = [Content(mediaType = "multipart/form-data")]
-        )
+        requestBody =
+            io.swagger.v3.oas.annotations.parameters.RequestBody(
+                content = [Content(mediaType = "multipart/form-data")],
+            ),
     )
     @RequiresRoleAtLeast(Role.USER)
     fun submitProblem(
@@ -75,11 +75,15 @@ class ApprovalController {
 
     @GetMapping("/problemsBySource/{sourceId}")
     @Operation(
-        summary = "Either USER with it's problems, or ADMIN, or PUBLIC && source.reviewStatus === ReviewStatus.APPROVED. Get problems by source",
+        summary = "Either USER with it's problems, or ADMIN, or PUBLIC && source.reviewStatus === ReviewStatus.APPROVED.",
         description = "Get all problems submitted for the source.",
     )
-    fun getProblemsBySource(@PathVariable sourceId: String): ResponseEntity<List<ProblemDisplayViewDto>> {
-        val problems = approvalService.getProblemsBySource(sourceId)
+    fun getProblemsBySource(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+        @PathVariable sourceId: String,
+    ): ResponseEntity<List<ProblemDisplayViewDto>> {
+        val problems = approvalService.getProblemsBySource(sourceId, page, size)
         return ResponseEntity(problems, HttpStatus.OK)
     }
 
@@ -89,9 +93,10 @@ class ApprovalController {
         description = "Approve source with problems by source ID.",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun approve(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<SourceDisplayDto> {
-        return ResponseEntity.ok(approvalService.approve(sourceId, reviewMsgDto.reviewMessage))
-    }
+    fun approve(
+        @PathVariable sourceId: String,
+        @RequestBody reviewMsgDto: ReviewMsgDto,
+    ): ResponseEntity<SourceDisplayDto> = ResponseEntity.ok(approvalService.approve(sourceId, reviewMsgDto.reviewMessage))
 
     @GetMapping("/sources")
     @Operation(
@@ -99,9 +104,7 @@ class ApprovalController {
         description = "Get all sources submitted for approval (or already approved).",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun getSources(): ResponseEntity<List<SourceDisplayDto>> {
-        return ResponseEntity.ok(approvalService.getSources())
-    }
+    fun getSources(): ResponseEntity<List<SourceDisplayDto>> = ResponseEntity.ok(approvalService.getSources())
 
     @PatchMapping("/reject/{sourceId}")
     @Operation(
@@ -109,9 +112,10 @@ class ApprovalController {
         description = "Reject source with problems by source ID.",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun reject(@PathVariable sourceId: String, @RequestBody reviewMsgDto: ReviewMsgDto): ResponseEntity<SourceDisplayDto> {
-        return ResponseEntity.ok(approvalService.reject(sourceId, reviewMsgDto.reviewMessage))
-    }
+    fun reject(
+        @PathVariable sourceId: String,
+        @RequestBody reviewMsgDto: ReviewMsgDto,
+    ): ResponseEntity<SourceDisplayDto> = ResponseEntity.ok(approvalService.reject(sourceId, reviewMsgDto.reviewMessage))
 
     @DeleteMapping("/source/{id}")
     @Operation(
@@ -119,7 +123,9 @@ class ApprovalController {
         description = "Delete source with all problems by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun deleteSource(@PathVariable id: String): ResponseEntity<Void> {
+    fun deleteSource(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         approvalService.deleteSource(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -130,7 +136,9 @@ class ApprovalController {
         description = "Delete problem by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun deleteProblem(@PathVariable id: String): ResponseEntity<Void> {
+    fun deleteProblem(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         approvalService.deleteProblem(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -141,9 +149,10 @@ class ApprovalController {
         description = "Update source data by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun update(@PathVariable id: String, @RequestBody sourceData: SourceSubmitDto): ResponseEntity<SourceDisplayDto> {
-        return ResponseEntity.ok(approvalService.updateSource(id, sourceData))
-    }
+    fun update(
+        @PathVariable id: String,
+        @RequestBody sourceData: SourceSubmitDto,
+    ): ResponseEntity<SourceDisplayDto> = ResponseEntity.ok(approvalService.updateSource(id, sourceData))
 
     @PutMapping("/problem/texts/{id}")
     @Operation(
@@ -151,7 +160,10 @@ class ApprovalController {
         description = "Update problem texts by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun updateProblemTexts(@PathVariable id: String, @RequestBody problemTexts: ProblemTextsDto): ResponseEntity<Void> {
+    fun updateProblemTexts(
+        @PathVariable id: String,
+        @RequestBody problemTexts: ProblemTextsDto,
+    ): ResponseEntity<Void> {
         approvalService.updateProblemTexts(id, problemTexts)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -162,7 +174,9 @@ class ApprovalController {
         description = "Delete problem image by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun deleteProblemImage(@PathVariable id: String): ResponseEntity<Void> {
+    fun deleteProblemImage(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         approvalService.deleteProblemImage(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -173,7 +187,9 @@ class ApprovalController {
         description = "Delete answer image by ID.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun deleteAnswerImage(@PathVariable id: String): ResponseEntity<Void> {
+    fun deleteAnswerImage(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         approvalService.deleteAnswerImage(id)
         return ResponseEntity(HttpStatus.NO_CONTENT)
     }
@@ -182,26 +198,29 @@ class ApprovalController {
     @Operation(
         summary = "USER but owning. Upload problem image",
         description = "Upload problem image by ID.",
-        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = [Content(mediaType = "multipart/form-data")]
-        )
+        requestBody =
+            io.swagger.v3.oas.annotations.parameters.RequestBody(
+                content = [Content(mediaType = "multipart/form-data")],
+            ),
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun uploadProblemImage(@PathVariable id: String, @RequestPart("problemImageFile") problemImageFile: MultipartFile): ResponseEntity<ImageSrcDto> {
-        return ResponseEntity.ok(ImageSrcDto(approvalService.uploadProblemImage(id, problemImageFile)))
-    }
+    fun uploadProblemImage(
+        @PathVariable id: String,
+        @RequestPart("problemImageFile") problemImageFile: MultipartFile,
+    ): ResponseEntity<ImageSrcDto> = ResponseEntity.ok(ImageSrcDto(approvalService.uploadProblemImage(id, problemImageFile)))
 
     @PostMapping("/problem/answerImage/{id}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @Operation(
         summary = "USER but owning. Upload answer image",
         description = "Upload answer image by ID.",
-        requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
-            content = [Content(mediaType = "multipart/form-data")]
-        )
+        requestBody =
+            io.swagger.v3.oas.annotations.parameters.RequestBody(
+                content = [Content(mediaType = "multipart/form-data")],
+            ),
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun uploadAnswerImage(@PathVariable id: String, @RequestPart("answerImageFile") answerImageFile: MultipartFile): ResponseEntity<ImageSrcDto> {
-        return ResponseEntity.ok(ImageSrcDto(approvalService.uploadAnswerImage(id, answerImageFile)))
-    }
-
+    fun uploadAnswerImage(
+        @PathVariable id: String,
+        @RequestPart("answerImageFile") answerImageFile: MultipartFile,
+    ): ResponseEntity<ImageSrcDto> = ResponseEntity.ok(ImageSrcDto(approvalService.uploadAnswerImage(id, answerImageFile)))
 }
