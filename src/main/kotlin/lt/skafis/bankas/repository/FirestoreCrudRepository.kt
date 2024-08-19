@@ -3,8 +3,10 @@ package lt.skafis.bankas.repository
 import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Identifiable
 
-abstract class FirestoreCrudRepository<T : Identifiable>(private val firestore: Firestore, private val clazz: Class<T>) {
-
+abstract class FirestoreCrudRepository<T : Identifiable>(
+    private val firestore: Firestore,
+    private val clazz: Class<T>,
+) {
     abstract val collectionPath: String
 
     fun create(document: T): T {
@@ -20,7 +22,10 @@ abstract class FirestoreCrudRepository<T : Identifiable>(private val firestore: 
         return if (docSnapshot.exists()) docSnapshot.toObject(clazz) else null
     }
 
-    fun update(document: T, id: String): Boolean {
+    fun update(
+        document: T,
+        id: String,
+    ): Boolean {
         val docRef = firestore.collection(collectionPath).document(id)
         return try {
             docRef.set(document).get()

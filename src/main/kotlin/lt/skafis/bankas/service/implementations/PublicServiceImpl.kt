@@ -14,8 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class PublicServiceImpl: PublicService {
-
+class PublicServiceImpl : PublicService {
     @Autowired
     private lateinit var sourceRepository: SourceRepository
 
@@ -34,24 +33,18 @@ class PublicServiceImpl: PublicService {
     @Autowired
     private lateinit var userService: UserService
 
-    override fun getProblemsCount(): Long {
-        return problemRepository.countApproved()
-    }
+    override fun getProblemsCount(): Long = problemRepository.countApproved()
 
-    override fun getCategoriesCount(): Long {
-        return categoryRepository.countDocuments()
-    }
+    override fun getCategoriesCount(): Long = categoryRepository.countDocuments()
 
-    override fun getCategoryProblemCount(categoryId: String): Long {
-        return problemRepository.countApprovedByCategoryId(categoryId)
-    }
+    override fun getCategoryProblemCount(categoryId: String): Long = problemRepository.countApprovedByCategoryId(categoryId)
 
-    override fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto> {
-        return problemRepository.getByCategoryId(categoryId)
+    override fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto> =
+        problemRepository
+            .getByCategoryId(categoryId)
             .filter {
                 it.isApproved
-            }
-            .map {
+            }.map {
                 ProblemDisplayViewDto(
                     id = it.id,
                     sourceListNr = it.sourceListNr,
@@ -64,18 +57,20 @@ class PublicServiceImpl: PublicService {
                     sourceId = it.sourceId,
                 )
             }.shuffled()
-    }
 
-    override fun getCategoryById(categoryId: String): Category {
-        return categoryRepository.findById(categoryId) ?: throw Exception("Category with id $categoryId not found")
-    }
+    override fun getCategoryById(categoryId: String): Category =
+        categoryRepository.findById(categoryId) ?: throw Exception("Category with id $categoryId not found")
 
-    override fun getCategories(page: Int, size: Int, search: String): List<Category> {
-        return categoryRepository.getSearchPageableCategories(search, size, (page * size).toLong())
+    override fun getCategories(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<Category> =
+        categoryRepository
+            .getSearchPageableCategories(search, size, (page * size).toLong())
             .sortedBy {
                 it.name
             }
-    }
 
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
         val problem = problemRepository.getBySkfCode(skfCode)
@@ -96,8 +91,7 @@ class PublicServiceImpl: PublicService {
 
     override fun getSourceById(sourceId: String): SourceDisplayDto {
         val source = sourceService.getSourceById(sourceId)
-        if (source.reviewStatus != ReviewStatus.APPROVED && source.authorId != userService.getCurrentUserId())
-        {
+        if (source.reviewStatus != ReviewStatus.APPROVED && source.authorId != userService.getCurrentUserId()) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val authorUsername = userService.getUsernameById(source.authorId)
@@ -106,15 +100,17 @@ class PublicServiceImpl: PublicService {
 
     override fun getSourcesByAuthor(authorUsername: String): List<SourceDisplayDto> {
         val authorId = userService.getUserIdByUsername(authorUsername)
-        return sourceRepository.getByAuthor(authorId)
+        return sourceRepository
+            .getByAuthor(authorId)
             .filter { it.reviewStatus == ReviewStatus.APPROVED }
             .map {
                 it.toDisplayDto(authorUsername)
             }
     }
 
-    override fun getUnsortedProblems(): List<ProblemDisplayViewDto> {
-        return problemRepository.getUnsortedApprovedProblems()
+    override fun getUnsortedProblems(): List<ProblemDisplayViewDto> =
+        problemRepository
+            .getUnsortedApprovedProblems()
             .map {
                 ProblemDisplayViewDto(
                     id = it.id,
@@ -127,21 +123,22 @@ class PublicServiceImpl: PublicService {
                     categories = it.categories,
                     sourceId = it.sourceId,
                 )
-            }
-            .shuffled()
-    }
+            }.shuffled()
 
-    override fun getUnsortedProblemsCount(): Long {
-        return problemRepository.countUnsortedApproved()
-    }
+    override fun getUnsortedProblemsCount(): Long = problemRepository.countUnsortedApproved()
 
-    override fun getApprovedSources(): List<SourceDisplayDto> {
-        return sourceRepository.findAll()
-            .filter { it.reviewStatus == ReviewStatus.APPROVED }
-            .map {
+    override fun getApprovedSources(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto> =
+        sourceRepository
+            .getApprovedSearchPageable(
+                search,
+                size,
+                (page * size).toLong(),
+            ).map {
                 val authorUsername = userService.getUsernameById(it.authorId)
                 it.toDisplayDto(authorUsername)
             }
-    }
-
 }
