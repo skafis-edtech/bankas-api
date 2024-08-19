@@ -16,8 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import org.threeten.bp.Instant
-import org.threeten.bp.ZoneId
-import org.threeten.bp.format.DateTimeFormatter
 import org.webjars.NotFoundException
 import java.util.*
 
@@ -222,6 +220,7 @@ class ApprovalServiceImpl: ApprovalService {
             throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
         }
         problemRepository.delete(problemId)
+        metaService.removeSkfCodeFromUsedList(problem.skfCode)
         if (problem.problemImagePath.startsWith("problems/")) {
             storageRepository.deleteImage(problem.problemImagePath)
         }

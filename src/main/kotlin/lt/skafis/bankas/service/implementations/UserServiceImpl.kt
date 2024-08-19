@@ -21,6 +21,11 @@ class UserServiceImpl(private val userRepository: UserRepository) : UserService 
         return user.username
     }
 
+    override fun getUserIdByUsername(username: String): String {
+        val user = userRepository.getByUsername(username) ?: throw NotFoundException("User not found")
+        return user.id
+    }
+
     override fun getRoleById(userId: String): Role {
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
         return user.role
