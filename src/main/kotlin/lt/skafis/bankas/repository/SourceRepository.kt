@@ -1,6 +1,7 @@
 package lt.skafis.bankas.repository
 
 import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.Query
 import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Source
 import org.springframework.stereotype.Repository
@@ -37,7 +38,7 @@ class SourceRepository(
     ): List<Source> {
         val collectionRef = firestore.collection(collectionPath)
 
-        val query = collectionRef.orderBy("lastModifiedOn").get().get()
+        val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
         val documents = query.documents
 
         // If search is not null, filter the documents based on the search criteria
@@ -59,6 +60,81 @@ class SourceRepository(
         val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
 
         return pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
+    }
+
+    fun getPendingSearchPageable(
+        search: String,
+        limit: Int,
+        offset: Long,
+    ): List<Source> {
+        val collectionRef = firestore.collection(collectionPath)
+
+        val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
+        val documents = query.documents
+
+        // If search is not null, filter the documents based on the search criteria
+        val filteredDocuments =
+            if (!search.isEmpty()) {
+                val normalizedSearch = normalizeString(search)
+                documents.filter { document ->
+                    val source = document.toObject(Source::class.java)
+                    source.name.let { normalizeString(it).contains(normalizedSearch) } && source.reviewStatus == ReviewStatus.PENDING
+                }
+            } else {
+                documents.filter { document ->
+                    val source = document.toObject(Source::class.java)
+                    source.reviewStatus == ReviewStatus.PENDING
+                }
+            }
+
+        // Apply pagination
+        val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+
+        return pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
+    }
+
+    fun getByAuthorSearchPageable(
+        userId: String,
+        search: String,
+        limit: Int,
+        offset: Long,
+        isApproved: Boolean = false,
+    ): List<Source> {
+        val collectionRef = firestore.collection(collectionPath)
+
+        val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
+        val documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+
+// Group by review status
+        val groupedDocuments = documents.groupBy { it.reviewStatus }
+
+// Define the order of statuses
+        val statusOrder = listOf(ReviewStatus.REJECTED, ReviewStatus.PENDING, ReviewStatus.APPROVED)
+
+// Sort and flatten the grouped documents
+        val sortedDocuments =
+            statusOrder.flatMap { status ->
+                groupedDocuments[status] ?: emptyList()
+            }
+        val filteredDocuments =
+            if (search.isNotEmpty()) {
+                val normalizedSearch = normalizeString(search)
+                sortedDocuments.filter { source ->
+                    normalizeString(source.name).contains(normalizedSearch) &&
+                        source.authorId == userId &&
+                        (!isApproved || source.reviewStatus == ReviewStatus.APPROVED)
+                }
+            } else {
+                sortedDocuments.filter { source ->
+                    source.authorId == userId &&
+                        (!isApproved || source.reviewStatus == ReviewStatus.APPROVED)
+                }
+            }
+
+// Apply pagination
+        val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+
+        return pagedDocuments
     }
 
     fun normalizeString(input: String): String =

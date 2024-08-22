@@ -111,13 +111,19 @@ class ApprovalServiceImpl : ApprovalService {
         return createdProblem.id
     }
 
-    override fun getMySources(): List<SourceDisplayDto> {
+    override fun getMySources(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto> {
         val userId = userService.getCurrentUserId()
         return sourceRepository
-            .getByAuthor(userId)
-            .sortedByDescending {
-                it.lastModifiedOn
-            }.map {
+            .getByAuthorSearchPageable(
+                userId,
+                search,
+                size,
+                (page * size).toLong(),
+            ).map {
                 it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
     }
@@ -158,10 +164,13 @@ class ApprovalServiceImpl : ApprovalService {
     ): SourceDisplayDto {
         val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        val amendedReviewHistory =
+            "${source.reviewHistory} \n ${Instant.now()} $username patvirtino" +
+                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
         val updatedSource =
             source.copy(
                 reviewStatus = ReviewStatus.APPROVED,
-                reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
+                reviewHistory = amendedReviewHistory,
             )
         sourceRepository.update(updatedSource, sourceId)
 
@@ -196,10 +205,13 @@ class ApprovalServiceImpl : ApprovalService {
     ): SourceDisplayDto {
         val username = userService.getCurrentUserUsername()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        val amendedReviewHistory =
+            "${source.reviewHistory} \n ${Instant.now()} $username atmetė" +
+                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
         val updatedSource =
             source.copy(
                 reviewStatus = ReviewStatus.REJECTED,
-                reviewHistory = "${source.reviewHistory}${Instant.now()} $username rašė: $reviewMessage\n",
+                reviewHistory = amendedReviewHistory,
             )
         sourceRepository.update(updatedSource, sourceId)
 
@@ -267,12 +279,17 @@ class ApprovalServiceImpl : ApprovalService {
         return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
-    override fun getSources(): List<SourceDisplayDto> =
+    override fun getPendingSources(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto> =
         sourceRepository
-            .findAll()
-            .sortedByDescending {
-                it.lastModifiedOn
-            }.map {
+            .getPendingSearchPageable(
+                search,
+                size,
+                (page * size).toLong(),
+            ).map {
                 it.toDisplayDto(userService.getUsernameById(it.authorId))
             }
 

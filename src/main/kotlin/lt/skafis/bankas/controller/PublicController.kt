@@ -72,8 +72,11 @@ class PublicController {
 
     @GetMapping("/sourcesByAuthor/{authorUsername}")
     fun getSourcesByAuthor(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+        @RequestParam(required = false, defaultValue = "") search: String,
         @PathVariable authorUsername: String,
-    ): ResponseEntity<List<SourceDisplayDto>> = ResponseEntity.ok(publicService.getSourcesByAuthor(authorUsername))
+    ): ResponseEntity<List<SourceDisplayDto>> = ResponseEntity.ok(publicService.getSourcesByAuthor(authorUsername, page, size, search))
 
     @GetMapping("/approvedSources")
     fun getApprovedSources(

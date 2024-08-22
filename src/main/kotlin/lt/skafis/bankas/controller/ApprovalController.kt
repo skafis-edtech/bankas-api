@@ -45,7 +45,7 @@ class ApprovalController {
     @PostMapping("/submit/problem/{sourceId}", consumes = [MediaType.MULTIPART_FORM_DATA_VALUE])
     @Operation(
         summary = "USER. Submit problem data with images",
-        description = "Doesn't work from swagger... responds with 415. Submit problem data with images for approval. Returns the ID of the created problem.",
+        description = "415 from swagger.... Submit problem with images for approval. returns ID of the created problem.",
         requestBody =
             io.swagger.v3.oas.annotations.parameters.RequestBody(
                 content = [Content(mediaType = "multipart/form-data")],
@@ -68,8 +68,12 @@ class ApprovalController {
         description = "Get all sources submitted by the current user.",
     )
     @RequiresRoleAtLeast(Role.USER)
-    fun getMySources(): ResponseEntity<List<SourceDisplayDto>> {
-        val sources = approvalService.getMySources()
+    fun getMySources(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+        @RequestParam(required = false, defaultValue = "") search: String,
+    ): ResponseEntity<List<SourceDisplayDto>> {
+        val sources = approvalService.getMySources(page, size, search)
         return ResponseEntity(sources, HttpStatus.OK)
     }
 
@@ -104,7 +108,11 @@ class ApprovalController {
         description = "Get all sources submitted for approval (or already approved).",
     )
     @RequiresRoleAtLeast(Role.ADMIN)
-    fun getSources(): ResponseEntity<List<SourceDisplayDto>> = ResponseEntity.ok(approvalService.getSources())
+    fun getPendingSources(
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+        @RequestParam(required = false, defaultValue = "") search: String,
+    ): ResponseEntity<List<SourceDisplayDto>> = ResponseEntity.ok(approvalService.getPendingSources(page, size, search))
 
     @PatchMapping("/reject/{sourceId}")
     @Operation(
