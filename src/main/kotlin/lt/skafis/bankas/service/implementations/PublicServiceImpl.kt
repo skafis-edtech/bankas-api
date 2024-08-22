@@ -98,11 +98,15 @@ class PublicServiceImpl : PublicService {
         return source.toDisplayDto(authorUsername)
     }
 
-    override fun getSourcesByAuthor(authorUsername: String): List<SourceDisplayDto> {
+    override fun getSourcesByAuthor(
+        authorUsername: String,
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto> {
         val authorId = userService.getUserIdByUsername(authorUsername)
         return sourceRepository
-            .getByAuthor(authorId)
-            .filter { it.reviewStatus == ReviewStatus.APPROVED }
+            .getByAuthorSearchPageable(authorId, search, size, (page * size).toLong(), isApproved = true)
             .map {
                 it.toDisplayDto(authorUsername)
             }

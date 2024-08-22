@@ -13,7 +13,11 @@ interface ApprovalService {
         answerImageFile: MultipartFile?,
     ): String
 
-    fun getMySources(): List<SourceDisplayDto>
+    fun getMySources(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto>
 
     fun getProblemsBySource(
         sourceId: String,
@@ -40,7 +44,11 @@ interface ApprovalService {
         sourceData: SourceSubmitDto,
     ): SourceDisplayDto
 
-    fun getSources(): List<SourceDisplayDto>
+    fun getPendingSources(
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto>
 
     fun updateProblemTexts(
         problemId: String,

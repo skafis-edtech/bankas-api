@@ -25,7 +25,12 @@ interface PublicService {
 
     fun getSourceById(sourceId: String): SourceDisplayDto
 
-    fun getSourcesByAuthor(authorUsername: String): List<SourceDisplayDto>
+    fun getSourcesByAuthor(
+        authorUsername: String,
+        page: Int,
+        size: Int,
+        search: String,
+    ): List<SourceDisplayDto>
 
     fun getUnsortedProblems(): List<ProblemDisplayViewDto>
 
