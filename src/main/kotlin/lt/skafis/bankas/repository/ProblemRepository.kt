@@ -117,4 +117,14 @@ class ProblemRepository(
 
         return pagedDocuments.mapNotNull { it.toObject(Problem::class.java) }
     }
+
+    fun countBySource(sourceId: String): Long =
+        firestore
+            .collection(collectionPath)
+            .whereEqualTo("sourceId", sourceId)
+            .get()
+            .get()
+            .documents
+            .size
+            .toLong()
 }

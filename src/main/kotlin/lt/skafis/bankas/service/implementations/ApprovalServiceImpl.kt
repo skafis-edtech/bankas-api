@@ -102,7 +102,7 @@ class ApprovalServiceImpl : ApprovalService {
         if (source.reviewStatus == ReviewStatus.APPROVED) {
             val sourceProblems = problemRepository.getBySourceId(sourceId)
             sourceProblems.forEach {
-                problemRepository.update(it.copy(skfCode = "", isApproved = false), it.id)
+                problemRepository.update(it.copy(isApproved = false), it.id)
                 if (it.isApproved) {
                     metaService.removeSkfCodeFromUsedList(it.skfCode)
                 }
@@ -124,7 +124,8 @@ class ApprovalServiceImpl : ApprovalService {
                 size,
                 (page * size).toLong(),
             ).map {
-                it.toDisplayDto(userService.getUsernameById(it.authorId))
+                val count = problemRepository.countBySource(it.id)
+                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
             }
     }
 
@@ -249,7 +250,9 @@ class ApprovalServiceImpl : ApprovalService {
             throw IllegalAccessException("User $userId does not own source ${problem.sourceId}")
         }
         problemRepository.delete(problemId)
-        metaService.removeSkfCodeFromUsedList(problem.skfCode)
+        if (problem.skfCode.isNotEmpty()) {
+            metaService.removeSkfCodeFromUsedList(problem.skfCode)
+        }
         if (problem.problemImagePath.startsWith("problems/")) {
             storageRepository.deleteImage(problem.problemImagePath)
         }
@@ -290,7 +293,8 @@ class ApprovalServiceImpl : ApprovalService {
                 size,
                 (page * size).toLong(),
             ).map {
-                it.toDisplayDto(userService.getUsernameById(it.authorId))
+                val count = problemRepository.countBySource(it.id)
+                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
             }
 
     override fun updateProblemTexts(

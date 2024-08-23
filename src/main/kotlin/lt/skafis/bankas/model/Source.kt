@@ -11,20 +11,21 @@ data class Source(
     val reviewHistory: String = "",
     val authorId: String = "",
     val createdOn: String = Instant.now().toString(),
-    val lastModifiedOn: String = Instant.now().toString()
-): Identifiable {
+    val lastModifiedOn: String = Instant.now().toString(),
+) : Identifiable {
     fun toDisplayDto(
         authorUsername: String = "",
-    ): SourceDisplayDto {
-        return SourceDisplayDto(
+        problemCount: Int = 0,
+    ): SourceDisplayDto =
+        SourceDisplayDto(
             id = this.id,
             name = this.name,
             description = this.description,
             reviewStatus = this.reviewStatus,
             reviewHistory = this.reviewHistory,
             authorUsername = authorUsername,
+            problemCount = problemCount,
             createdOn = this.createdOn,
-            lastModifiedOn = this.lastModifiedOn
+            lastModifiedOn = this.lastModifiedOn,
         )
-    }
 }

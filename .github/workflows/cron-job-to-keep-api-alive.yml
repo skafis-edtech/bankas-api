@@ -2,7 +2,7 @@ name: HTTP Request every 14 minutes
 
 on:
   schedule:
-    - cron: "*/14 * * * *"
+    - cron: "*/13 * * * *"
 
 jobs:
   send_requests:
