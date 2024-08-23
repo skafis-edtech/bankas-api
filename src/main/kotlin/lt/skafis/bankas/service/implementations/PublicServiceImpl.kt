@@ -142,7 +142,8 @@ class PublicServiceImpl : PublicService {
                 size,
                 (page * size).toLong(),
             ).map {
+                val count = problemRepository.countBySource(it.id)
                 val authorUsername = userService.getUsernameById(it.authorId)
-                it.toDisplayDto(authorUsername)
+                it.toDisplayDto(authorUsername, count.toInt())
             }
 }

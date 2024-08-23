@@ -10,6 +10,7 @@ data class SourceDisplayDto(
     val reviewStatus: ReviewStatus = ReviewStatus.PENDING,
     val reviewHistory: String = "",
     val authorUsername: String = "",
+    val problemCount: Int = 0,
     val createdOn: String = Instant.now().toString(),
-    val lastModifiedOn: String = Instant.now().toString()
+    val lastModifiedOn: String = Instant.now().toString(),
 )

@@ -124,7 +124,8 @@ class ApprovalServiceImpl : ApprovalService {
                 size,
                 (page * size).toLong(),
             ).map {
-                it.toDisplayDto(userService.getUsernameById(it.authorId))
+                val count = problemRepository.countBySource(it.id)
+                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
             }
     }
 
@@ -290,7 +291,8 @@ class ApprovalServiceImpl : ApprovalService {
                 size,
                 (page * size).toLong(),
             ).map {
-                it.toDisplayDto(userService.getUsernameById(it.authorId))
+                val count = problemRepository.countBySource(it.id)
+                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
             }
 
     override fun updateProblemTexts(
