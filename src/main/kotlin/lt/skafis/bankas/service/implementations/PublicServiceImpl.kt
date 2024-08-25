@@ -91,11 +91,12 @@ class PublicServiceImpl : PublicService {
 
     override fun getSourceById(sourceId: String): SourceDisplayDto {
         val source = sourceService.getSourceById(sourceId)
-        if (source.reviewStatus != ReviewStatus.APPROVED && source.authorId != userService.getCurrentUserId()) {
+        if (source.authorId != userService.getCurrentUserId()) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val authorUsername = userService.getUsernameById(source.authorId)
-        return source.toDisplayDto(authorUsername)
+        val count = problemRepository.countBySource(sourceId)
+        return source.toDisplayDto(authorUsername, count.toInt())
     }
 
     override fun getSourcesByAuthor(
@@ -108,7 +109,8 @@ class PublicServiceImpl : PublicService {
         return sourceRepository
             .getByAuthorSearchPageable(authorId, search, size, (page * size).toLong(), isApproved = true)
             .map {
-                it.toDisplayDto(authorUsername)
+                val count = problemRepository.countBySource(it.id)
+                it.toDisplayDto(authorUsername, count.toInt())
             }
     }
 
