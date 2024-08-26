@@ -106,9 +106,9 @@ class ProblemRepository(
         offset: Long,
     ): List<Problem> {
         val collectionRef = firestore.collection(collectionPath)
-
         val query =
             collectionRef
+                .orderBy("sourceListNr")
                 .whereEqualTo("sourceId", sourceId)
                 .get()
                 .get()
