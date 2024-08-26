@@ -142,9 +142,7 @@ class ApprovalServiceImpl : ApprovalService {
 
         return problemRepository
             .getBySourceIdPageable(sourceId, size, (page * size).toLong())
-            .sortedBy {
-                it.sourceListNr
-            }.map {
+            .map {
                 ProblemDisplayViewDto(
                     id = it.id,
                     sourceListNr = it.sourceListNr,
