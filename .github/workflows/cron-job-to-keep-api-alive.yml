@@ -1,4 +1,4 @@
-name: HTTP Request every 14 minutes
+name: Trigger every 10 minutes (15 minutes till shuts down)
 
 on:
   schedule:
@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Send HTTP GET request
         run: |
-          curl -X GET "https://api.bankas.skafis.lt/public/problems/count"
+          curl -X GET "https://api.bankas.skafis.lt/misc/triggerService"
