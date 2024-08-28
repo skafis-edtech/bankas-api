@@ -72,23 +72,30 @@ class SourceRepository(
         val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
         val documents = query.documents
 
-        // If search is not null, filter the documents based on the search criteria
+        // Normalize the search term if it's provided
+        val normalizedSearch = normalizeString(search)
+
+        // Filter the documents based on the search criteria
         val filteredDocuments =
-            if (!search.isEmpty()) {
-                val normalizedSearch = normalizeString(search)
-                documents.filter { document ->
-                    val source = document.toObject(Source::class.java)
-                    source.name.let { normalizeString(it).contains(normalizedSearch) } && source.reviewStatus == ReviewStatus.PENDING
-                }
-            } else {
-                documents.filter { document ->
-                    val source = document.toObject(Source::class.java)
-                    source.reviewStatus == ReviewStatus.PENDING
-                }
+            documents.filter { document ->
+                val source = document.toObject(Source::class.java)
+                val matchesSearch = search.isEmpty() || normalizeString(source.name).contains(normalizedSearch)
+                matchesSearch && source.reviewStatus == ReviewStatus.PENDING
             }
 
-        // Apply pagination
-        val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+        // Sort the filtered documents into two parts:
+        // 1. Names not containing "(DAR TVARKOMA)"
+        // 2. Names containing "(DAR TVARKOMA)"
+        val sortedDocuments =
+            filteredDocuments.sortedWith(
+                compareBy(
+                    { it.toObject(Source::class.java).name.contains("(DAR TVARKOMA)") },
+                    { it.toObject(Source::class.java).lastModifiedOn },
+                ),
+            )
+
+// Apply pagination
+        val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit.toInt())
 
         return pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
     }
