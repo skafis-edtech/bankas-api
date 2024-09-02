@@ -23,7 +23,7 @@ class UserServiceImpl(
     }
 
     override fun getUserIdByUsername(username: String): String {
-        val user = userRepository.getByUsername(username) ?: throw NotFoundException("User not found")
+        val user = userRepository.getUserByUsername(username) ?: throw NotFoundException("User not found")
         return user.id
     }
 
@@ -44,7 +44,7 @@ class UserServiceImpl(
     }
 
     override fun getBio(username: String): String {
-        val user = userRepository.getByUsername(username) ?: throw NotFoundException("User not found")
+        val user = userRepository.getUserByUsername(username) ?: throw NotFoundException("User not found")
         return user.bio
     }
 
