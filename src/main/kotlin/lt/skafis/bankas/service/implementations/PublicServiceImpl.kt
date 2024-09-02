@@ -91,7 +91,7 @@ class PublicServiceImpl : PublicService {
 
     override fun getSourceById(sourceId: String): SourceDisplayDto {
         val source = sourceService.getSourceById(sourceId)
-        if (source.authorId != userService.getCurrentUserId()) {
+        if (source.authorId != userService.getCurrentUserId() && source.reviewStatus != ReviewStatus.APPROVED) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
         val authorUsername = userService.getUsernameById(source.authorId)

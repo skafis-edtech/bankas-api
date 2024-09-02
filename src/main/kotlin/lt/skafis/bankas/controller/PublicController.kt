@@ -1,15 +1,12 @@
 package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
-import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.CountDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.Category
-import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.service.PublicService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -64,11 +61,9 @@ class PublicController {
 
     @GetMapping("/source/{sourceId}")
     @Operation(
-        summary = "USER if owned, ADMIN else. Idk why I've put it in public controller then... :D",
+        summary = "PUBLIC if approved, USER if owned, ADMIN else.",
         description = "Get source by ID. Returns source entity.",
     )
-    @SecurityRequirement(name = "bearerAuth")
-    @RequiresRoleAtLeast(Role.USER)
     fun getSourceById(
         @PathVariable sourceId: String,
     ): ResponseEntity<SourceDisplayDto> = ResponseEntity.ok(publicService.getSourceById(sourceId))
