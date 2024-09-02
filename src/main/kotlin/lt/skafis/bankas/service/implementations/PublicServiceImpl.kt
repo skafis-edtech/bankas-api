@@ -3,9 +3,9 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.*
-import lt.skafis.bankas.repository.CategoryRepository
-import lt.skafis.bankas.repository.ProblemRepository
-import lt.skafis.bankas.repository.SourceRepository
+import lt.skafis.bankas.repository.firestore.CategoryRepository
+import lt.skafis.bankas.repository.firestore.ProblemRepository
+import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.service.ProblemService
 import lt.skafis.bankas.service.PublicService
 import lt.skafis.bankas.service.SourceService

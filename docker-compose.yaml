@@ -7,6 +7,7 @@ services:
       - "9000:9000"
     environment:
       - FIREBASE_SERVICE_ACCOUNT_PATH=/etc/secrets/firebase-admin.json
+      - FIREBASE_REALTIME_DB_URL=https://bankas-skafis-default-rtdb.europe-west1.firebaseio.com
       - ENVIRONMENT=dev
       - PORT=9000
     volumes:

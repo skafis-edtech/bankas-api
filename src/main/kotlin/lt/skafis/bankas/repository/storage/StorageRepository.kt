@@ -1,4 +1,4 @@
-package lt.skafis.bankas.repository
+package lt.skafis.bankas.repository.storage
 
 import com.google.cloud.storage.Blob
 import com.google.cloud.storage.Bucket
@@ -12,11 +12,13 @@ import java.util.concurrent.TimeUnit
 class StorageRepository(
     private val storage: Storage,
 ) {
-
     @Value("\${firebase.storage.bucket}")
     private lateinit var bucketName: String
 
-    fun uploadImage(file: MultipartFile, filePath: String): String {
+    fun uploadImage(
+        file: MultipartFile,
+        filePath: String,
+    ): String {
         val bucket: Bucket = storage.get(bucketName)
         val blob: Blob = bucket.create(filePath, file.bytes, file.contentType)
         return blob.mediaLink
@@ -49,13 +51,10 @@ class StorageRepository(
         return bucket.get(filePath)
     }
 
-    fun getBucket(): Bucket {
-        return storage.get(bucketName)
-    }
+    fun getBucket(): Bucket = storage.get(bucketName)
 
     fun createBlob(filePath: String): Blob {
         val bucket: Bucket = storage.get(bucketName)
         return bucket.create(filePath, ByteArray(0)) // Create an empty blob
     }
-
 }

@@ -2,7 +2,7 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.User
-import lt.skafis.bankas.repository.UserRepository
+import lt.skafis.bankas.repository.firestore.UserRepository
 import lt.skafis.bankas.service.UserService
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service

@@ -1,4 +1,4 @@
-package lt.skafis.bankas.repository
+package lt.skafis.bankas.repository.firestore
 
 import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Category

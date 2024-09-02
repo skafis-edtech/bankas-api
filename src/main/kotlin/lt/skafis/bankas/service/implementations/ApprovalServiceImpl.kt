@@ -5,9 +5,9 @@ import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Source
-import lt.skafis.bankas.repository.ProblemRepository
-import lt.skafis.bankas.repository.SourceRepository
-import lt.skafis.bankas.repository.StorageRepository
+import lt.skafis.bankas.repository.firestore.ProblemRepository
+import lt.skafis.bankas.repository.firestore.SourceRepository
+import lt.skafis.bankas.repository.storage.StorageRepository
 import lt.skafis.bankas.service.ApprovalService
 import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.ProblemService

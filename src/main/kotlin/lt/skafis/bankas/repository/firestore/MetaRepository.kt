@@ -1,12 +1,14 @@
-package lt.skafis.bankas.repository
+package lt.skafis.bankas.repository.firestore
 
-import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.DocumentSnapshot
+import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.ProblemMeta
 import org.springframework.stereotype.Repository
 
 @Repository
-class MetaRepository(private val firestore: Firestore) {
+class MetaRepository(
+    private val firestore: Firestore,
+) {
     private val basePath = "meta"
     private val documentPath = "$basePath/problemMeta"
 
@@ -29,5 +31,4 @@ class MetaRepository(private val firestore: Firestore) {
             false
         }
     }
-
 }

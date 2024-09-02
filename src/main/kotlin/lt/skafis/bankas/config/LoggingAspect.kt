@@ -1,13 +1,13 @@
 package lt.skafis.bankas.config
 
-import org.aspectj.lang.annotation.Aspect
-import org.aspectj.lang.annotation.Around
-import org.springframework.stereotype.Component
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.aspectj.lang.ProceedingJoinPoint
+import org.aspectj.lang.annotation.Around
+import org.aspectj.lang.annotation.Aspect
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
+import org.springframework.stereotype.Component
 
 @Aspect
 @Component
@@ -25,15 +25,16 @@ class LoggingAspect {
         val userId = authentication?.token?.claims?.get("user_id") as? String
         val userRoles = authentication?.token?.claims?.get("roles") as? List<*>
 
-        val result = try {
-            val proceed = joinPoint.proceed()
+        val result =
+            try {
+                val proceed = joinPoint.proceed()
 
-            logger.info("user: $userId , roles: $userRoles : ${className}.${methodName} called with args: $args , returned $proceed")
-            proceed
-        } catch (ex: Throwable) {
-            logger.error("Method: $methodName threw an exception: ${ex.message}")
-            throw ex
-        }
+                logger.info("user: $userId , roles: $userRoles : $className.$methodName called with args: $args")
+                proceed
+            } catch (ex: Throwable) {
+                logger.error("Method: $methodName threw an exception: ${ex.message}")
+                throw ex
+            }
 
         return result
     }

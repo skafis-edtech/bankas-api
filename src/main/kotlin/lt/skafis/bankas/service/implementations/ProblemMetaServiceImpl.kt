@@ -1,22 +1,24 @@
 package lt.skafis.bankas.service.implementations
 
-import lt.skafis.bankas.repository.MetaRepository
+import lt.skafis.bankas.repository.firestore.MetaRepository
 import lt.skafis.bankas.service.ProblemMetaService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
 
 @Service
-class ProblemMetaServiceImpl: ProblemMetaService {
-
+class ProblemMetaServiceImpl : ProblemMetaService {
     @Autowired
     private lateinit var firestoreMetaRepository: MetaRepository
+
     override fun getLowestUnusedSkfCode(): String {
         val problemMeta = firestoreMetaRepository.getProblemMeta() ?: throw NotFoundException("Problem meta not found")
-        val usedSkfCodesNrs = problemMeta.usedSkfCodes.split(",")
-            .filter { it.isNotEmpty() }
-            .map { it.toInt() }
-            .toSet()
+        val usedSkfCodesNrs =
+            problemMeta.usedSkfCodes
+                .split(",")
+                .filter { it.isNotEmpty() }
+                .map { it.toInt() }
+                .toSet()
         val lowestUnusedNumberUpToMillion = (1..1000000).first { !usedSkfCodesNrs.contains(it) }
         return "SKF-$lowestUnusedNumberUpToMillion"
     }
@@ -44,6 +46,4 @@ class ProblemMetaServiceImpl: ProblemMetaService {
         val updatedProblemMeta = problemMeta.copy(usedSkfCodes = "")
         firestoreMetaRepository.updateProblemMeta(updatedProblemMeta)
     }
-
-
 }

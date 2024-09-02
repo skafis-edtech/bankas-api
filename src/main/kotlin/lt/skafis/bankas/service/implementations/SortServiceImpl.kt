@@ -3,8 +3,8 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.Role
-import lt.skafis.bankas.repository.ProblemRepository
-import lt.skafis.bankas.repository.SourceRepository
+import lt.skafis.bankas.repository.firestore.ProblemRepository
+import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.service.ProblemService
 import lt.skafis.bankas.service.SortService
 import lt.skafis.bankas.service.UserService
@@ -12,8 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 
 @Service
-class SortServiceImpl: SortService {
-
+class SortServiceImpl : SortService {
     @Autowired
     private lateinit var userService: UserService
 
@@ -29,9 +28,10 @@ class SortServiceImpl: SortService {
     override fun getMySortedProblems(): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
         val sources = sourceRepository.getByAuthor(userId)
-        val problems = sources.flatMap { source ->
-            problemRepository.getBySourceSorted(source.id)
-        }
+        val problems =
+            sources.flatMap { source ->
+                problemRepository.getBySourceSorted(source.id)
+            }
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
@@ -49,9 +49,10 @@ class SortServiceImpl: SortService {
     override fun getMyUnsortedProblems(): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
         val sources = sourceRepository.getByAuthor(userId)
-        val problems = sources.flatMap { source ->
-            problemRepository.getBySourceUnsorted(source.id)
-        }
+        val problems =
+            sources.flatMap { source ->
+                problemRepository.getBySourceUnsorted(source.id)
+            }
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
@@ -66,7 +67,10 @@ class SortServiceImpl: SortService {
         }
     }
 
-    override fun sortProblem(problemId: String, categories: List<String>): Problem {
+    override fun sortProblem(
+        problemId: String,
+        categories: List<String>,
+    ): Problem {
         val problem = problemRepository.findById(problemId) ?: throw Exception("Problem with id $problemId not found")
         val source = sourceRepository.findById(problem.sourceId) ?: throw Exception("Source with id ${problem.sourceId} not found")
         if (source.authorId != userService.getCurrentUserId()) {
@@ -80,9 +84,10 @@ class SortServiceImpl: SortService {
     override fun getNotMySortedProblems(): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
         val sources = sourceRepository.getByNotAuthor(userId)
-        val problems = sources.flatMap { source ->
-            problemRepository.getBySourceSorted(source.id)
-        }
+        val problems =
+            sources.flatMap { source ->
+                problemRepository.getBySourceSorted(source.id)
+            }
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
@@ -100,9 +105,10 @@ class SortServiceImpl: SortService {
     override fun getNotMyUnsortedProblems(): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
         val sources = sourceRepository.getByNotAuthor(userId)
-        val problems = sources.flatMap { source ->
-            problemRepository.getBySourceUnsorted(source.id)
-        }
+        val problems =
+            sources.flatMap { source ->
+                problemRepository.getBySourceUnsorted(source.id)
+            }
         return problems.map {
             ProblemDisplayViewDto(
                 id = it.id,
