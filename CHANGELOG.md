@@ -12,6 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 ### Removed
 
+## 3.2.0 ...
+Since firestore reads for free tier are pretty limited (50k reads per day), 
+I have to do some optimization, so I don't need to pay money. That optimization 
+includes refactoring Repository layer in code and using firebase realtimedb for caching frequently called volatile data. 
+For now it won't be even volatile. Just will be used for reading and will be updated on every write or delete operation.
+Later, when this will also exceed limits, then gonna limit the realtime db updating to a periodic stuff.
+
+## 3.1.0 - 2024-08-27
+Some stuff... not following...
+
 ## [1.0.0] - 2024-07-12
 
 ### Added

@@ -14,32 +14,32 @@ import java.io.FileInputStream
 
 @Configuration
 class FirebaseConfig {
-
     private val serviceAccountPath = System.getenv("FIREBASE_SERVICE_ACCOUNT_PATH")
+    private val databaseUrl = System.getenv("FIREBASE_REALTIME_DB_URL") // Get database URL from environment variables
 
     @Bean
     fun firebaseApp(): FirebaseApp {
         val serviceAccount = FileInputStream(serviceAccountPath)
-        val options = FirebaseOptions.builder()
-            .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-            .build()
+        val options =
+            FirebaseOptions
+                .builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setDatabaseUrl(databaseUrl) // Use the database URL from the environment variable
+                .build()
         return FirebaseApp.initializeApp(options)
     }
 
     @Bean
-    fun firebaseAuth(firebaseApp: FirebaseApp): FirebaseAuth {
-        return FirebaseAuth.getInstance(firebaseApp)
-    }
+    fun firebaseAuth(firebaseApp: FirebaseApp): FirebaseAuth = FirebaseAuth.getInstance(firebaseApp)
 
     @Bean
-    fun firestore(firebaseApp: FirebaseApp): Firestore {
-        return FirestoreClient.getFirestore(firebaseApp)
-    }
+    fun firestore(firebaseApp: FirebaseApp): Firestore = FirestoreClient.getFirestore(firebaseApp)
 
     @Bean
     fun storage(): Storage {
         val serviceAccount = FileInputStream(serviceAccountPath)
-        return StorageOptions.newBuilder()
+        return StorageOptions
+            .newBuilder()
             .setCredentials(GoogleCredentials.fromStream(serviceAccount))
             .build()
             .service

@@ -1,4 +1,4 @@
-package lt.skafis.bankas.repository
+package lt.skafis.bankas.repository.firestore
 
 import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Category
@@ -16,34 +16,38 @@ class CategoryRepository(
         limit: Int,
         offset: Long,
     ): List<Category> {
-        val collectionRef = firestore.collection(collectionPath)
+        // Check if cache contains categories, use them if present
+        val cachedCategories = collectionCache.values.toList()
 
-        // Retrieve all documents if search is null, or retrieve a larger set to filter
-        val query =
-            if (search.isEmpty()) {
-                collectionRef.orderBy("name")
+        val documents =
+            if (cachedCategories.isNotEmpty()) {
+                // If cache is populated, use it
+                cachedCategories
             } else {
-                collectionRef.orderBy("name")
-            }.get().get()
-
-        val documents = query.documents
+                // If cache is empty, fetch from Firestore and update the cache
+                val query =
+                    firestore
+                        .collection(collectionPath)
+                        .orderBy("name")
+                        .get()
+                        .get()
+                val fetchedDocuments = query.documents.mapNotNull { it.toObject(Category::class.java) }
+                fetchedDocuments.forEach { collectionCache[it.id] = it }
+                fetchedDocuments
+            }
 
         // If search is not null, filter the documents based on the search criteria
         val filteredDocuments =
-            if (!search.isEmpty()) {
+            if (search.isNotEmpty()) {
                 val normalizedSearch = normalizeString(search)
-                documents.filter { document ->
-                    val category = document.toObject(Category::class.java)
-                    category.name.let { normalizeString(it).contains(normalizedSearch) }
+                documents.filter { category ->
+                    normalizeString(category.name).contains(normalizedSearch)
                 }
             } else {
                 documents
             }
 
-        // Apply pagination
-        val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
-
-        return pagedDocuments.mapNotNull { it.toObject(Category::class.java) }
+        return filteredDocuments.drop(offset.toInt()).take(limit)
     }
 
     fun normalizeString(input: String): String =
