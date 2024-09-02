@@ -8,8 +8,6 @@ import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.cloud.FirestoreClient
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import java.io.FileInputStream
@@ -45,11 +43,5 @@ class FirebaseConfig {
             .setCredentials(GoogleCredentials.fromStream(serviceAccount))
             .build()
             .service
-    }
-
-    @Bean
-    fun realtimeDatabase(firebaseApp: FirebaseApp): DatabaseReference {
-        val firebaseDatabase = FirebaseDatabase.getInstance(firebaseApp)
-        return firebaseDatabase.reference
     }
 }

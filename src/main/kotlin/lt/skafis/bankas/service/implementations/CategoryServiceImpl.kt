@@ -4,7 +4,6 @@ import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.repository.firestore.CategoryRepository
 import lt.skafis.bankas.service.CategoryService
-import lt.skafis.bankas.service.RealtimeService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
 import org.webjars.NotFoundException
@@ -14,12 +13,9 @@ class CategoryServiceImpl : CategoryService {
     @Autowired
     private lateinit var categoryRepository: CategoryRepository
 
-    @Autowired
-    private lateinit var realtimeService: RealtimeService
-
     override fun getCategories(): List<Category> =
-        realtimeService
-            .getAllCategories()
+        categoryRepository
+            .findAll()
             .sortedBy { it.name }
 
     override fun getCategoryById(id: String): Category =
@@ -30,7 +26,6 @@ class CategoryServiceImpl : CategoryService {
             categoryRepository.create(
                 Category(name = categoryPostDto.name, description = categoryPostDto.description),
             )
-        realtimeService.updateCategories()
         return category
     }
 
@@ -45,7 +40,6 @@ class CategoryServiceImpl : CategoryService {
                 description = categoryPostDto.description,
             )
         val success = categoryRepository.update(categoryToUpdate, id)
-        if (success) realtimeService.updateCategories()
         return if (success) {
             categoryToUpdate
         } else {
@@ -56,6 +50,5 @@ class CategoryServiceImpl : CategoryService {
     override fun deleteCategory(id: String) {
         val success = categoryRepository.delete(id)
         if (!success) throw Exception("Failed to delete category with id $id")
-        realtimeService.updateCategories()
     }
 }
