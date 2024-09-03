@@ -8,7 +8,7 @@ RUN gradle build
 # Package stage
 
 FROM openjdk:21
-ENV JAR_NAME=korys-0.0.1-SNAPSHOT.jar
+ENV JAR_NAME=bankas-0.0.1-SNAPSHOT.jar
 ENV APP_HOME=/usr/app/
 WORKDIR $APP_HOME
 COPY --from=BUILD $APP_HOME .
