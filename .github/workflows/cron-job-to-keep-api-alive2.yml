@@ -1,0 +1,14 @@
+name: Trigger every 20 minutes part 2
+
+on:
+  schedule:
+    - cron: "10,30,50 * * * *"
+
+jobs:
+  send_requests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Send HTTP GET request to trigger 2
+        run: |
+          curl -X GET "https://api.bankas.skafis.lt/misc/triggerService"
