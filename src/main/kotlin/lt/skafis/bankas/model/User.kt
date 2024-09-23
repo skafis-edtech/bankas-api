@@ -6,4 +6,5 @@ data class User(
     val username: String = "",
     val role: Role = Role.USER,
     var bio: String = "",
+    val balance: Int = 0,
 )

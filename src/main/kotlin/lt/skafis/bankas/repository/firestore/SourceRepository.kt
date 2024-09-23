@@ -3,6 +3,7 @@ import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.Query
 import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.model.Visibility
 import org.springframework.stereotype.Repository
 import java.text.Normalizer
 import java.util.concurrent.ConcurrentHashMap
@@ -94,7 +95,7 @@ class SourceRepository(
                 documents.filter { document ->
                     val source = document.toObject(Source::class.java)
                     val matchesSearch = search.isEmpty() || normalizeString(source.name).contains(normalizedSearch)
-                    matchesSearch && source.reviewStatus == ReviewStatus.PENDING
+                    matchesSearch && source.reviewStatus == ReviewStatus.PENDING && source.visibility == Visibility.PUBLIC
                 }
 
             // Sort the filtered documents into two parts:

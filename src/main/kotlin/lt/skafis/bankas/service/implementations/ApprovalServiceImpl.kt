@@ -3,7 +3,6 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.ReviewStatus
-import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
@@ -47,6 +46,7 @@ class ApprovalServiceImpl : ApprovalService {
                 Source(
                     name = sourceData.name,
                     description = sourceData.description,
+                    visibility = sourceData.visibility,
                     authorId = userId,
                 ),
             )
@@ -126,34 +126,6 @@ class ApprovalServiceImpl : ApprovalService {
             ).map {
                 val count = problemRepository.countBySource(it.id)
                 it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
-            }
-    }
-
-    override fun getProblemsBySource(
-        sourceId: String,
-        page: Int,
-        size: Int,
-    ): List<ProblemDisplayViewDto> {
-        val userId = userService.getCurrentUserId()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.authorId != userId && source.reviewStatus != ReviewStatus.APPROVED) {
-            userService.grantRoleAtLeast(Role.ADMIN)
-        }
-
-        return problemRepository
-            .getBySourceIdPageable(sourceId, size, (page * size).toLong())
-            .map {
-                ProblemDisplayViewDto(
-                    id = it.id,
-                    sourceListNr = it.sourceListNr,
-                    skfCode = it.skfCode,
-                    problemText = it.problemText,
-                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
-                    answerText = it.answerText,
-                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
-                    sourceId = it.sourceId,
-                    categories = it.categories,
-                )
             }
     }
 
@@ -273,6 +245,7 @@ class ApprovalServiceImpl : ApprovalService {
             source.copy(
                 name = sourceData.name,
                 description = sourceData.description,
+                visibility = sourceData.visibility,
                 lastModifiedOn = Instant.now().toString(),
                 reviewStatus = ReviewStatus.PENDING,
             )
