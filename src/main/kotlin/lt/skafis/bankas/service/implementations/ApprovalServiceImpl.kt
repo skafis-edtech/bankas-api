@@ -10,7 +10,7 @@ import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.repository.storage.StorageRepository
 import lt.skafis.bankas.service.ApprovalService
 import lt.skafis.bankas.service.ProblemMetaService
-import lt.skafis.bankas.service.ProblemService
+import lt.skafis.bankas.service.StorageService
 import lt.skafis.bankas.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -31,7 +31,7 @@ class ApprovalServiceImpl : ApprovalService {
     private lateinit var problemRepository: ProblemRepository
 
     @Autowired
-    private lateinit var problemService: ProblemService
+    private lateinit var storageService: StorageService
 
     @Autowired
     private lateinit var storageRepository: StorageRepository
@@ -148,9 +148,9 @@ class ApprovalServiceImpl : ApprovalService {
                     sourceListNr = it.sourceListNr,
                     skfCode = it.skfCode,
                     problemText = it.problemText,
-                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
-                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
                     sourceId = it.sourceId,
                     categories = it.categories,
                 )
