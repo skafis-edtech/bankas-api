@@ -47,7 +47,7 @@ class ProblemRepository(
                 .get()
                 .documents
                 .mapNotNull { it.toObject(Problem::class.java) }
-                .firstOrNull() ?: throw Exception("Problem with skfCode $skfCode not found")
+                .firstOrNull() ?: Problem()
         }
 
     fun countApproved(): Long =
