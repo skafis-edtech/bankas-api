@@ -27,34 +27,6 @@ class ProblemRepository(
                 .mapNotNull { it.toObject(Problem::class.java) }
         }
 
-    fun getBySourceSorted(sourceId: String): List<Problem> {
-        val cacheKey = "sorted:$sourceId"
-        return sourceIdCache.computeIfAbsent(cacheKey) {
-            firestore
-                .collection(collectionPath)
-                .whereEqualTo("sourceId", sourceId)
-                .whereNotEqualTo("categories", emptyList<String>())
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Problem::class.java) }
-        }
-    }
-
-    fun getBySourceUnsorted(sourceId: String): List<Problem> {
-        val cacheKey = "unsorted:$sourceId"
-        return sourceIdCache.computeIfAbsent(cacheKey) {
-            firestore
-                .collection(collectionPath)
-                .whereEqualTo("sourceId", sourceId)
-                .whereEqualTo("categories", emptyList<String>())
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Problem::class.java) }
-        }
-    }
-
     fun getByCategoryId(categoryId: String): List<Problem> =
         categoryIdCache.computeIfAbsent(categoryId) {
             firestore
@@ -148,7 +120,7 @@ class ProblemRepository(
                     .get()
                     .get()
             val documents = query.documents
-            val pagedDocuments = documents.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = documents.drop(offset.toInt()).take(limit)
             pagedDocuments.mapNotNull { it.toObject(Problem::class.java) }
         }
     }
@@ -174,5 +146,24 @@ class ProblemRepository(
         skfCodeCache.clear()
         categoryIdCache.clear()
         approvedCache.clear()
+    }
+
+    override fun create(document: Problem): Problem {
+        val createdDocument = super.create(document)
+        clearAllCaches() // Clear all caches after creating a document
+        return createdDocument
+    }
+
+    override fun update(
+        document: Problem,
+        id: String,
+    ): Boolean {
+        clearAllCaches()
+        return super.update(document, id)
+    }
+
+    override fun delete(id: String): Boolean {
+        clearAllCaches()
+        return super.delete(id)
     }
 }

@@ -24,4 +24,6 @@ For tagged releases to push to dockerhub:
 Having image pushed you can sun container with this:
 `docker compose up -d`
 
+## Testing
+
 

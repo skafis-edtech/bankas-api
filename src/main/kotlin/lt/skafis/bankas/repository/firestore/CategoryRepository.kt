@@ -4,12 +4,15 @@ import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Category
 import org.springframework.stereotype.Repository
 import java.text.Normalizer
+import java.util.concurrent.ConcurrentHashMap
 
 @Repository
 class CategoryRepository(
     private val firestore: Firestore,
 ) : FirestoreCrudRepository<Category>(firestore, Category::class.java) {
     override val collectionPath = "categories"
+
+    private val collectionCache = ConcurrentHashMap<String, Category>()
 
     fun getSearchPageableCategories(
         search: String,

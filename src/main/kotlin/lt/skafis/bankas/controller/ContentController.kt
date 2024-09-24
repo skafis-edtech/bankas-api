@@ -18,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile
 
 @RestController
 @RequestMapping("/content")
-@Tag(name = "Approval Controller", description = "USER and ADMIN")
+@Tag(name = "Content Controller", description = "USER and ADMIN")
 @SecurityRequirement(name = "bearerAuth")
 @Logged
 class ContentController {

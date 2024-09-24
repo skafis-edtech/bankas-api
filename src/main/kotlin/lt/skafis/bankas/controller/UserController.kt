@@ -23,7 +23,7 @@ class UserController {
     @Operation(summary = "USER")
     @SecurityRequirement(name = "bearerAuth")
     fun updateBio(
-        @RequestBody userDataDto: UserDataDto,
+        @RequestBody userDataDto: UserPublicDataDto,
         principal: Principal,
     ): ResponseEntity<Void> {
         userService.updateBio(userDataDto.bio, principal.name)

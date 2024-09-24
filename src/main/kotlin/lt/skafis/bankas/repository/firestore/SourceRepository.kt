@@ -19,30 +19,6 @@ class SourceRepository(
     private val approvedCache = ConcurrentHashMap<String, List<Source>>()
     private val pendingCache = ConcurrentHashMap<String, List<Source>>()
 
-    fun getByAuthor(author: String): List<Source> =
-        authorCache.computeIfAbsent(author) {
-            firestore
-                .collection(collectionPath)
-                .whereEqualTo("authorId", author)
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Source::class.java) }
-        }
-
-    fun getByNotAuthor(author: String): List<Source> {
-        val cacheKey = "not:$author"
-        return authorCache.computeIfAbsent(cacheKey) {
-            firestore
-                .collection(collectionPath)
-                .whereNotEqualTo("authorId", author)
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Source::class.java) }
-        }
-    }
-
     fun getApprovedSearchPageable(
         search: String,
         limit: Int,
@@ -70,7 +46,7 @@ class SourceRepository(
                 }
 
             // Apply pagination
-            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
         }
@@ -108,7 +84,7 @@ class SourceRepository(
                 )
 
             // Apply pagination
-            val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
         }
@@ -155,7 +131,7 @@ class SourceRepository(
                 }
 
             // Apply pagination
-            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments
         }
@@ -181,5 +157,23 @@ class SourceRepository(
         authorCache.clear()
         approvedCache.clear()
         pendingCache.clear()
+    }
+
+    override fun create(document: Source): Source {
+        clearAllCaches()
+        return super.create(document)
+    }
+
+    override fun update(
+        document: Source,
+        id: String,
+    ): Boolean {
+        clearAllCaches()
+        return super.update(document, id)
+    }
+
+    override fun delete(id: String): Boolean {
+        clearAllCaches()
+        return super.delete(id)
     }
 }
