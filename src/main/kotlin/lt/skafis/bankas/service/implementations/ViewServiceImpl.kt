@@ -1,25 +1,26 @@
 package lt.skafis.bankas.service.implementations
 
+import lt.skafis.bankas.dto.CategoryDisplayDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.*
 import lt.skafis.bankas.repository.firestore.CategoryRepository
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
-import lt.skafis.bankas.service.ProblemService
-import lt.skafis.bankas.service.PublicService
-import lt.skafis.bankas.service.SourceService
+import lt.skafis.bankas.service.StorageService
 import lt.skafis.bankas.service.UserService
+import lt.skafis.bankas.service.ViewService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
+import org.webjars.NotFoundException
 
 @Service
-class PublicServiceImpl : PublicService {
+class ViewServiceImpl : ViewService {
     @Autowired
     private lateinit var sourceRepository: SourceRepository
 
     @Autowired
-    private lateinit var problemService: ProblemService
+    private lateinit var storageService: StorageService
 
     @Autowired
     private lateinit var problemRepository: ProblemRepository
@@ -28,14 +29,9 @@ class PublicServiceImpl : PublicService {
     private lateinit var categoryRepository: CategoryRepository
 
     @Autowired
-    private lateinit var sourceService: SourceService
-
-    @Autowired
     private lateinit var userService: UserService
 
     override fun getProblemsCount(): Long = problemRepository.countApproved()
-
-    override fun getCategoriesCount(): Long = categoryRepository.countDocuments()
 
     override fun getCategoryProblemCount(categoryId: String): Long = problemRepository.countApprovedByCategoryId(categoryId)
 
@@ -50,9 +46,9 @@ class PublicServiceImpl : PublicService {
                     sourceListNr = it.sourceListNr,
                     skfCode = it.skfCode,
                     problemText = it.problemText,
-                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
-                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
                     categories = it.categories,
                     sourceId = it.sourceId,
                 )
@@ -65,11 +61,14 @@ class PublicServiceImpl : PublicService {
         page: Int,
         size: Int,
         search: String,
-    ): List<Category> =
+    ): List<CategoryDisplayDto> =
         categoryRepository
             .getSearchPageableCategories(search, size, (page * size).toLong())
             .sortedBy {
                 it.name
+            }.map {
+                val count = problemRepository.countApprovedByCategoryId(it.id)
+                it.toDisplayDto(count.toInt())
             }
 
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
@@ -81,16 +80,16 @@ class PublicServiceImpl : PublicService {
             sourceListNr = problem.sourceListNr,
             skfCode = problem.skfCode,
             problemText = problem.problemText,
-            problemImageSrc = problemService.utilsGetImageSrc(problem.problemImagePath),
+            problemImageSrc = storageService.utilsGetImageSrc(problem.problemImagePath),
             answerText = problem.answerText,
-            answerImageSrc = problemService.utilsGetImageSrc(problem.answerImagePath),
+            answerImageSrc = storageService.utilsGetImageSrc(problem.answerImagePath),
             categories = problem.categories,
             sourceId = problem.sourceId,
         )
     }
 
     override fun getSourceById(sourceId: String): SourceDisplayDto {
-        val source = sourceService.getSourceById(sourceId)
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source with id $sourceId not found")
         if (source.authorId != userService.getCurrentUserId() && source.reviewStatus != ReviewStatus.APPROVED) {
             userService.grantRoleAtLeast(Role.ADMIN)
         }
@@ -123,9 +122,9 @@ class PublicServiceImpl : PublicService {
                     sourceListNr = it.sourceListNr,
                     skfCode = it.skfCode,
                     problemText = it.problemText,
-                    problemImageSrc = problemService.utilsGetImageSrc(it.problemImagePath),
+                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
                     answerText = it.answerText,
-                    answerImageSrc = problemService.utilsGetImageSrc(it.answerImagePath),
+                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
                     categories = it.categories,
                     sourceId = it.sourceId,
                 )
@@ -148,4 +147,32 @@ class PublicServiceImpl : PublicService {
                 val authorUsername = userService.getUsernameById(it.authorId)
                 it.toDisplayDto(authorUsername, count.toInt())
             }
+
+    override fun getProblemsBySource(
+        sourceId: String,
+        page: Int,
+        size: Int,
+    ): List<ProblemDisplayViewDto> {
+        val userId = userService.getCurrentUserId()
+        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId && source.reviewStatus != ReviewStatus.APPROVED) {
+            userService.grantRoleAtLeast(Role.ADMIN)
+        }
+
+        return problemRepository
+            .getBySourceIdPageable(sourceId, size, (page * size).toLong())
+            .map {
+                ProblemDisplayViewDto(
+                    id = it.id,
+                    sourceListNr = it.sourceListNr,
+                    skfCode = it.skfCode,
+                    problemText = it.problemText,
+                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
+                    answerText = it.answerText,
+                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
+                    sourceId = it.sourceId,
+                    categories = it.categories,
+                )
+            }
+    }
 }

@@ -3,6 +3,7 @@ import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.Query
 import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Source
+import lt.skafis.bankas.model.Visibility
 import org.springframework.stereotype.Repository
 import java.text.Normalizer
 import java.util.concurrent.ConcurrentHashMap
@@ -17,30 +18,6 @@ class SourceRepository(
     private val authorCache = ConcurrentHashMap<String, List<Source>>()
     private val approvedCache = ConcurrentHashMap<String, List<Source>>()
     private val pendingCache = ConcurrentHashMap<String, List<Source>>()
-
-    fun getByAuthor(author: String): List<Source> =
-        authorCache.computeIfAbsent(author) {
-            firestore
-                .collection(collectionPath)
-                .whereEqualTo("authorId", author)
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Source::class.java) }
-        }
-
-    fun getByNotAuthor(author: String): List<Source> {
-        val cacheKey = "not:$author"
-        return authorCache.computeIfAbsent(cacheKey) {
-            firestore
-                .collection(collectionPath)
-                .whereNotEqualTo("authorId", author)
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Source::class.java) }
-        }
-    }
 
     fun getApprovedSearchPageable(
         search: String,
@@ -69,7 +46,7 @@ class SourceRepository(
                 }
 
             // Apply pagination
-            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
         }
@@ -94,7 +71,7 @@ class SourceRepository(
                 documents.filter { document ->
                     val source = document.toObject(Source::class.java)
                     val matchesSearch = search.isEmpty() || normalizeString(source.name).contains(normalizedSearch)
-                    matchesSearch && source.reviewStatus == ReviewStatus.PENDING
+                    matchesSearch && source.reviewStatus == ReviewStatus.PENDING && source.visibility == Visibility.PUBLIC
                 }
 
             // Sort the filtered documents into two parts:
@@ -107,7 +84,7 @@ class SourceRepository(
                 )
 
             // Apply pagination
-            val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
         }
@@ -154,7 +131,7 @@ class SourceRepository(
                 }
 
             // Apply pagination
-            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit.toInt())
+            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments
         }
@@ -180,5 +157,23 @@ class SourceRepository(
         authorCache.clear()
         approvedCache.clear()
         pendingCache.clear()
+    }
+
+    override fun create(document: Source): Source {
+        clearAllCaches()
+        return super.create(document)
+    }
+
+    override fun update(
+        document: Source,
+        id: String,
+    ): Boolean {
+        clearAllCaches()
+        return super.update(document, id)
+    }
+
+    override fun delete(id: String): Boolean {
+        clearAllCaches()
+        return super.delete(id)
     }
 }

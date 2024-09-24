@@ -19,12 +19,6 @@ interface ApprovalService {
         search: String,
     ): List<SourceDisplayDto>
 
-    fun getProblemsBySource(
-        sourceId: String,
-        page: Int,
-        size: Int,
-    ): List<ProblemDisplayViewDto>
-
     fun approve(
         sourceId: String,
         reviewMessage: String,

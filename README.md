@@ -8,7 +8,7 @@
 
 ## Dev
 1. Somehow get firebase-admin.json file (from firebase console) - have it anywhere on your computer
-2. Set environment variables `FIREBASE_SERVICE_ACCOUNT_PATH` and `FIREBASE_REALTIME_DB_URL` to the path of the file (on intellij - edit configuration, or just add args to bootRun command), or if running with docker compose - replace "path/on/your/device/firebase-admin.json" with the path to the file
+2. Set environment variables `FIREBASE_SERVICE_ACCOUNT_PATH` to the path of the file (on intellij - edit configuration, or just add args to bootRun command), or if running with docker compose - replace "path/on/your/device/firebase-admin.json" with the path to the file
 3. Run the application (in IDE or with `./gradlew build` and `./gradlew bootRun`)
 4. Open http://localhost:9000/swagger-ui/index.html in browser
 
@@ -23,5 +23,7 @@ For tagged releases to push to dockerhub:
 
 Having image pushed you can sun container with this:
 `docker compose up -d`
+
+## Testing
 
 

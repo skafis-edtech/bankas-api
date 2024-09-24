@@ -1,13 +1,12 @@
 package lt.skafis.bankas.service
 
+import lt.skafis.bankas.dto.CategoryDisplayDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.Category
 
-interface PublicService {
+interface ViewService {
     fun getProblemsCount(): Long
-
-    fun getCategoriesCount(): Long
 
     fun getCategoryProblemCount(categoryId: String): Long
 
@@ -19,7 +18,7 @@ interface PublicService {
         page: Int,
         size: Int,
         search: String,
-    ): List<Category>
+    ): List<CategoryDisplayDto>
 
     fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto
 
@@ -41,4 +40,10 @@ interface PublicService {
         size: Int,
         search: String,
     ): List<SourceDisplayDto>
+
+    fun getProblemsBySource(
+        sourceId: String,
+        page: Int,
+        size: Int,
+    ): List<ProblemDisplayViewDto>
 }
