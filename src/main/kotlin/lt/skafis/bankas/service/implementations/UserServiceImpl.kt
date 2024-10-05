@@ -12,10 +12,7 @@ import org.webjars.NotFoundException
 class UserServiceImpl(
     private val userRepository: UserRepository,
 ) : UserService {
-    override fun getUserById(userId: String): User {
-        val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
-        return user
-    }
+    override fun getUserById(userId: String): User = userRepository.getUserById(userId) ?: User()
 
     override fun getUsernameById(userId: String): String {
         val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
@@ -65,7 +62,7 @@ class UserServiceImpl(
 
     override fun getCurrentUserId(): String {
         val authentication = SecurityContextHolder.getContext().authentication
-        return authentication?.name ?: throw IllegalStateException("No authenticated user found")
+        return authentication?.name ?: ""
     }
 
     override fun getCurrentUserUsername(): String {

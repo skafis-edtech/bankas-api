@@ -73,19 +73,32 @@ class ViewServiceImpl : ViewService {
 
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
         val problem = problemRepository.getBySkfCode(skfCode)
-        if (!problem.isApproved) throw Exception("Problem with skfCode $skfCode is not approved")
-
-        return ProblemDisplayViewDto(
-            id = problem.id,
-            sourceListNr = problem.sourceListNr,
-            skfCode = problem.skfCode,
-            problemText = problem.problemText,
-            problemImageSrc = storageService.utilsGetImageSrc(problem.problemImagePath),
-            answerText = problem.answerText,
-            answerImageSrc = storageService.utilsGetImageSrc(problem.answerImagePath),
-            categories = problem.categories,
-            sourceId = problem.sourceId,
-        )
+        if (problem == Problem()) {
+            return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.NOT_EXISTING)
+        } else {
+            val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+            val userId = userService.getCurrentUserId()
+            val userData = userService.getUserById(userId)
+            if (problem.isApproved ||
+                source.authorId == userId ||
+                userData.role == Role.ADMIN && source.visibility == Visibility.PUBLIC
+            ) {
+                return ProblemDisplayViewDto(
+                    id = problem.id,
+                    sourceListNr = problem.sourceListNr,
+                    skfCode = problem.skfCode,
+                    problemText = problem.problemText,
+                    problemImageSrc = storageService.utilsGetImageSrc(problem.problemImagePath),
+                    answerText = problem.answerText,
+                    answerImageSrc = storageService.utilsGetImageSrc(problem.answerImagePath),
+                    categories = problem.categories,
+                    sourceId = problem.sourceId,
+                    problemVisibility = ProblemVisibility.VISIBLE,
+                )
+            } else {
+                return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.HIDDEN)
+            }
+        }
     }
 
     override fun getSourceById(sourceId: String): SourceDisplayDto {

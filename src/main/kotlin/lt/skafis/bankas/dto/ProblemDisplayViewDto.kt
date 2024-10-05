@@ -1,5 +1,7 @@
 package lt.skafis.bankas.dto
 
+import lt.skafis.bankas.model.ProblemVisibility
+
 data class ProblemDisplayViewDto(
     val id: String = "",
     val sourceListNr: Int = 0,
@@ -10,4 +12,5 @@ data class ProblemDisplayViewDto(
     val answerImageSrc: String = "",
     val categories: List<String> = emptyList(),
     val sourceId: String = "",
+    val problemVisibility: ProblemVisibility = ProblemVisibility.VISIBLE,
 )

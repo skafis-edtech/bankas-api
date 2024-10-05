@@ -1,6 +1,7 @@
 package lt.skafis.bankas.controller
 
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.dto.CategoryDisplayDto
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*
 @RestController
 @RequestMapping("/view")
 @Tag(name = "View Controller", description = "PUBLIC")
+@SecurityRequirement(name = "bearerAuth")
 @Logged
 class ViewController {
     @Autowired

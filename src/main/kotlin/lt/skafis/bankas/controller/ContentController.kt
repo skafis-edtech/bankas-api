@@ -53,9 +53,9 @@ class ContentController {
         @RequestPart("problem") problem: ProblemSubmitDto,
         @RequestPart(value = "problemImageFile", required = false) problemImageFile: MultipartFile?,
         @RequestPart(value = "answerImageFile", required = false) answerImageFile: MultipartFile?,
-    ): ResponseEntity<IdDto> {
-        val problemId = approvalService.submitProblem(sourceId, problem, problemImageFile, answerImageFile)
-        return ResponseEntity(IdDto(problemId), HttpStatus.CREATED)
+    ): ResponseEntity<IdSkfDto> {
+        val problemIds = approvalService.submitProblem(sourceId, problem, problemImageFile, answerImageFile)
+        return ResponseEntity(problemIds, HttpStatus.CREATED)
     }
 
     @GetMapping("/mySources")

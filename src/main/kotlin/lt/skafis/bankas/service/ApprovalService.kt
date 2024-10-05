@@ -11,7 +11,7 @@ interface ApprovalService {
         problem: ProblemSubmitDto,
         problemImageFile: MultipartFile?,
         answerImageFile: MultipartFile?,
-    ): String
+    ): IdSkfDto
 
     fun getMySources(
         page: Int,
