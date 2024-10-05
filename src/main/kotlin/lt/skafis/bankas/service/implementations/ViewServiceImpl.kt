@@ -74,13 +74,14 @@ class ViewServiceImpl : ViewService {
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
         val problem = problemRepository.getBySkfCode(skfCode)
         if (problem == Problem()) {
-            return ProblemDisplayViewDto(problemVisibility = ProblemVisibility.NOT_EXISTING)
+            return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.NOT_EXISTING)
         } else {
             val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
-            val userId = userService.getCurrentUserId() // TODO: FOR SOME DUMB FUCKIN REASON THIS DOESN"T GET USER'S ID!!!
+            val userId = userService.getCurrentUserId()
+            val userData = userService.getUserById(userId)
             if (problem.isApproved ||
                 source.authorId == userId ||
-                userService.getUserById(userId).role == Role.ADMIN
+                userData.role == Role.ADMIN && source.visibility == Visibility.PUBLIC
             ) {
                 return ProblemDisplayViewDto(
                     id = problem.id,
@@ -95,7 +96,7 @@ class ViewServiceImpl : ViewService {
                     problemVisibility = ProblemVisibility.VISIBLE,
                 )
             } else {
-                return ProblemDisplayViewDto(problemVisibility = ProblemVisibility.HIDDEN)
+                return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.HIDDEN)
             }
         }
     }

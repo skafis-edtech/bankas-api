@@ -58,7 +58,7 @@ class ApprovalServiceImpl : ApprovalService {
         problem: ProblemSubmitDto,
         problemImageFile: MultipartFile?,
         answerImageFile: MultipartFile?,
-    ): String {
+    ): IdSkfDto {
         val userId = userService.getCurrentUserId()
         val imagesUUID = UUID.randomUUID()
         var problemImagePath = ""
@@ -80,9 +80,13 @@ class ApprovalServiceImpl : ApprovalService {
             storageRepository.uploadImage(it, answerImagePath)
         }
 
+        val skfCode = metaService.getLowestUnusedSkfCode()
+        metaService.amendUsedSkfCodeList(skfCode)
+
         val createdProblem =
             problemRepository.create(
                 Problem(
+                    skfCode = skfCode,
                     sourceListNr = problem.sourceListNr,
                     problemText = problem.problemText,
                     problemImagePath = problemImagePath,
@@ -108,7 +112,7 @@ class ApprovalServiceImpl : ApprovalService {
                 }
             }
         }
-        return createdProblem.id
+        return IdSkfDto(createdProblem.id, createdProblem.skfCode)
     }
 
     override fun getMySources(
@@ -148,22 +152,11 @@ class ApprovalServiceImpl : ApprovalService {
         if (source.reviewStatus != ReviewStatus.APPROVED) {
             val problems = problemRepository.getBySourceId(sourceId)
             problems.forEach {
-                if (it.skfCode.isEmpty()) {
-                    val skfCode = metaService.getLowestUnusedSkfCode()
-                    metaService.amendUsedSkfCodeList(skfCode)
-                    val updatedProblem =
-                        it.copy(
-                            skfCode = skfCode,
-                            isApproved = true,
-                        )
-                    problemRepository.update(updatedProblem, it.id)
-                } else {
-                    val updatedProblem =
-                        it.copy(
-                            isApproved = true,
-                        )
-                    problemRepository.update(updatedProblem, it.id)
-                }
+                val updatedProblem =
+                    it.copy(
+                        isApproved = true,
+                    )
+                problemRepository.update(updatedProblem, it.id)
             }
         }
 

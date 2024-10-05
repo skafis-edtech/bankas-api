@@ -12,5 +12,5 @@ data class ProblemDisplayViewDto(
     val answerImageSrc: String = "",
     val categories: List<String> = emptyList(),
     val sourceId: String = "",
-    val problemVisibility: ProblemVisibility = ProblemVisibility.HIDDEN,
+    val problemVisibility: ProblemVisibility = ProblemVisibility.VISIBLE,
 )
