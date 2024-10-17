@@ -6,6 +6,8 @@ data class Category(
     override var id: String = "",
     val name: String = "",
     val description: String = "",
+    val isPrivate: Boolean = false,
+    val ownerOfPrivateId: String = "",
 ) : Identifiable {
     fun toDisplayDto(problemCount: Int = 0): CategoryDisplayDto =
         CategoryDisplayDto(
@@ -13,5 +15,6 @@ data class Category(
             name = this.name,
             description = this.description,
             problemCount = problemCount,
+            isPrivate = this.isPrivate,
         )
 }

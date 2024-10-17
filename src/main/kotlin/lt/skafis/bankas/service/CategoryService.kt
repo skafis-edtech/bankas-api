@@ -12,13 +12,4 @@ interface CategoryService {
     ): Category
 
     fun deleteCategory(id: String)
-
-    fun createPrivateCategory(categoryPostDto: CategoryPostDto): Category
-
-    fun updatePrivateCategory(
-        id: String,
-        categoryPostDto: CategoryPostDto,
-    ): Category
-
-    fun deletePrivateCategory(id: String)
 }

@@ -5,4 +5,5 @@ data class CategoryDisplayDto(
     val name: String = "",
     val description: String = "",
     val problemCount: Int = 0,
+    val isPrivate: Boolean = false,
 )

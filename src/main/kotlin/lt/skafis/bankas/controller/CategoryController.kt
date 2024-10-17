@@ -16,14 +16,13 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/category")
 @Tag(name = "Category Controller", description = "Public - SUPER_ADMIN, private - USER")
 @SecurityRequirement(name = "bearerAuth")
-@RequiresRoleAtLeast(Role.SUPER_ADMIN)
+@RequiresRoleAtLeast(Role.USER)
 @Logged
 class CategoryController {
     @Autowired
     private lateinit var categoryService: CategoryService
 
     @PostMapping
-    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
     fun createPublicCategory(
         @RequestBody categoryPostDto: CategoryPostDto,
     ): ResponseEntity<Category> {
@@ -32,7 +31,6 @@ class CategoryController {
     }
 
     @PutMapping("/{id}")
-    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
     fun updatePublicCategory(
         @PathVariable id: String,
         @RequestBody categoryPostDto: CategoryPostDto,
@@ -42,39 +40,10 @@ class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
     fun deletePublicCategory(
         @PathVariable id: String,
     ): ResponseEntity<Void> {
         categoryService.deleteCategory(id)
-        return ResponseEntity.ok().build()
-    }
-
-    @PostMapping("/private")
-    @RequiresRoleAtLeast(Role.USER)
-    fun createPrivateCategory(
-        @RequestBody categoryPostDto: CategoryPostDto,
-    ): ResponseEntity<Category> {
-        val category = categoryService.createPrivateCategory(categoryPostDto)
-        return ResponseEntity.ok(category)
-    }
-
-    @PutMapping("/private/{id}")
-    @RequiresRoleAtLeast(Role.USER)
-    fun updatePrivateCategory(
-        @PathVariable id: String,
-        @RequestBody categoryPostDto: CategoryPostDto,
-    ): ResponseEntity<Category> {
-        val updatedCategory = categoryService.updatePrivateCategory(id, categoryPostDto)
-        return ResponseEntity.ok(updatedCategory)
-    }
-
-    @DeleteMapping("/private/{id}")
-    @RequiresRoleAtLeast(Role.USER)
-    fun deletePrivateCategory(
-        @PathVariable id: String,
-    ): ResponseEntity<Void> {
-        categoryService.deletePrivateCategory(id)
         return ResponseEntity.ok().build()
     }
 }
