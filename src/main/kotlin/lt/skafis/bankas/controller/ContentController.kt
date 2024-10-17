@@ -8,6 +8,7 @@ import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.SortBy
 import lt.skafis.bankas.service.ApprovalService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -68,8 +69,9 @@ class ContentController {
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "10") size: Int,
         @RequestParam(required = false, defaultValue = "") search: String,
+        @RequestParam(required = false, defaultValue = "NEWEST") sortBy: SortBy,
     ): ResponseEntity<List<SourceDisplayDto>> {
-        val sources = approvalService.getMySources(page, size, search)
+        val sources = approvalService.getMySources(page, size, search, sortBy)
         return ResponseEntity(sources, HttpStatus.OK)
     }
 

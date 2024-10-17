@@ -13,14 +13,6 @@ class CategoryServiceImpl : CategoryService {
     @Autowired
     private lateinit var categoryRepository: CategoryRepository
 
-    override fun getCategories(): List<Category> =
-        categoryRepository
-            .findAll()
-            .sortedBy { it.name }
-
-    override fun getCategoryById(id: String): Category =
-        categoryRepository.findById(id) ?: throw NotFoundException("Category with id $id not found")
-
     override fun createCategory(categoryPostDto: CategoryPostDto): Category {
         val category =
             categoryRepository.create(
@@ -50,5 +42,20 @@ class CategoryServiceImpl : CategoryService {
     override fun deleteCategory(id: String) {
         val success = categoryRepository.delete(id)
         if (!success) throw Exception("Failed to delete category with id $id")
+    }
+
+    override fun createPrivateCategory(categoryPostDto: CategoryPostDto): Category {
+        TODO("Not yet implemented")
+    }
+
+    override fun updatePrivateCategory(
+        id: String,
+        categoryPostDto: CategoryPostDto,
+    ): Category {
+        TODO("Not yet implemented")
+    }
+
+    override fun deletePrivateCategory(id: String) {
+        TODO("Not yet implemented")
     }
 }

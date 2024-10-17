@@ -3,6 +3,7 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.ReviewStatus
+import lt.skafis.bankas.model.SortBy
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
@@ -119,6 +120,7 @@ class ApprovalServiceImpl : ApprovalService {
         page: Int,
         size: Int,
         search: String,
+        sortBy: SortBy,
     ): List<SourceDisplayDto> {
         val userId = userService.getCurrentUserId()
         return sourceRepository
@@ -127,6 +129,7 @@ class ApprovalServiceImpl : ApprovalService {
                 search,
                 size,
                 (page * size).toLong(),
+                sortBy = sortBy,
             ).map {
                 val count = problemRepository.countBySource(it.id)
                 it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())

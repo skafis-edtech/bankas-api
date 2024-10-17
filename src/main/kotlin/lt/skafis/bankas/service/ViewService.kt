@@ -4,6 +4,7 @@ import lt.skafis.bankas.dto.CategoryDisplayDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.SourceDisplayDto
 import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.SortBy
 
 interface ViewService {
     fun getProblemsCount(): Long
@@ -29,6 +30,7 @@ interface ViewService {
         page: Int,
         size: Int,
         search: String,
+        sortBy: SortBy,
     ): List<SourceDisplayDto>
 
     fun getUnsortedProblems(): List<ProblemDisplayViewDto>
