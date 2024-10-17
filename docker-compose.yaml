@@ -10,5 +10,6 @@ services:
       - FIREBASE_REALTIME_DB_URL=https://bankas-skafis-default-rtdb.europe-west1.firebaseio.com
       - ENVIRONMENT=dev
       - PORT=9000
+      - SENTRY_AUTH_TOKEN=your-sentry-auth-token
     volumes:
       - /local/path/to/firebase-admin.json:/etc/secrets/firebase-admin.json

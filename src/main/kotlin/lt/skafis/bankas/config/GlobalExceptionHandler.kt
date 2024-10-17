@@ -10,7 +10,6 @@ import org.webjars.NotFoundException
 
 @ControllerAdvice
 class GlobalExceptionHandler {
-
     private val log = LoggerFactory.getLogger(javaClass)
 
     @ExceptionHandler(NotFoundException::class)
@@ -27,11 +26,13 @@ class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>("Internal exception occurred: " + ex.message)
     }
 
-//    @ExceptionHandler(Exception::class)
-//    fun handleException(ex: Exception): ResponseEntity<String> {
-//        log.error("Exception occurred: " + ex.message)
-//        log.trace(ex.stackTraceToString())
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>("Error occurred, try again. If the issue remains, contact the system admin. Error message: " + ex.message)
-//    }
-
+    @ExceptionHandler(Exception::class)
+    fun handleException(ex: Exception): ResponseEntity<String> {
+        // Sentry.captureException(ex)
+        log.error("Exception occurred: " + ex.message)
+        log.trace(ex.stackTraceToString())
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body<String>(
+            "Error occurred, try again. If the issue remains, contact the system admin. Error message: " + ex.message,
+        )
+    }
 }

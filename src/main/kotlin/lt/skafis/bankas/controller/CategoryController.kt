@@ -14,42 +14,67 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/category")
-@Tag(name = "Category Controller", description = "SUPER_ADMIN")
+@Tag(name = "Category Controller", description = "Public - SUPER_ADMIN, private - USER")
 @SecurityRequirement(name = "bearerAuth")
 @RequiresRoleAtLeast(Role.SUPER_ADMIN)
 @Logged
 class CategoryController {
-
     @Autowired
     private lateinit var categoryService: CategoryService
 
     @PostMapping
-    fun createCategory(@RequestBody categoryPostDto: CategoryPostDto): ResponseEntity<Category> {
+    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
+    fun createPublicCategory(
+        @RequestBody categoryPostDto: CategoryPostDto,
+    ): ResponseEntity<Category> {
         val category = categoryService.createCategory(categoryPostDto)
         return ResponseEntity.ok(category)
     }
 
-    @GetMapping
-    fun getAllCategories(): ResponseEntity<List<Category>> {
-        val categories = categoryService.getCategories()
-        return ResponseEntity.ok(categories)
-    }
-
-    @GetMapping("/{id}")
-    fun getCategoryById(@PathVariable id: String): ResponseEntity<Category> {
-        val category = categoryService.getCategoryById(id)
-        return ResponseEntity.ok(category)
-    }
-
     @PutMapping("/{id}")
-    fun updateCategory(@PathVariable id: String, @RequestBody categoryPostDto: CategoryPostDto): ResponseEntity<Category> {
+    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
+    fun updatePublicCategory(
+        @PathVariable id: String,
+        @RequestBody categoryPostDto: CategoryPostDto,
+    ): ResponseEntity<Category> {
         val updatedCategory = categoryService.updateCategory(id, categoryPostDto)
         return ResponseEntity.ok(updatedCategory)
     }
 
     @DeleteMapping("/{id}")
-    fun deleteCategory(@PathVariable id: String): ResponseEntity<Void> {
+    @RequiresRoleAtLeast(Role.SUPER_ADMIN)
+    fun deletePublicCategory(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
         categoryService.deleteCategory(id)
+        return ResponseEntity.ok().build()
+    }
+
+    @PostMapping("/private")
+    @RequiresRoleAtLeast(Role.USER)
+    fun createPrivateCategory(
+        @RequestBody categoryPostDto: CategoryPostDto,
+    ): ResponseEntity<Category> {
+        val category = categoryService.createPrivateCategory(categoryPostDto)
+        return ResponseEntity.ok(category)
+    }
+
+    @PutMapping("/private/{id}")
+    @RequiresRoleAtLeast(Role.USER)
+    fun updatePrivateCategory(
+        @PathVariable id: String,
+        @RequestBody categoryPostDto: CategoryPostDto,
+    ): ResponseEntity<Category> {
+        val updatedCategory = categoryService.updatePrivateCategory(id, categoryPostDto)
+        return ResponseEntity.ok(updatedCategory)
+    }
+
+    @DeleteMapping("/private/{id}")
+    @RequiresRoleAtLeast(Role.USER)
+    fun deletePrivateCategory(
+        @PathVariable id: String,
+    ): ResponseEntity<Void> {
+        categoryService.deletePrivateCategory(id)
         return ResponseEntity.ok().build()
     }
 }

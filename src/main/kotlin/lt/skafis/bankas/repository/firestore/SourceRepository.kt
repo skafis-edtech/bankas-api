@@ -2,6 +2,7 @@ package lt.skafis.bankas.repository.firestore
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.Query
 import lt.skafis.bankas.model.ReviewStatus
+import lt.skafis.bankas.model.SortBy
 import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.model.Visibility
 import org.springframework.stereotype.Repository
@@ -74,17 +75,8 @@ class SourceRepository(
                     matchesSearch && source.reviewStatus == ReviewStatus.PENDING && source.visibility == Visibility.PUBLIC
                 }
 
-            // Sort the filtered documents into two parts:
-            val sortedDocuments =
-                filteredDocuments.sortedWith(
-                    compareBy(
-                        { it.toObject(Source::class.java).name.contains("(DAR TVARKOMA)") },
-                        { it.toObject(Source::class.java).lastModifiedOn },
-                    ),
-                )
-
             // Apply pagination
-            val pagedDocuments = sortedDocuments.drop(offset.toInt()).take(limit)
+            val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
             pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
         }
@@ -96,35 +88,47 @@ class SourceRepository(
         limit: Int,
         offset: Long,
         isApproved: Boolean = false,
+        sortBy: SortBy = SortBy.NEWEST,
     ): List<Source> {
-        val cacheKey = "authorSearch:$userId:$search:$limit:$offset:$isApproved"
+        val cacheKey = "authorSearch:$userId:$search:$limit:$offset:$isApproved:$sortBy"
         return authorCache.computeIfAbsent(cacheKey) {
             val collectionRef = firestore.collection(collectionPath)
-            val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
-            val documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
-
-            // Group by review status
-            val groupedDocuments = documents.groupBy { it.reviewStatus }
-
-            // Define the order of statuses
-            val statusOrder = listOf(ReviewStatus.REJECTED, ReviewStatus.PENDING, ReviewStatus.APPROVED)
-
-            // Sort and flatten the grouped documents
-            val sortedDocuments =
-                statusOrder.flatMap { status ->
-                    groupedDocuments[status] ?: emptyList()
-                }
+            var documents = emptyList<Source>()
+            if (sortBy == SortBy.NEWEST) {
+                val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.OLDEST) {
+                val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.NAME_ASC) {
+                val query = collectionRef.orderBy("name", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.NAME_DESC) {
+                val query = collectionRef.orderBy("name", Query.Direction.DESCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.MOST_PROBLEMS) {
+                val query = collectionRef.orderBy("problemCount", Query.Direction.DESCENDING).get().get()
+                // TODO: Add a problemCount field in FIrestore
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.LEAST_PROBLEMS) {
+                // TODO: Add a problemCount field in FIrestore
+                val query = collectionRef.orderBy("problemCount", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            }
 
             val filteredDocuments =
                 if (search.isNotEmpty()) {
                     val normalizedSearch = normalizeString(search)
-                    sortedDocuments.filter { source ->
-                        normalizeString(source.name).contains(normalizedSearch) &&
+                    documents.filter { source ->
+                        (
+                            normalizeString(source.name).contains(normalizedSearch) ||
+                                normalizeString(source.description).contains(normalizedSearch)
+                        ) &&
                             source.authorId == userId &&
                             (!isApproved || source.reviewStatus == ReviewStatus.APPROVED)
                     }
                 } else {
-                    sortedDocuments.filter { source ->
+                    documents.filter { source ->
                         source.authorId == userId &&
                             (!isApproved || source.reviewStatus == ReviewStatus.APPROVED)
                     }

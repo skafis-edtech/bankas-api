@@ -1,6 +1,7 @@
 package lt.skafis.bankas.service
 
 import lt.skafis.bankas.dto.*
+import lt.skafis.bankas.model.SortBy
 import org.springframework.web.multipart.MultipartFile
 
 interface ApprovalService {
@@ -17,6 +18,7 @@ interface ApprovalService {
         page: Int,
         size: Int,
         search: String,
+        sortBy: SortBy,
     ): List<SourceDisplayDto>
 
     fun approve(

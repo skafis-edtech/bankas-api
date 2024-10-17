@@ -1,6 +1,6 @@
 package lt.skafis.bankas.dto
 
-data class IdSkfDto (
+data class IdSkfDto(
     val id: String,
-    val skfCode: String
+    val skfCode: String,
 )

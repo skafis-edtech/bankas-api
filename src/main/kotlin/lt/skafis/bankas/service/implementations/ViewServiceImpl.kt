@@ -74,14 +74,15 @@ class ViewServiceImpl : ViewService {
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
         val problem = problemRepository.getBySkfCode(skfCode)
         if (problem == Problem()) {
-            return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.NOT_EXISTING)
+            return ProblemDisplayViewDto(skfCode = skfCode, problemVisibility = ProblemVisibility.NOT_EXISTING)
         } else {
             val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
             val userId = userService.getCurrentUserId()
             val userData = userService.getUserById(userId)
             if (problem.isApproved ||
                 source.authorId == userId ||
-                userData.role == Role.ADMIN && source.visibility == Visibility.PUBLIC
+                userData.role == Role.ADMIN &&
+                source.visibility == Visibility.PUBLIC
             ) {
                 return ProblemDisplayViewDto(
                     id = problem.id,
@@ -96,7 +97,7 @@ class ViewServiceImpl : ViewService {
                     problemVisibility = ProblemVisibility.VISIBLE,
                 )
             } else {
-                return ProblemDisplayViewDto(skfCode=skfCode, problemVisibility = ProblemVisibility.HIDDEN)
+                return ProblemDisplayViewDto(skfCode = skfCode, problemVisibility = ProblemVisibility.HIDDEN)
             }
         }
     }
@@ -116,10 +117,11 @@ class ViewServiceImpl : ViewService {
         page: Int,
         size: Int,
         search: String,
+        sortBy: SortBy,
     ): List<SourceDisplayDto> {
         val authorId = userService.getUserIdByUsername(authorUsername)
         return sourceRepository
-            .getByAuthorSearchPageable(authorId, search, size, (page * size).toLong(), isApproved = true)
+            .getByAuthorSearchPageable(authorId, search, size, (page * size).toLong(), isApproved = true, sortBy)
             .map {
                 val count = problemRepository.countBySource(it.id)
                 it.toDisplayDto(authorUsername, count.toInt())
