@@ -46,8 +46,7 @@ class ProblemRepository(
                 .get()
                 .get()
                 .documents
-                .mapNotNull { it.toObject(Problem::class.java) }
-                .firstOrNull() ?: Problem()
+                .firstNotNullOfOrNull { it.toObject(Problem::class.java) } ?: Problem()
         }
 
     fun countApproved(): Long =
@@ -78,32 +77,6 @@ class ProblemRepository(
             }.size
             .toLong()
     }
-
-    fun countUnsortedApproved(): Long =
-        approvedCache
-            .computeIfAbsent("unsortedApproved") {
-                firestore
-                    .collection(collectionPath)
-                    .whereEqualTo("isApproved", true)
-                    .whereEqualTo("categories", emptyList<String>())
-                    .get()
-                    .get()
-                    .documents
-                    .mapNotNull { it.toObject(Problem::class.java) }
-            }.size
-            .toLong()
-
-    fun getUnsortedApprovedProblems(): List<Problem> =
-        approvedCache.computeIfAbsent("unsortedApproved") {
-            firestore
-                .collection(collectionPath)
-                .whereEqualTo("isApproved", true)
-                .whereEqualTo("categories", emptyList<String>())
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Problem::class.java) }
-        }
 
     fun getBySourceIdPageable(
         sourceId: String,

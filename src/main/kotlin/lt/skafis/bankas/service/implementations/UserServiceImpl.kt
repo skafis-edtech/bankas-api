@@ -56,7 +56,7 @@ class UserServiceImpl(
                     user.role === Role.SUPER_ADMIN
             )
         ) {
-            throw IllegalArgumentException("Unauthorized access")
+            throw IllegalAccessException("Unauthorized access")
         }
     }
 

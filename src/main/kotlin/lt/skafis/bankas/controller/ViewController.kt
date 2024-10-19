@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/view")
-@Tag(name = "View Controller", description = "PUBLIC")
+@Tag(name = "General View Controller", description = "Stats for public, problemView for USERS")
 @SecurityRequirement(name = "bearerAuth")
 @Logged
 class ViewController {

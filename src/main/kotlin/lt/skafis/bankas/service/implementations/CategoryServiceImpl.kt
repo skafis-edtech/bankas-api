@@ -3,6 +3,7 @@ package lt.skafis.bankas.service.implementations
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
 import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.Visibility
 import lt.skafis.bankas.repository.firestore.CategoryRepository
 import lt.skafis.bankas.service.CategoryService
 import lt.skafis.bankas.service.UserService
@@ -19,18 +20,16 @@ class CategoryServiceImpl : CategoryService {
     private lateinit var userService: UserService
 
     override fun createCategory(categoryPostDto: CategoryPostDto): Category {
-        if (categoryPostDto.isPrivate) {
-            userService.grantRoleAtLeast(Role.USER)
-        } else {
+        if (categoryPostDto.visibility == Visibility.PUBLIC) {
             userService.grantRoleAtLeast(Role.SUPER_ADMIN)
         }
-        val userId = if (categoryPostDto.isPrivate) userService.getCurrentUserId() else ""
+        val userId = if (categoryPostDto.visibility == Visibility.PRIVATE) userService.getCurrentUserId() else ""
         val category =
             categoryRepository.create(
                 Category(
                     name = categoryPostDto.name,
                     description = categoryPostDto.description,
-                    isPrivate = categoryPostDto.isPrivate,
+                    visibility = categoryPostDto.visibility,
                     ownerOfPrivateId = userId,
                 ),
             )
@@ -42,24 +41,24 @@ class CategoryServiceImpl : CategoryService {
         categoryPostDto: CategoryPostDto,
     ): Category {
         var categoryToUpdate = categoryRepository.findById(id) ?: throw NotFoundException("Category with id $id not found")
-        val newIsPrivate: Boolean
-        if (categoryToUpdate.isPrivate) {
+        val newIsPrivate: Visibility
+        if (categoryToUpdate.visibility == Visibility.PRIVATE) {
             val userId = userService.getCurrentUserId()
             if (categoryToUpdate.ownerOfPrivateId != userId) {
                 userService.grantRoleAtLeast(Role.SUPER_ADMIN)
-                newIsPrivate = categoryPostDto.isPrivate
+                newIsPrivate = categoryPostDto.visibility
             } else {
-                newIsPrivate = true
+                newIsPrivate = Visibility.PRIVATE
             }
         } else {
             userService.grantRoleAtLeast(Role.SUPER_ADMIN)
-            newIsPrivate = categoryPostDto.isPrivate
+            newIsPrivate = categoryPostDto.visibility
         }
         categoryToUpdate =
             categoryToUpdate.copy(
                 name = categoryPostDto.name,
                 description = categoryPostDto.description,
-                isPrivate = newIsPrivate,
+                visibility = newIsPrivate,
             )
         val success = categoryRepository.update(categoryToUpdate, id)
         return if (success) {
@@ -71,7 +70,7 @@ class CategoryServiceImpl : CategoryService {
 
     override fun deleteCategory(id: String) {
         val category = categoryRepository.findById(id) ?: throw NotFoundException("Category with id $id not found")
-        if (category.isPrivate) {
+        if (category.visibility == Visibility.PRIVATE) {
             val userId = userService.getCurrentUserId()
             if (category.ownerOfPrivateId != userId) {
                 throw Exception("User with id $userId is not the owner of category with id $id")
@@ -81,5 +80,12 @@ class CategoryServiceImpl : CategoryService {
         }
         val success = categoryRepository.delete(id)
         if (!success) throw Exception("Failed to delete category with id $id")
+    }
+
+    override fun sortProblem(
+        problemId: String,
+        categoryIdList: List<String>,
+    ) {
+        TODO("Not yet implemented")
     }
 }

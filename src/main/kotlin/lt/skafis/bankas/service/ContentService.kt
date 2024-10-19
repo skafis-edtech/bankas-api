@@ -4,7 +4,7 @@ import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.SortBy
 import org.springframework.web.multipart.MultipartFile
 
-interface ApprovalService {
+interface ContentService {
     fun submitSourceData(sourceData: SourceSubmitDto): String
 
     fun submitProblem(
@@ -21,16 +21,6 @@ interface ApprovalService {
         sortBy: SortBy,
     ): List<SourceDisplayDto>
 
-    fun approve(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto
-
-    fun reject(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto
-
     fun deleteSource(sourceId: String)
 
     fun deleteProblem(problemId: String)
@@ -39,12 +29,6 @@ interface ApprovalService {
         sourceId: String,
         sourceData: SourceSubmitDto,
     ): SourceDisplayDto
-
-    fun getPendingSources(
-        page: Int,
-        size: Int,
-        search: String,
-    ): List<SourceDisplayDto>
 
     fun updateProblemTexts(
         problemId: String,

@@ -17,39 +17,63 @@ class SourceRepository(
 
     // Caches
     private val authorCache = ConcurrentHashMap<String, List<Source>>()
-    private val approvedCache = ConcurrentHashMap<String, List<Source>>()
+    private val availableCache = ConcurrentHashMap<String, List<Source>>()
     private val pendingCache = ConcurrentHashMap<String, List<Source>>()
 
-    fun getApprovedSearchPageable(
+    fun getAvailableSources(
         search: String,
         limit: Int,
         offset: Long,
+        sortBy: SortBy,
+        userId: String,
     ): List<Source> {
-        val cacheKey = "approved:$search:$limit:$offset"
-        return approvedCache.computeIfAbsent(cacheKey) {
+        val cacheKey = "available:$search:$limit:$offset:$sortBy"
+        return availableCache.computeIfAbsent(cacheKey) {
             val collectionRef = firestore.collection(collectionPath)
-            val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
-            val documents = query.documents
+            var documents = emptyList<Source>()
+            if (sortBy == SortBy.NEWEST) {
+                val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.DESCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.OLDEST) {
+                val query = collectionRef.orderBy("lastModifiedOn", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.NAME_ASC) {
+                val query = collectionRef.orderBy("name", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.NAME_DESC) {
+                val query = collectionRef.orderBy("name", Query.Direction.DESCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.MOST_PROBLEMS) {
+                val query = collectionRef.orderBy("problemCount", Query.Direction.DESCENDING).get().get()
+                // TODO: Add a problemCount field in Firestore
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            } else if (sortBy == SortBy.LEAST_PROBLEMS) {
+                // TODO: Add a problemCount field in Firestore
+                val query = collectionRef.orderBy("problemCount", Query.Direction.ASCENDING).get().get()
+                documents = query.documents.mapNotNull { it.toObject(Source::class.java) }
+            }
 
-            // Filter documents based on the search criteria and approval status
             val filteredDocuments =
                 if (search.isNotEmpty()) {
                     val normalizedSearch = normalizeString(search)
-                    documents.filter { document ->
-                        val source = document.toObject(Source::class.java)
-                        normalizeString(source.name).contains(normalizedSearch) && source.reviewStatus == ReviewStatus.APPROVED
+                    documents.filter { source ->
+                        (
+                            normalizeString(source.name).contains(normalizedSearch) ||
+                                normalizeString(source.description).contains(normalizedSearch)
+                        ) &&
+                            source.reviewStatus == ReviewStatus.APPROVED ||
+                            source.authorId == userId
                     }
                 } else {
-                    documents.filter { document ->
-                        val source = document.toObject(Source::class.java)
-                        source.reviewStatus == ReviewStatus.APPROVED
+                    documents.filter { source ->
+                        source.reviewStatus == ReviewStatus.APPROVED ||
+                            source.authorId == userId
                     }
                 }
 
-            // Apply pagination
             val pagedDocuments = filteredDocuments.drop(offset.toInt()).take(limit)
 
-            pagedDocuments.mapNotNull { it.toObject(Source::class.java) }
+            pagedDocuments
         }
     }
 
@@ -159,7 +183,7 @@ class SourceRepository(
     // Optional: Method to clear all caches
     fun clearAllCaches() {
         authorCache.clear()
-        approvedCache.clear()
+        availableCache.clear()
         pendingCache.clear()
     }
 

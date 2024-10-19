@@ -8,7 +8,7 @@ import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.repository.storage.StorageRepository
-import lt.skafis.bankas.service.ApprovalService
+import lt.skafis.bankas.service.ContentService
 import lt.skafis.bankas.service.ProblemMetaService
 import lt.skafis.bankas.service.StorageService
 import lt.skafis.bankas.service.UserService
@@ -20,7 +20,7 @@ import org.webjars.NotFoundException
 import java.util.*
 
 @Service
-class ApprovalServiceImpl : ApprovalService {
+class ContentServiceImpl : ContentService {
     @Autowired
     private lateinit var userService: UserService
 
@@ -136,65 +136,6 @@ class ApprovalServiceImpl : ApprovalService {
             }
     }
 
-    override fun approve(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto {
-        val username = userService.getCurrentUserUsername()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        val amendedReviewHistory =
-            "${source.reviewHistory} \n ${Instant.now()} $username patvirtino" +
-                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
-        val updatedSource =
-            source.copy(
-                reviewStatus = ReviewStatus.APPROVED,
-                reviewHistory = amendedReviewHistory,
-            )
-        sourceRepository.update(updatedSource, sourceId)
-
-        if (source.reviewStatus != ReviewStatus.APPROVED) {
-            val problems = problemRepository.getBySourceId(sourceId)
-            problems.forEach {
-                val updatedProblem =
-                    it.copy(
-                        isApproved = true,
-                    )
-                problemRepository.update(updatedProblem, it.id)
-            }
-        }
-
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
-    }
-
-    override fun reject(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto {
-        val username = userService.getCurrentUserUsername()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        val amendedReviewHistory =
-            "${source.reviewHistory} \n ${Instant.now()} $username atmetė" +
-                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
-        val updatedSource =
-            source.copy(
-                reviewStatus = ReviewStatus.REJECTED,
-                reviewHistory = amendedReviewHistory,
-            )
-        sourceRepository.update(updatedSource, sourceId)
-
-        if (source.reviewStatus == ReviewStatus.APPROVED) {
-            val problems = problemRepository.getBySourceId(sourceId)
-            problems.forEach {
-                val updatedProblem =
-                    it.copy(
-                        isApproved = false,
-                    )
-                problemRepository.update(updatedProblem, it.id)
-            }
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
-    }
-
     override fun deleteSource(sourceId: String) {
         val userId = userService.getCurrentUserId()
         val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
@@ -248,21 +189,6 @@ class ApprovalServiceImpl : ApprovalService {
         unapproveSource(updatedSource)
         return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
-
-    override fun getPendingSources(
-        page: Int,
-        size: Int,
-        search: String,
-    ): List<SourceDisplayDto> =
-        sourceRepository
-            .getPendingSearchPageable(
-                search,
-                size,
-                (page * size).toLong(),
-            ).map {
-                val count = problemRepository.countBySource(it.id)
-                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
-            }
 
     override fun updateProblemTexts(
         problemId: String,

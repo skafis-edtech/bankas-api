@@ -12,4 +12,9 @@ interface CategoryService {
     ): Category
 
     fun deleteCategory(id: String)
+
+    fun sortProblem(
+        problemId: String,
+        categoryIdList: List<String>,
+    )
 }

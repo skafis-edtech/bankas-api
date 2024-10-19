@@ -23,7 +23,7 @@ class CategoryController {
     private lateinit var categoryService: CategoryService
 
     @PostMapping
-    fun createPublicCategory(
+    fun createCategory(
         @RequestBody categoryPostDto: CategoryPostDto,
     ): ResponseEntity<Category> {
         val category = categoryService.createCategory(categoryPostDto)
@@ -31,7 +31,7 @@ class CategoryController {
     }
 
     @PutMapping("/{id}")
-    fun updatePublicCategory(
+    fun updateCategory(
         @PathVariable id: String,
         @RequestBody categoryPostDto: CategoryPostDto,
     ): ResponseEntity<Category> {
@@ -40,10 +40,19 @@ class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    fun deletePublicCategory(
+    fun deleteCategory(
         @PathVariable id: String,
     ): ResponseEntity<Void> {
         categoryService.deleteCategory(id)
+        return ResponseEntity.ok().build()
+    }
+
+    @PutMapping("/sort/{problemId}")
+    fun sortProblem(
+        @PathVariable problemId: String,
+        @RequestBody categoryIdList: List<String>,
+    ): ResponseEntity<Void> {
+        categoryService.sortProblem(problemId, categoryIdList)
         return ResponseEntity.ok().build()
     }
 }
