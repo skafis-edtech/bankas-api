@@ -15,7 +15,7 @@ class CategoryRepository(
 
     private val collectionCache = ConcurrentHashMap<String, List<Category>>()
 
-    fun getSearchPageableCategories(
+    fun getAvailableCategories(
         search: String,
         limit: Int,
         offset: Long,

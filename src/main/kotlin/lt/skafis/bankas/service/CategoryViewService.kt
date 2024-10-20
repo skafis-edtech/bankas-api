@@ -9,6 +9,7 @@ interface CategoryViewService {
         categoryId: String,
         page: Int,
         size: Int,
+        seed: Long,
     ): List<ProblemDisplayViewDto>
 
     fun getCategoryById(categoryId: String): Category

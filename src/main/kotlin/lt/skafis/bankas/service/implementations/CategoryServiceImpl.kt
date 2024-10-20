@@ -2,9 +2,12 @@ package lt.skafis.bankas.service.implementations
 
 import lt.skafis.bankas.dto.CategoryPostDto
 import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.ReviewStatus
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.Visibility
 import lt.skafis.bankas.repository.firestore.CategoryRepository
+import lt.skafis.bankas.repository.firestore.ProblemRepository
+import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.service.CategoryService
 import lt.skafis.bankas.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,6 +16,12 @@ import org.webjars.NotFoundException
 
 @Service
 class CategoryServiceImpl : CategoryService {
+    @Autowired
+    private lateinit var problemRepository: ProblemRepository
+
+    @Autowired
+    private lateinit var sourceRepository: SourceRepository
+
     @Autowired
     private lateinit var categoryRepository: CategoryRepository
 
@@ -86,6 +95,23 @@ class CategoryServiceImpl : CategoryService {
         problemId: String,
         categoryIdList: List<String>,
     ) {
-        TODO("Not yet implemented")
+        val userId = userService.getCurrentUserId()
+        val problem = problemRepository.findById(problemId) ?: throw NotFoundException("Problem with id $problemId not found")
+        val source = sourceRepository.findById(problem.sourceId) ?: throw NotFoundException("Source not found")
+        if (source.authorId != userId) {
+            if (source.reviewStatus == ReviewStatus.APPROVED) {
+                userService.grantRoleAtLeast(Role.ADMIN)
+            } else {
+                throw IllegalAccessException("Unauthorized access")
+            }
+        }
+        val success =
+            problemRepository.update(
+                problem.copy(
+                    categories = categoryIdList,
+                ),
+                problemId,
+            )
+        if (!success) throw Exception("Failed to update problem with id $problemId")
     }
 }

@@ -30,13 +30,12 @@ class CategoryViewServiceImpl : CategoryViewService {
         categoryId: String,
         page: Int,
         size: Int,
+        seed: Long,
     ): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
-        problemRepository
-            .getByCategoryId(categoryId)
-            .filter {
-                it.isApproved
-            }.map {
+        return problemRepository
+            .getAvailableByCategoryId(categoryId, size, (page * size).toLong(), userId, seed)
+            .map {
                 ProblemDisplayViewDto(
                     id = it.id,
                     sourceListNr = it.sourceListNr,
@@ -48,7 +47,7 @@ class CategoryViewServiceImpl : CategoryViewService {
                     categories = it.categories,
                     sourceId = it.sourceId,
                 )
-            }.shuffled()
+            }
     }
 
     override fun getCategoryById(categoryId: String): Category {
@@ -68,11 +67,11 @@ class CategoryViewServiceImpl : CategoryViewService {
     ): List<CategoryDisplayDto> {
         val userId = userService.getCurrentUserId()
         return categoryRepository
-            .getSearchPageableCategories(search, size, (page * size).toLong(), userId)
+            .getAvailableCategories(search, size, (page * size).toLong(), userId)
             .sortedBy {
                 it.name
             }.map {
-                val count = problemRepository.countApprovedByCategoryId(it.id)
+                val count = problemRepository.countAvailableByCategoryId(it.id, userId)
                 it.toDisplayDto(count.toInt())
             }
     }

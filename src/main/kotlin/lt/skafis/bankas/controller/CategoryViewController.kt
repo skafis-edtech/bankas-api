@@ -23,10 +23,14 @@ class CategoryViewController {
     @Autowired
     private lateinit var categoryViewService: CategoryViewService
 
-    @GetMapping("/problemsByCategory/{categoryId}")
+    @GetMapping("/problemsByCategory/{categoryId}/{seed}")
     fun getProblemsByCategory(
         @PathVariable categoryId: String,
-    ): ResponseEntity<List<ProblemDisplayViewDto>> = ResponseEntity.ok(categoryViewService.getProblemsByCategoryShuffle(categoryId))
+        @PathVariable seed: Long,
+        @RequestParam(required = false, defaultValue = "0") page: Int,
+        @RequestParam(required = false, defaultValue = "10") size: Int,
+    ): ResponseEntity<List<ProblemDisplayViewDto>> =
+        ResponseEntity.ok(categoryViewService.getProblemsByCategoryShuffle(categoryId, page, size, seed))
 
     @GetMapping("/category/{categoryId}")
     fun getCategoryById(

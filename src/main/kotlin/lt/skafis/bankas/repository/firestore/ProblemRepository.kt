@@ -1,13 +1,18 @@
 package lt.skafis.bankas.repository.firestore
 import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Problem
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 @Repository
 class ProblemRepository(
     private val firestore: Firestore,
 ) : FirestoreCrudRepository<Problem>(firestore, Problem::class.java) {
+    @Autowired
+    private lateinit var sourceRepository: SourceRepository
+
     override val collectionPath = "problems"
 
     // Caches
@@ -27,16 +32,34 @@ class ProblemRepository(
                 .mapNotNull { it.toObject(Problem::class.java) }
         }
 
-    fun getByCategoryId(categoryId: String): List<Problem> =
-        categoryIdCache.computeIfAbsent(categoryId) {
-            firestore
-                .collection(collectionPath)
-                .whereArrayContains("categories", categoryId)
-                .get()
-                .get()
-                .documents
-                .mapNotNull { it.toObject(Problem::class.java) }
-        }
+    fun getAvailableByCategoryId(
+        categoryId: String,
+        limit: Int,
+        offset: Long,
+        userId: String,
+        seed: Long,
+    ): List<Problem> {
+        val cacheKey = "approved_or_owned:$categoryId:$userId"
+
+        val problems =
+            categoryIdCache.computeIfAbsent(cacheKey) {
+                firestore
+                    .collection(collectionPath)
+                    .whereArrayContains("categories", categoryId)
+                    .get()
+                    .get()
+                    .documents
+                    .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
+            }
+
+        // Shuffle with seed
+        val random = Random(seed)
+        val shuffledProblems = problems.shuffled(random)
+
+        // Apply pagination
+        return shuffledProblems.drop(offset.toInt()).take(limit)
+    }
 
     fun getBySkfCode(skfCode: String): Problem =
         skfCodeCache.computeIfAbsent(skfCode) {
@@ -62,18 +85,22 @@ class ProblemRepository(
             }.size
             .toLong()
 
-    fun countApprovedByCategoryId(categoryId: String): Long {
-        val cacheKey = "approved:$categoryId"
+    fun countAvailableByCategoryId(
+        categoryId: String,
+        userId: String,
+    ): Long {
+        val cacheKey = "approved_or_owned:$categoryId:$userId"
+
         return categoryIdCache
             .computeIfAbsent(cacheKey) {
                 firestore
                     .collection(collectionPath)
-                    .whereEqualTo("isApproved", true)
                     .whereArrayContains("categories", categoryId)
                     .get()
                     .get()
                     .documents
                     .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
             }.size
             .toLong()
     }
