@@ -1,5 +1,6 @@
 package lt.skafis.bankas.service.implementations
 
+import lt.skafis.bankas.config.AppConfig
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.ReviewStatus
@@ -20,7 +21,9 @@ import org.webjars.NotFoundException
 import java.util.*
 
 @Service
-class ContentServiceImpl : ContentService {
+class ContentServiceImpl(
+    private val appConfig: AppConfig,
+) : ContentService {
     @Autowired
     private lateinit var userService: UserService
 
@@ -94,6 +97,7 @@ class ContentServiceImpl : ContentService {
                     answerText = problem.answerText,
                     answerImagePath = answerImagePath,
                     sourceId = sourceId,
+                    categories = listOf(appConfig.unsortedCategoryId),
                 ),
             )
 

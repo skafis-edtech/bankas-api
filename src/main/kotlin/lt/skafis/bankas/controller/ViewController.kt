@@ -3,8 +3,10 @@ package lt.skafis.bankas.controller
 import io.swagger.v3.oas.annotations.security.SecurityRequirement
 import io.swagger.v3.oas.annotations.tags.Tag
 import lt.skafis.bankas.config.Logged
+import lt.skafis.bankas.config.RequiresRoleAtLeast
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
 import lt.skafis.bankas.dto.StatsDto
+import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.service.ViewService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -26,6 +28,7 @@ class ViewController {
     fun getStats(): ResponseEntity<StatsDto> = ResponseEntity.ok(StatsDto(viewService.getProblemsCount()))
 
     @GetMapping("/problem/{skfCode}")
+    @RequiresRoleAtLeast(Role.USER)
     fun getProblemBySkfCode(
         @PathVariable skfCode: String,
     ): ResponseEntity<ProblemDisplayViewDto> = ResponseEntity.ok(viewService.getProblemBySkfCode(skfCode))
