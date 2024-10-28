@@ -11,7 +11,6 @@ import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.repository.storage.StorageRepository
 import lt.skafis.bankas.service.ContentService
 import lt.skafis.bankas.service.ProblemMetaService
-import lt.skafis.bankas.service.StorageService
 import lt.skafis.bankas.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -32,9 +31,6 @@ class ContentServiceImpl(
 
     @Autowired
     private lateinit var problemRepository: ProblemRepository
-
-    @Autowired
-    private lateinit var storageService: StorageService
 
     @Autowired
     private lateinit var storageRepository: StorageRepository

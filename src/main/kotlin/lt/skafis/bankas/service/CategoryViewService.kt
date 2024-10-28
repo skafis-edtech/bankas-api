@@ -10,6 +10,8 @@ interface CategoryViewService {
         page: Int,
         size: Int,
         seed: Long,
+        allSourcesExcept: List<String>,
+        onlySources: List<String>,
     ): List<ProblemDisplayViewDto>
 
     fun getCategoryById(categoryId: String): Category
@@ -18,5 +20,7 @@ interface CategoryViewService {
         page: Int,
         size: Int,
         search: String,
+        allSourcesExcept: List<String>,
+        onlySources: List<String>,
     ): List<CategoryDisplayDto>
 }

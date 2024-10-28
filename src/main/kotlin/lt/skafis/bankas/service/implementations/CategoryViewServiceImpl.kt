@@ -31,23 +31,59 @@ class CategoryViewServiceImpl : CategoryViewService {
         page: Int,
         size: Int,
         seed: Long,
+        allSourcesExcept: List<String>,
+        onlySources: List<String>,
     ): List<ProblemDisplayViewDto> {
         val userId = userService.getCurrentUserId()
-        return problemRepository
-            .getAvailableByCategoryId(categoryId, size, (page * size).toLong(), userId, seed)
-            .map {
-                ProblemDisplayViewDto(
-                    id = it.id,
-                    sourceListNr = it.sourceListNr,
-                    skfCode = it.skfCode,
-                    problemText = it.problemText,
-                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
-                    answerText = it.answerText,
-                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
-                    categories = it.categories,
-                    sourceId = it.sourceId,
-                )
-            }
+        if (allSourcesExcept.isNotEmpty()) {
+            return problemRepository
+                .getAvailableByCategoryAndSourceExceptList(categoryId, size, (page * size).toLong(), userId, allSourcesExcept, seed)
+                .map {
+                    ProblemDisplayViewDto(
+                        id = it.id,
+                        sourceListNr = it.sourceListNr,
+                        skfCode = it.skfCode,
+                        problemText = it.problemText,
+                        problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
+                        answerText = it.answerText,
+                        answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
+                        categories = it.categories,
+                        sourceId = it.sourceId,
+                    )
+                }
+        } else if (onlySources.isNotEmpty()) {
+            return problemRepository
+                .getAvailableByCategoryAndSourceList(categoryId, size, (page * size).toLong(), userId, onlySources, seed)
+                .map {
+                    ProblemDisplayViewDto(
+                        id = it.id,
+                        sourceListNr = it.sourceListNr,
+                        skfCode = it.skfCode,
+                        problemText = it.problemText,
+                        problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
+                        answerText = it.answerText,
+                        answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
+                        categories = it.categories,
+                        sourceId = it.sourceId,
+                    )
+                }
+        } else {
+            return problemRepository
+                .getAvailableByCategoryId(categoryId, size, (page * size).toLong(), userId, seed)
+                .map {
+                    ProblemDisplayViewDto(
+                        id = it.id,
+                        sourceListNr = it.sourceListNr,
+                        skfCode = it.skfCode,
+                        problemText = it.problemText,
+                        problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
+                        answerText = it.answerText,
+                        answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
+                        categories = it.categories,
+                        sourceId = it.sourceId,
+                    )
+                }
+        }
     }
 
     override fun getCategoryById(categoryId: String): Category {
@@ -64,6 +100,8 @@ class CategoryViewServiceImpl : CategoryViewService {
         page: Int,
         size: Int,
         search: String,
+        allSourcesExcept: List<String>,
+        onlySources: List<String>,
     ): List<CategoryDisplayDto> {
         val userId = userService.getCurrentUserId()
         return categoryRepository
@@ -71,7 +109,14 @@ class CategoryViewServiceImpl : CategoryViewService {
             .sortedBy {
                 it.name
             }.map {
-                val count = problemRepository.countAvailableByCategoryId(it.id, userId)
+                val count =
+                    if (allSourcesExcept.isNotEmpty()) {
+                        problemRepository.countAvailableByCategoryAndSourceExceptList(userId, it.id, allSourcesExcept)
+                    } else if (onlySources.isNotEmpty()) {
+                        problemRepository.countAvailableByCategoryAndSourceList(userId, it.id, onlySources)
+                    } else {
+                        problemRepository.countAvailableByCategoryId(userId, it.id)
+                    }
                 it.toDisplayDto(count.toInt())
             }
     }

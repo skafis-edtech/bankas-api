@@ -61,6 +61,78 @@ class ProblemRepository(
         return shuffledProblems.drop(offset.toInt()).take(limit)
     }
 
+    fun getAllAvailableByCategory(
+        categoryId: String,
+        userId: String,
+    ): List<Problem> =
+        firestore
+            .collection(collectionPath)
+            .whereArrayContains("categories", categoryId)
+            .get()
+            .get()
+            .documents
+            .mapNotNull { it.toObject(Problem::class.java) }
+            .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
+
+    fun getAvailableByCategoryAndSourceExceptList(
+        categoryId: String,
+        limit: Int,
+        offset: Long,
+        userId: String,
+        sourceIds: List<String>,
+        seed: Long,
+    ): List<Problem> {
+        val cacheKey = "approved_or_owned_except:$categoryId:$userId:${sourceIds.joinToString(",")}"
+        val problems =
+            categoryIdCache.computeIfAbsent(cacheKey) {
+                firestore
+                    .collection(collectionPath)
+                    .whereArrayContains("categories", categoryId)
+                    .get()
+                    .get()
+                    .documents
+                    .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.sourceId !in sourceIds }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
+            }
+
+        // Shuffle with seed
+        val random = Random(seed)
+        val shuffledProblems = problems.shuffled(random)
+
+        // Apply pagination
+        return shuffledProblems.drop(offset.toInt()).take(limit)
+    }
+
+    fun getAvailableByCategoryAndSourceList(
+        categoryId: String,
+        limit: Int,
+        offset: Long,
+        userId: String,
+        sourceIds: List<String>,
+        seed: Long,
+    ): List<Problem> {
+        val cacheKey = "approved_or_owned_only:$categoryId:$userId:${sourceIds.joinToString(",")}"
+        val problems =
+            categoryIdCache.computeIfAbsent(cacheKey) {
+                firestore
+                    .collection(collectionPath)
+                    .whereArrayContains("categories", categoryId)
+                    .get()
+                    .get()
+                    .documents
+                    .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.sourceId in sourceIds }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
+            }
+        // Shuffle with seed
+        val random = Random(seed)
+        val shuffledProblems = problems.shuffled(random)
+
+        // Apply pagination
+        return shuffledProblems.drop(offset.toInt()).take(limit)
+    }
+
     fun getBySkfCode(skfCode: String): Problem =
         skfCodeCache.computeIfAbsent(skfCode) {
             firestore
@@ -86,10 +158,10 @@ class ProblemRepository(
             .toLong()
 
     fun countAvailableByCategoryId(
-        categoryId: String,
         userId: String,
+        categoryId: String,
     ): Long {
-        val cacheKey = "approved_or_owned:$categoryId:$userId"
+        val cacheKey = "count_all$categoryId:$userId"
 
         return categoryIdCache
             .computeIfAbsent(cacheKey) {
@@ -136,6 +208,48 @@ class ProblemRepository(
                     .get()
                     .documents
                     .mapNotNull { it.toObject(Problem::class.java) }
+            }.size
+            .toLong()
+    }
+
+    fun countAvailableByCategoryAndSourceList(
+        userId: String,
+        categoryId: String,
+        sourceIds: List<String>,
+    ): Long {
+        val cacheKey = "count_only:$categoryId:${sourceIds.joinToString(",")}"
+        return categoryIdCache
+            .computeIfAbsent(cacheKey) {
+                firestore
+                    .collection(collectionPath)
+                    .whereArrayContains("categories", categoryId)
+                    .get()
+                    .get()
+                    .documents
+                    .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.sourceId in sourceIds }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
+            }.size
+            .toLong()
+    }
+
+    fun countAvailableByCategoryAndSourceExceptList(
+        userId: String,
+        categoryId: String,
+        sourceIds: List<String>,
+    ): Long {
+        val cacheKey = "count_except:$categoryId:${sourceIds.joinToString(",")}"
+        return categoryIdCache
+            .computeIfAbsent(cacheKey) {
+                firestore
+                    .collection(collectionPath)
+                    .whereArrayContains("categories", categoryId)
+                    .get()
+                    .get()
+                    .documents
+                    .mapNotNull { it.toObject(Problem::class.java) }
+                    .filter { it.sourceId !in sourceIds }
+                    .filter { it.isApproved || sourceRepository.findById(it.sourceId)!!.authorId == userId }
             }.size
             .toLong()
     }

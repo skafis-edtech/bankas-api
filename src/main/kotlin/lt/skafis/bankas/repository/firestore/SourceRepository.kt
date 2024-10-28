@@ -61,8 +61,10 @@ class SourceRepository(
                             normalizeString(source.name).contains(normalizedSearch) ||
                                 normalizeString(source.description).contains(normalizedSearch)
                         ) &&
-                            source.reviewStatus == ReviewStatus.APPROVED ||
-                            source.authorId == userId
+                            (
+                                source.reviewStatus == ReviewStatus.APPROVED ||
+                                    source.authorId == userId
+                            )
                     }
                 } else {
                     documents.filter { source ->

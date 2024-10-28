@@ -14,6 +14,7 @@ data class Category(
             id = this.id,
             name = this.name,
             description = this.description,
+            visibility = this.visibility,
             problemCount = problemCount,
         )
 }

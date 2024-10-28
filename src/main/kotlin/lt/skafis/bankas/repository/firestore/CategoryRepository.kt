@@ -47,7 +47,8 @@ class CategoryRepository(
             val searchFilteredDocuments =
                 if (search.isNotEmpty()) {
                     filteredDocuments.filter { category ->
-                        normalizeString(category.name).contains(normalizedSearch)
+                        normalizeString(category.name).contains(normalizedSearch) ||
+                            normalizeString(category.description).contains(normalizedSearch)
                     }
                 } else {
                     filteredDocuments
@@ -57,6 +58,28 @@ class CategoryRepository(
 
             finalDocuments
         }
+    }
+
+    fun clearAllCaches() {
+        collectionCache.clear()
+    }
+
+    override fun create(document: Category): Category {
+        clearAllCaches()
+        return super.create(document)
+    }
+
+    override fun update(
+        document: Category,
+        id: String,
+    ): Boolean {
+        clearAllCaches()
+        return super.update(document, id)
+    }
+
+    override fun delete(id: String): Boolean {
+        clearAllCaches()
+        return super.delete(id)
     }
 
     fun normalizeString(input: String): String =
