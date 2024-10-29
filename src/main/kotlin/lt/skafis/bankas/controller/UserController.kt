@@ -6,6 +6,7 @@ import lt.skafis.bankas.config.Logged
 import lt.skafis.bankas.dto.RegisterData
 import lt.skafis.bankas.dto.UserDataDto
 import lt.skafis.bankas.dto.UserPublicDataDto
+import lt.skafis.bankas.model.User
 import lt.skafis.bankas.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -40,6 +41,12 @@ class UserController {
         userService.registerUser(registerData)
         return ResponseEntity(HttpStatus.CREATED)
     }
+
+    // THIS IS HOW ACTUALLY EVERYTHING SHOULD BE HANDLED !!!!
+    @GetMapping("/myInfo")
+    @Operation(summary = "USER")
+    @SecurityRequirement(name = "bearerAuth")
+    fun getMyInfo(principal: Principal): ResponseEntity<User> = ResponseEntity.ok(userService.getUserData(principal.name))
 
     @PatchMapping("/bio")
     @Operation(summary = "USER")

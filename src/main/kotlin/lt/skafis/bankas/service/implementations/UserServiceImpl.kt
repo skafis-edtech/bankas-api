@@ -102,4 +102,9 @@ class UserServiceImpl(
 
         return userRepository.registerUser(user)
     }
+
+    override fun getUserData(userId: String): User {
+        val user = userRepository.getUserById(userId) ?: throw NotFoundException("User not found")
+        return user
+    }
 }
