@@ -1,5 +1,6 @@
 package lt.skafis.bankas.service
 
+import lt.skafis.bankas.dto.RegisterData
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.User
 
@@ -24,4 +25,6 @@ interface UserService {
     fun getCurrentUserId(): String
 
     fun getCurrentUserUsername(): String
+
+    fun registerUser(registerData: RegisterData): String
 }

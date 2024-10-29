@@ -1,10 +1,10 @@
 package lt.skafis.bankas.service.implementations
 
-import lt.skafis.bankas.dto.CategoryDisplayDto
 import lt.skafis.bankas.dto.ProblemDisplayViewDto
-import lt.skafis.bankas.dto.SourceDisplayDto
-import lt.skafis.bankas.model.*
-import lt.skafis.bankas.repository.firestore.CategoryRepository
+import lt.skafis.bankas.model.Problem
+import lt.skafis.bankas.model.ProblemVisibility
+import lt.skafis.bankas.model.Role
+import lt.skafis.bankas.model.Visibility
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.service.StorageService
@@ -26,50 +26,9 @@ class ViewServiceImpl : ViewService {
     private lateinit var problemRepository: ProblemRepository
 
     @Autowired
-    private lateinit var categoryRepository: CategoryRepository
-
-    @Autowired
     private lateinit var userService: UserService
 
     override fun getProblemsCount(): Long = problemRepository.countApproved()
-
-    override fun getCategoryProblemCount(categoryId: String): Long = problemRepository.countApprovedByCategoryId(categoryId)
-
-    override fun getProblemsByCategoryShuffle(categoryId: String): List<ProblemDisplayViewDto> =
-        problemRepository
-            .getByCategoryId(categoryId)
-            .filter {
-                it.isApproved
-            }.map {
-                ProblemDisplayViewDto(
-                    id = it.id,
-                    sourceListNr = it.sourceListNr,
-                    skfCode = it.skfCode,
-                    problemText = it.problemText,
-                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
-                    answerText = it.answerText,
-                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
-                    categories = it.categories,
-                    sourceId = it.sourceId,
-                )
-            }.shuffled()
-
-    override fun getCategoryById(categoryId: String): Category =
-        categoryRepository.findById(categoryId) ?: throw Exception("Category with id $categoryId not found")
-
-    override fun getCategories(
-        page: Int,
-        size: Int,
-        search: String,
-    ): List<CategoryDisplayDto> =
-        categoryRepository
-            .getSearchPageableCategories(search, size, (page * size).toLong())
-            .sortedBy {
-                it.name
-            }.map {
-                val count = problemRepository.countApprovedByCategoryId(it.id)
-                it.toDisplayDto(count.toInt())
-            }
 
     override fun getProblemBySkfCode(skfCode: String): ProblemDisplayViewDto {
         val problem = problemRepository.getBySkfCode(skfCode)
@@ -100,94 +59,5 @@ class ViewServiceImpl : ViewService {
                 return ProblemDisplayViewDto(skfCode = skfCode, problemVisibility = ProblemVisibility.HIDDEN)
             }
         }
-    }
-
-    override fun getSourceById(sourceId: String): SourceDisplayDto {
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source with id $sourceId not found")
-        if (source.authorId != userService.getCurrentUserId() && source.reviewStatus != ReviewStatus.APPROVED) {
-            userService.grantRoleAtLeast(Role.ADMIN)
-        }
-        val authorUsername = userService.getUsernameById(source.authorId)
-        val count = problemRepository.countBySource(sourceId)
-        return source.toDisplayDto(authorUsername, count.toInt())
-    }
-
-    override fun getSourcesByAuthor(
-        authorUsername: String,
-        page: Int,
-        size: Int,
-        search: String,
-        sortBy: SortBy,
-    ): List<SourceDisplayDto> {
-        val authorId = userService.getUserIdByUsername(authorUsername)
-        return sourceRepository
-            .getByAuthorSearchPageable(authorId, search, size, (page * size).toLong(), isApproved = true, sortBy)
-            .map {
-                val count = problemRepository.countBySource(it.id)
-                it.toDisplayDto(authorUsername, count.toInt())
-            }
-    }
-
-    override fun getUnsortedProblems(): List<ProblemDisplayViewDto> =
-        problemRepository
-            .getUnsortedApprovedProblems()
-            .map {
-                ProblemDisplayViewDto(
-                    id = it.id,
-                    sourceListNr = it.sourceListNr,
-                    skfCode = it.skfCode,
-                    problemText = it.problemText,
-                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
-                    answerText = it.answerText,
-                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
-                    categories = it.categories,
-                    sourceId = it.sourceId,
-                )
-            }.shuffled()
-
-    override fun getUnsortedProblemsCount(): Long = problemRepository.countUnsortedApproved()
-
-    override fun getApprovedSources(
-        page: Int,
-        size: Int,
-        search: String,
-    ): List<SourceDisplayDto> =
-        sourceRepository
-            .getApprovedSearchPageable(
-                search,
-                size,
-                (page * size).toLong(),
-            ).map {
-                val count = problemRepository.countBySource(it.id)
-                val authorUsername = userService.getUsernameById(it.authorId)
-                it.toDisplayDto(authorUsername, count.toInt())
-            }
-
-    override fun getProblemsBySource(
-        sourceId: String,
-        page: Int,
-        size: Int,
-    ): List<ProblemDisplayViewDto> {
-        val userId = userService.getCurrentUserId()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        if (source.authorId != userId && source.reviewStatus != ReviewStatus.APPROVED) {
-            userService.grantRoleAtLeast(Role.ADMIN)
-        }
-
-        return problemRepository
-            .getBySourceIdPageable(sourceId, size, (page * size).toLong())
-            .map {
-                ProblemDisplayViewDto(
-                    id = it.id,
-                    sourceListNr = it.sourceListNr,
-                    skfCode = it.skfCode,
-                    problemText = it.problemText,
-                    problemImageSrc = storageService.utilsGetImageSrc(it.problemImagePath),
-                    answerText = it.answerText,
-                    answerImageSrc = storageService.utilsGetImageSrc(it.answerImagePath),
-                    sourceId = it.sourceId,
-                    categories = it.categories,
-                )
-            }
     }
 }

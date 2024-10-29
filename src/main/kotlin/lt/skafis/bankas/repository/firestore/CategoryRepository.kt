@@ -2,6 +2,7 @@ package lt.skafis.bankas.repository.firestore
 
 import com.google.cloud.firestore.Firestore
 import lt.skafis.bankas.model.Category
+import lt.skafis.bankas.model.Visibility
 import org.springframework.stereotype.Repository
 import java.text.Normalizer
 import java.util.concurrent.ConcurrentHashMap
@@ -12,45 +13,73 @@ class CategoryRepository(
 ) : FirestoreCrudRepository<Category>(firestore, Category::class.java) {
     override val collectionPath = "categories"
 
-    private val collectionCache = ConcurrentHashMap<String, Category>()
+    private val collectionCache = ConcurrentHashMap<String, List<Category>>()
 
-    fun getSearchPageableCategories(
+    fun getAvailableCategories(
         search: String,
         limit: Int,
         offset: Long,
+        userId: String,
     ): List<Category> {
-        // Check if cache contains categories, use them if present
-        val cachedCategories = collectionCache.values.toList()
+        val cacheKey = "pageable:$search:$limit:$offset:$userId"
 
-        val documents =
-            if (cachedCategories.isNotEmpty()) {
-                // If cache is populated, use it
-                cachedCategories
-            } else {
-                // If cache is empty, fetch from Firestore and update the cache
-                val query =
-                    firestore
-                        .collection(collectionPath)
-                        .orderBy("name")
-                        .get()
-                        .get()
-                val fetchedDocuments = query.documents.mapNotNull { it.toObject(Category::class.java) }
-                fetchedDocuments.forEach { collectionCache[it.id] = it }
-                fetchedDocuments
-            }
+        return collectionCache.computeIfAbsent(cacheKey) {
+            val collectionRef = firestore.collection(collectionPath)
+            val query = collectionRef.orderBy("name").get().get()
+            val documents = query.documents
 
-        // If search is not null, filter the documents based on the search criteria
-        val filteredDocuments =
-            if (search.isNotEmpty()) {
-                val normalizedSearch = normalizeString(search)
-                documents.filter { category ->
-                    normalizeString(category.name).contains(normalizedSearch)
+            val normalizedSearch = normalizeString(search)
+
+            val filteredDocuments =
+                documents.mapNotNull { document ->
+                    val category = document.toObject(Category::class.java)
+                    // Make sure to check if category is not null
+                    if (
+                        category.visibility == Visibility.PUBLIC ||
+                        (category.visibility == Visibility.PRIVATE && category.ownerOfPrivateId == userId)
+                    ) {
+                        category
+                    } else {
+                        null
+                    }
                 }
-            } else {
-                documents
-            }
 
-        return filteredDocuments.drop(offset.toInt()).take(limit)
+            val searchFilteredDocuments =
+                if (search.isNotEmpty()) {
+                    filteredDocuments.filter { category ->
+                        normalizeString(category.name).contains(normalizedSearch) ||
+                            normalizeString(category.description).contains(normalizedSearch)
+                    }
+                } else {
+                    filteredDocuments
+                }
+
+            val finalDocuments = searchFilteredDocuments.drop(offset.toInt()).take(limit)
+
+            finalDocuments
+        }
+    }
+
+    fun clearAllCaches() {
+        collectionCache.clear()
+    }
+
+    override fun create(document: Category): Category {
+        clearAllCaches()
+        return super.create(document)
+    }
+
+    override fun update(
+        document: Category,
+        id: String,
+    ): Boolean {
+        clearAllCaches()
+        return super.update(document, id)
+    }
+
+    override fun delete(id: String): Boolean {
+        clearAllCaches()
+        return super.delete(id)
     }
 
     fun normalizeString(input: String): String =

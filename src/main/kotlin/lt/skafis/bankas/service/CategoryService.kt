@@ -13,12 +13,8 @@ interface CategoryService {
 
     fun deleteCategory(id: String)
 
-    fun createPrivateCategory(categoryPostDto: CategoryPostDto): Category
-
-    fun updatePrivateCategory(
-        id: String,
-        categoryPostDto: CategoryPostDto,
-    ): Category
-
-    fun deletePrivateCategory(id: String)
+    fun sortProblem(
+        problemId: String,
+        categoryIdList: List<String>,
+    )
 }

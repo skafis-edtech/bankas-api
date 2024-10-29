@@ -1,5 +1,6 @@
 package lt.skafis.bankas.repository.firestore
 import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.SetOptions
 import lt.skafis.bankas.model.User
 import org.springframework.stereotype.Repository
 import java.util.concurrent.ConcurrentHashMap
@@ -13,6 +14,7 @@ class UserRepository(
     // Caches
     private val userIdCache = ConcurrentHashMap<String, User?>()
     private val usernameCache = ConcurrentHashMap<String, User?>()
+    private val emailCache = ConcurrentHashMap<String, User?>()
 
     fun getUserById(id: String): User? =
         userIdCache.computeIfAbsent(id) {
@@ -36,6 +38,17 @@ class UserRepository(
             query.documents.firstOrNull()?.toObject(User::class.java)
         }
 
+    fun getUserByEmail(email: String): User? =
+        emailCache.computeIfAbsent(email) {
+            val query =
+                firestore
+                    .collection(collectionPath)
+                    .whereEqualTo("email", email)
+                    .get()
+                    .get()
+            query.documents.firstOrNull()?.toObject(User::class.java)
+        }
+
     fun updateUserBio(
         id: String,
         bio: String,
@@ -52,6 +65,21 @@ class UserRepository(
         } else {
             false
         }
+    }
+
+    fun registerUser(user: User): String {
+        val docRef = firestore.collection(collectionPath).document(user.id)
+        docRef.set(user, SetOptions.merge()).get() // Save the user to Firestore
+        userIdCache[user.id] = user // Update caches
+        usernameCache[user.username] = user
+        emailCache[user.email] = user
+        return user.id
+    }
+
+    fun getAllUsers(): List<User> {
+        val collection = firestore.collection(collectionPath).get().get()
+        val documents = collection.documents.mapNotNull { it.toObject(User::class.java) }
+        return documents
     }
 
     fun clearCaches() {

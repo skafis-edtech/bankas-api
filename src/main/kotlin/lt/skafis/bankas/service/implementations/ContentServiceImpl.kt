@@ -1,5 +1,6 @@
 package lt.skafis.bankas.service.implementations
 
+import lt.skafis.bankas.config.AppConfig
 import lt.skafis.bankas.dto.*
 import lt.skafis.bankas.model.Problem
 import lt.skafis.bankas.model.ReviewStatus
@@ -8,9 +9,8 @@ import lt.skafis.bankas.model.Source
 import lt.skafis.bankas.repository.firestore.ProblemRepository
 import lt.skafis.bankas.repository.firestore.SourceRepository
 import lt.skafis.bankas.repository.storage.StorageRepository
-import lt.skafis.bankas.service.ApprovalService
+import lt.skafis.bankas.service.ContentService
 import lt.skafis.bankas.service.ProblemMetaService
-import lt.skafis.bankas.service.StorageService
 import lt.skafis.bankas.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
@@ -20,7 +20,9 @@ import org.webjars.NotFoundException
 import java.util.*
 
 @Service
-class ApprovalServiceImpl : ApprovalService {
+class ContentServiceImpl(
+    private val appConfig: AppConfig,
+) : ContentService {
     @Autowired
     private lateinit var userService: UserService
 
@@ -29,9 +31,6 @@ class ApprovalServiceImpl : ApprovalService {
 
     @Autowired
     private lateinit var problemRepository: ProblemRepository
-
-    @Autowired
-    private lateinit var storageService: StorageService
 
     @Autowired
     private lateinit var storageRepository: StorageRepository
@@ -94,6 +93,7 @@ class ApprovalServiceImpl : ApprovalService {
                     answerText = problem.answerText,
                     answerImagePath = answerImagePath,
                     sourceId = sourceId,
+                    categories = listOf(appConfig.unsortedCategoryId),
                 ),
             )
 
@@ -134,65 +134,6 @@ class ApprovalServiceImpl : ApprovalService {
                 val count = problemRepository.countBySource(it.id)
                 it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
             }
-    }
-
-    override fun approve(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto {
-        val username = userService.getCurrentUserUsername()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        val amendedReviewHistory =
-            "${source.reviewHistory} \n ${Instant.now()} $username patvirtino" +
-                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
-        val updatedSource =
-            source.copy(
-                reviewStatus = ReviewStatus.APPROVED,
-                reviewHistory = amendedReviewHistory,
-            )
-        sourceRepository.update(updatedSource, sourceId)
-
-        if (source.reviewStatus != ReviewStatus.APPROVED) {
-            val problems = problemRepository.getBySourceId(sourceId)
-            problems.forEach {
-                val updatedProblem =
-                    it.copy(
-                        isApproved = true,
-                    )
-                problemRepository.update(updatedProblem, it.id)
-            }
-        }
-
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
-    }
-
-    override fun reject(
-        sourceId: String,
-        reviewMessage: String,
-    ): SourceDisplayDto {
-        val username = userService.getCurrentUserUsername()
-        val source = sourceRepository.findById(sourceId) ?: throw NotFoundException("Source not found")
-        val amendedReviewHistory =
-            "${source.reviewHistory} \n ${Instant.now()} $username atmetė" +
-                if (reviewMessage.isNotEmpty()) " su žinute: $reviewMessage" else "."
-        val updatedSource =
-            source.copy(
-                reviewStatus = ReviewStatus.REJECTED,
-                reviewHistory = amendedReviewHistory,
-            )
-        sourceRepository.update(updatedSource, sourceId)
-
-        if (source.reviewStatus == ReviewStatus.APPROVED) {
-            val problems = problemRepository.getBySourceId(sourceId)
-            problems.forEach {
-                val updatedProblem =
-                    it.copy(
-                        isApproved = false,
-                    )
-                problemRepository.update(updatedProblem, it.id)
-            }
-        }
-        return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
 
     override fun deleteSource(sourceId: String) {
@@ -248,21 +189,6 @@ class ApprovalServiceImpl : ApprovalService {
         unapproveSource(updatedSource)
         return updatedSource.toDisplayDto(userService.getUsernameById(updatedSource.authorId))
     }
-
-    override fun getPendingSources(
-        page: Int,
-        size: Int,
-        search: String,
-    ): List<SourceDisplayDto> =
-        sourceRepository
-            .getPendingSearchPageable(
-                search,
-                size,
-                (page * size).toLong(),
-            ).map {
-                val count = problemRepository.countBySource(it.id)
-                it.toDisplayDto(userService.getUsernameById(it.authorId), count.toInt())
-            }
 
     override fun updateProblemTexts(
         problemId: String,
