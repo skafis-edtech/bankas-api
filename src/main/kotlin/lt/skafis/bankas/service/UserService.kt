@@ -27,4 +27,6 @@ interface UserService {
     fun getCurrentUserUsername(): String
 
     fun registerUser(registerData: RegisterData): String
+
+    fun getUserData(userId: String): User
 }

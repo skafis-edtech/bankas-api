@@ -27,10 +27,10 @@ class CategoryViewController {
     @Autowired
     private lateinit var categoryViewService: CategoryViewService
 
-    @GetMapping("/problemsByCategory/{categoryId}/{seed}")
+    @GetMapping("/problemsByCategory/{categoryId}")
     fun getProblemsByCategory(
         @PathVariable categoryId: String,
-        @PathVariable seed: Long,
+        @RequestParam(required = false, defaultValue = "0") seed: Long,
         @RequestParam(required = false, defaultValue = "0") page: Int,
         @RequestParam(required = false, defaultValue = "10") size: Int,
         @RequestParam(required = false, defaultValue = "") allSourcesExcept: List<String>,
