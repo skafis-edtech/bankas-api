@@ -1,5 +1,8 @@
 package lt.skafis.bankas.service.implementations
 
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserRecord
+import lt.skafis.bankas.dto.RegisterData
 import lt.skafis.bankas.model.Role
 import lt.skafis.bankas.model.User
 import lt.skafis.bankas.repository.firestore.UserRepository
@@ -11,6 +14,7 @@ import org.webjars.NotFoundException
 @Service
 class UserServiceImpl(
     private val userRepository: UserRepository,
+    private val firebaseAuth: FirebaseAuth,
 ) : UserService {
     override fun getUserById(userId: String): User = userRepository.getUserById(userId) ?: User()
 
@@ -68,5 +72,34 @@ class UserServiceImpl(
     override fun getCurrentUserUsername(): String {
         val userId = getCurrentUserId()
         return getUsernameById(userId)
+    }
+
+    override fun registerUser(registerData: RegisterData): String {
+        val users = userRepository.getAllUsers()
+        if (users.any { it.username == registerData.username }) {
+            throw IllegalArgumentException("Username already exists.")
+        }
+        if (users.any { it.email == registerData.email }) {
+            throw IllegalArgumentException("Email already exists.")
+        }
+
+        val userRecord: UserRecord =
+            firebaseAuth.createUser(
+                UserRecord
+                    .CreateRequest()
+                    .setEmail(registerData.email)
+                    .setPassword(registerData.password),
+            )
+
+        val user =
+            User(
+                id = userRecord.uid,
+                email = registerData.email,
+                username = registerData.username,
+                role = Role.USER,
+                bio = "",
+            )
+
+        return userRepository.registerUser(user)
     }
 }
