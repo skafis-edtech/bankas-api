@@ -27,7 +27,7 @@ class SourceRepository(
         sortBy: SortBy,
         userId: String,
     ): List<Source> {
-        val cacheKey = "available:$search:$limit:$offset:$sortBy"
+        val cacheKey = "available:$search:$userId:$limit:$offset:$sortBy"
         return availableCache.computeIfAbsent(cacheKey) {
             val collectionRef = firestore.collection(collectionPath)
             var documents = emptyList<Source>()
